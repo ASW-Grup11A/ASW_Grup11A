@@ -4,5 +4,5 @@ from . import views
 
 app_name = 'empo_news'
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.main_page, name='main_page'),
 ]

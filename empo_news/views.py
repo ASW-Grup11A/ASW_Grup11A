@@ -2,5 +2,10 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the empo_news index.")
+def main_page(request):
+
+    context ={
+
+    }
+
+    return render(request, 'empo_news/main_page.html', context);
