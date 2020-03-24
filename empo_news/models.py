@@ -1,3 +1,5 @@
+
+
 from django.db import models
 
 
@@ -12,10 +14,19 @@ class Contribution(models.Model):
     points = models.IntegerField(default=1)
     publication_time = models.DateTimeField('publication date')
 
+    def is_url(self):
+        pass
+
 
 class UrlContribution(Contribution):
     url = models.CharField(max_length=500, null=True)
 
+    def is_url(self):
+        return True
+
 
 class AskContribution(Contribution):
     text = models.CharField(max_length=2000)
+
+    def is_url(self):
+        return False
