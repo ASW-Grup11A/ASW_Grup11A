@@ -1,3 +1,4 @@
+{% load functions %}
 <html op="news">
    <head>
        {% load static %}
@@ -12,18 +13,18 @@
                         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
                             <tr>
                                 <td style="width:18px;padding-right:4px">
-                                    <a href="{% url 'empo_news:main_page' %}">
+                                    <a href={% url 'empo_news:main_page' %}>
                                         <img src="{% static 'empo_news/images/y18.gif' %}" width="18" height="18" style="border:1px white solid;">
                                     </a>
                                 </td>
                                 <td style="line-height:12pt; height:10px;">
                                     <span class="pagetop">
-                                        <b class="hnname"><a href="news">Empo News</a></b>
-                                        <a href="newest">new</a> | <a href="front">past</a> | <a href="newcomments">comments</a> | <a href="ask">ask</a> | <a href="show">show</a> | <a href="jobs">jobs</a> | <a href="submit">submit</a>            </span>
+                                        <b class="hnname"><a href={% url 'empo_news:main_page' %}>Empo News</a></b>
+                                        <a href={% url 'empo_news:not_implemented' %}>new</a> | <a href={% url 'empo_news:not_implemented' %}>past</a> | <a href={% url 'empo_news:not_implemented' %}>comments</a> | <a href={% url 'empo_news:not_implemented' %}>ask</a> | <a href={% url 'empo_news:not_implemented' %}>show</a> | <a href={% url 'empo_news:not_implemented' %}>jobs</a> | <a href={% url 'empo_news:not_implemented' %}>submit</a>            </span>
                                 </td>
                                 <td style="text-align:right;padding-right:4px;">
                                     <span class="pagetop">
-                                        <a href="login?goto=news">login</a>
+                                        <a href={% url 'empo_news:not_implemented' %}>login</a>
                                     </span>
                                 </td>
                             </tr>
@@ -44,16 +45,16 @@
                                               </a>
                                            </center>
                                         </td>
-                                        <td class="title"><a href="direccio de la entrada" class="storylink">{{ contribution.title }}</a><span class="sitebit comhead">
-                                            {% if contribution.is_url %}
-                                                (<a href="from?site=jeffgeerling.com"><span class="sitestr">jeffgeerling.com</span></a>)
+                                        <td class="title"><a href={% url 'empo_news:not_implemented' %} class="storylink">{{ contribution.title }}</a><span class="sitebit comhead">
+                                            {% if contribution|get_class == "UrlContribution" %}
+                                                (<a href={{ contribution.url }}><span class="sitestr">{{ contribution.url }}</span></a>)
                                             {% endif %}
                                         </span></td>
                                     </tr>
                                     <tr>
                                         <td colspan="2"></td>
                                         <td class="subtext">
-                                           <span class="score" id="score_22677970">{{ contribution.points }} points</span> by <a href="user?id=username" class="hnuser">{{ contribution.username }}</a> <span class="age"><a href="item?id=22677970">{{ contribution.publication_time }} minutes ago</a></span> <span id="unv_22677970"></span> | <a href="hide?id=22677970&amp;goto=news">hide</a> | <a href="item?id=22677970">19&nbsp;comments</a>
+                                           <span class="score" id="score_22677970">{{ contribution.points }} points</span> by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.username }}</a> <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time }} minutes ago</a></span> <span id="unv_22677970"></span> | <a href="hide?id=22677970&amp;goto=news">hide</a> | <a href={% url 'empo_news:not_implemented' %}>19&nbsp;comments</a>
                                         </td>
                                     </tr>
                                     <tr class="spacer" style="height:5px"></tr>
@@ -71,7 +72,7 @@
                             </tr>
                         </table>
                         <br>
-                        <center><a href="https://www.ycombinator.com/apply/">
+                        <center><a href={% url 'empo_news:not_implemented' %}>
                              Applications are open for YC Summer 2020
                              </a>
                         </center>
@@ -79,17 +80,17 @@
                         <center>
                              <span class="yclinks">
                                  <a href={% url 'empo_news:not_implemented' %}>Guidelines</a>
-                                 | <a href="newsfaq.html">FAQ</a>
-                                 | <a href="mailto:hn@ycombinator.com">Support</a>
-                                 | <a href="https://github.com/HackerNews/API">API</a>
-                                 | <a href="security.html">Security</a>
-                                 | <a href="lists">Lists</a>
-                                 | <a href="bookmarklet.html" rel="nofollow">Bookmarklet</a>
-                                 | <a href="http://www.ycombinator.com/legal/">Legal</a>
-                                 | <a href="http://www.ycombinator.com/apply/">Apply to YC</a>
-                                 | <a href="mailto:hn@ycombinator.com">Contact</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>FAQ</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Support</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>API</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Security</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Lists</a>
+                                 | <a href={% url 'empo_news:not_implemented' %} rel="nofollow">Bookmarklet</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Legal</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Apply to YC</a>
+                                 | <a href="https://caixabenicarlo.es/blog/wp-content/uploads/2017/09/Beques-excel%C2%B7lencia-2017.1-768x379.jpg">Contact</a>
                              </span><br><br>
-                             <form method="get" action="//hn.algolia.com/">Search:
+                             <form method="get" action="{% url 'empo_news:not_implemented' %}">Search:
                                 <input type="text" name="q" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="false">
                              </form>
                         </center>

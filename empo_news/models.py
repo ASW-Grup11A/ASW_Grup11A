@@ -1,5 +1,4 @@
 
-
 from django.db import models
 
 
@@ -13,20 +12,12 @@ class Contribution(models.Model):
     title = models.CharField(max_length=2000)
     points = models.IntegerField(default=1)
     publication_time = models.DateTimeField('publication date')
-
-    def is_url(self):
-        pass
-
-
-class UrlContribution(Contribution):
     url = models.CharField(max_length=500, null=True)
+    text = models.CharField(max_length=2000, null=True)
 
-    def is_url(self):
-        return True
-
-
-class AskContribution(Contribution):
-    text = models.CharField(max_length=2000)
-
-    def is_url(self):
-        return False
+    def get_type(self):
+        if self.url is not None:
+            return "url"
+        elif self.text is not None:
+            return "ask"
+        return "failure"

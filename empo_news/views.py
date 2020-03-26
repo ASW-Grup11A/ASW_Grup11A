@@ -9,7 +9,6 @@ def main_page(request):
     context = {
         "list": most_points_list,
     }
-
     return render(request, 'empo_news/main_page.html', context);
 
 
