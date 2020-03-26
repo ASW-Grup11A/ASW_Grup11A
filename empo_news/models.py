@@ -8,12 +8,13 @@ class User(models.Model):
 
 
 class Contribution(models.Model):
-    username = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=2000)
     points = models.IntegerField(default=1)
     publication_time = models.DateTimeField('publication date')
-    url = models.CharField(max_length=500, null=True)
-    text = models.CharField(max_length=2000, null=True)
+    url = models.CharField(max_length=500, blank=True, null=True)
+    text = models.CharField(max_length=2000, blank=True, null=True)
+    comments = models.IntegerField(default=0)
 
     def get_type(self):
         if self.url is not None:

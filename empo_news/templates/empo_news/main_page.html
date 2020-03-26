@@ -40,13 +40,13 @@
                                         <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter }}.</span></td>
                                         <td valign="top" class="votelinks">
                                            <center>
-                                              <a id='up_22677970' href='vote?id=22677970&amp;how=up&amp;goto=news'>
+                                              <a id='up_22677970' href={% url 'empo_news:not_implemented' %}>
                                                  <div class='votearrow' title='upvote'></div>
                                               </a>
                                            </center>
                                         </td>
                                         <td class="title"><a href={% url 'empo_news:not_implemented' %} class="storylink">{{ contribution.title }}</a><span class="sitebit comhead">
-                                            {% if contribution|get_class == "UrlContribution" %}
+                                            {% if contribution|get_class == "url" %}
                                                 (<a href={{ contribution.url }}><span class="sitestr">{{ contribution.url }}</span></a>)
                                             {% endif %}
                                         </span></td>
@@ -54,7 +54,7 @@
                                     <tr>
                                         <td colspan="2"></td>
                                         <td class="subtext">
-                                           <span class="score" id="score_22677970">{{ contribution.points }} points</span> by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.username }}</a> <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time }} minutes ago</a></span> <span id="unv_22677970"></span> | <a href="hide?id=22677970&amp;goto=news">hide</a> | <a href={% url 'empo_news:not_implemented' %}>19&nbsp;comments</a>
+                                           <span class="score" id="score_22677970">{{ contribution.points }} points</span> by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a> <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time}} minutes ago</a></span> <span id="unv_22677970"></span> | <a href="hide?id=22677970&amp;goto=news">hide</a> | <a href={% url 'empo_news:not_implemented' %}>{{ contribution.comments }}&nbsp;comments</a>
                                         </td>
                                     </tr>
                                     <tr class="spacer" style="height:5px"></tr>

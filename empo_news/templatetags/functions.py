@@ -5,4 +5,4 @@ register = template.Library()
 
 @register.filter
 def get_class(obj):
-    return obj.__class__.__name__
+    return obj.get_type()
