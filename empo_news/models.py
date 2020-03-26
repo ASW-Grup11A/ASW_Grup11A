@@ -1,12 +1,14 @@
-
 from django.db import models
 
 
 class User(models.Model):
     username = models.CharField(max_length=15, primary_key=True)
     password = models.CharField(max_length=72)
-    hidden = models.ManyToManyField('Contribution', related_name="hidden_contributions", default=None)
-    upvoted = models.ManyToManyField('Contribution', related_name="upvoted_contributions", default=None)
+    hidden = models.ManyToManyField('Contribution', related_name="hidden_contributions", blank=True)
+    upvoted = models.ManyToManyField('Contribution', related_name="upvoted_contributions", blank=True)
+
+    def __str__(self):
+        return self.username
 
 
 class Contribution(models.Model):
@@ -24,3 +26,5 @@ class Contribution(models.Model):
         elif self.text is not None:
             return "ask"
         return "failure"
+
+

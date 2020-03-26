@@ -45,11 +45,19 @@
                                               </a>
                                            </center>
                                         </td>
-                                        <td class="title"><a href={% url 'empo_news:not_implemented' %} class="storylink">{{ contribution.title }}</a><span class="sitebit comhead">
+                                        <td class="title">
                                             {% if contribution|get_class == "url" %}
-                                                (<a href={{ contribution.url }}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                                <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
+                                            {% else %}
+                                                <a href={% url 'empo_news:not_implemented' %} class="storylink">{{ contribution.title }}</a>
                                             {% endif %}
-                                        </span></td>
+
+                                            <span class="sitebit comhead">
+                                                {% if contribution|get_class == "url" %}
+                                                    (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                                {% endif %}
+                                            </span>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td colspan="2"></td>
@@ -88,7 +96,7 @@
                                  | <a href={% url 'empo_news:not_implemented' %} rel="nofollow">Bookmarklet</a>
                                  | <a href={% url 'empo_news:not_implemented' %}>Legal</a>
                                  | <a href={% url 'empo_news:not_implemented' %}>Apply to YC</a>
-                                 | <a href="https://caixabenicarlo.es/blog/wp-content/uploads/2017/09/Beques-excel%C2%B7lencia-2017.1-768x379.jpg">Contact</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Contact</a>
                              </span><br><br>
                              <form method="get" action="{% url 'empo_news:not_implemented' %}">Search:
                                 <input type="text" name="q" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="false">
