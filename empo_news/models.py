@@ -7,7 +7,7 @@ class User(models.Model):
     hidden = models.ManyToManyField('Contribution', related_name="hidden_contributions", blank=True)
     upvoted = models.ManyToManyField('Contribution', related_name="upvoted_contributions", blank=True)
 
-    def __str__(self):
+    def str(self):
         return self.username
 
 
@@ -26,5 +26,3 @@ class Contribution(models.Model):
         elif self.text is not None:
             return "ask"
         return "failure"
-
-
