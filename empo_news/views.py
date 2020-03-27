@@ -1,3 +1,4 @@
+
 from datetime import date
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -44,4 +45,5 @@ def new_page(request):
 
 def not_implemented(request):
     return HttpResponse('View not yet implemented');
+
 
