@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 from empo_news.models import Contribution, User
 from django.urls import reverse
-from empo_news.forms import SubmitFor
+from empo_news.forms import SubmitForm
 
 def submit(request):
     form = SubmitForm()
