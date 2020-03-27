@@ -9,12 +9,14 @@ def index(request):
 
 
 def submit(request):
-    return render(request, 'empo_news/submit.html')
-
-
-def formTest(request):
     form = SubmitForm()
+    submit_response = request.POST
+
+    if submit_response.get('submit_button'):
+        if form.is_valid():
+            print("VALID")
+
     context = {
         'form': form,
     }
-    return render(request, 'empo_news/formtest.html', context)
+    return render(request, 'empo_news/submit.html', context)
