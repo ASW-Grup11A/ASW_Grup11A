@@ -7,4 +7,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('submit/', views.submit, name='submit'),
     path('', views.main_page, name='main_page'),
+    path('newest', views.new_page, name='new_page'),
+    path('notimplemented', views.not_implemented, name='not_implemented')
 ]
+
