@@ -19,10 +19,3 @@ class SubmitForm(forms.Form):
 
         return self.cleaned_data['url']
 
-    def clean_text(self):
-        url_data = self.cleaned_data['url']
-
-        if url_data:
-            raise ValidationError(_('Url field should be empty'))
-
-        return self.cleaned_data['text']
