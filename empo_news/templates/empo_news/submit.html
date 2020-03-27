@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{% static "empo_news/news.css" %}">
+        <title>Submit | Empo News</title>
+    </head>
+    <body>
+        <div>
+        <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef" style="margin-left:100px">
+            <tr><td bgcolor="#ff6600">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
+                    <tr><td style="line-height:12pt; height:10px;">
+                        <span class="pagetop"><b>Submit</b></span>
+                    </td></tr>
+                </table>
+            </td></tr>
+            <tr style="height:10px"></tr>
+            <tr><td>
+                {% block content %}
+                    <form action="" method="post">
+                    {% csrf_token %}
+                    <table>
+                        <tr><th>{{ form.title.label_tag }}</th><td>{{ form.title }}</td></tr>
+                        <tr><th>{{ form.url.label_tag }}</th><td>{{ form.url }}</td></tr>
+                        <tr><th></th><td>or</td></tr>
+                        <tr><th>{{ form.text.label_tag }}</th><td>{{ form.text }}</td></tr>
+                    </table>
+                    <input type="submit" value="submit" name="submit_button" style="margin-left: 43px; margin-top: 5px; margin-bottom: 10px"/>
+                    <br><p style="margin-left: 43px">Leave url blank to submit a question for discussion. If there is no url,
+                        the text (if any) will appear at the top of the thread.</p>
+                    <p style="margin-left: 43px">You can also submit via bookmarklet.</p>
+                    </form>
+                {% endblock %}
+            </td></tr></table></div></body></html>

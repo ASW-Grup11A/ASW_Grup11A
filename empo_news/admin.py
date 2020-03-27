@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+
+from empo_news.models import User, Contribution
+
+admin.site.register(User)
+admin.site.register(Contribution)
+
