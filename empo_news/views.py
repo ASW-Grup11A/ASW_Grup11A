@@ -26,3 +26,12 @@ def submit(request):
         'form': form,
     }
     return render(request, 'empo_news/submit.html', context)
+
+  
+def main_page(request):
+
+    context ={
+
+    }
+
+    return render(request, 'empo_news/main_page.html', context);
