@@ -30,6 +30,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 ALLOWED_HOSTS = [
     'empo-news.herokuapp.com',
+    'localhost',
 ]
 
 # Application definition
@@ -80,8 +81,14 @@ WSGI_APPLICATION = 'asw_grup11a.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'emponews',
+        'USER': 'admin',
+        'PASSWORD': 'adminadmin',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
