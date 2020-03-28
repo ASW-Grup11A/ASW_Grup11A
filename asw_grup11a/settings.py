@@ -28,7 +28,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '@^_&52z%#xcnk81)t#5hxq1blm1oqb
 # DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'empo-news.herokuapp.com',
+]
 
 # Application definition
 
