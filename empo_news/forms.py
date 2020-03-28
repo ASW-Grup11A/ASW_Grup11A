@@ -4,9 +4,9 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class SubmitForm(forms.Form):
-    title = forms.CharField(widget=forms.TextInput(attrs={"size": 40}), max_length=10, min_length=1, label='title',
+    title = forms.CharField(widget=forms.TextInput(attrs={"size": 40}), max_length=80, min_length=1, label='title',
                             label_suffix=" ")
-    url = forms.CharField(widget=forms.TextInput(attrs={"size": 40}), max_length=10, min_length=1, label='url',
+    url = forms.CharField(widget=forms.TextInput(attrs={"size": 40}), max_length=500, min_length=1, label='url',
                           label_suffix=" ", required=False)
     text = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "cols": 56}), label='text', label_suffix=" ",
                            required=False)
