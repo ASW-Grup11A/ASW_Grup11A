@@ -2,10 +2,10 @@ from datetime import date
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-
-from empo_news.models import Contribution, User
 from django.urls import reverse
+
 from empo_news.forms import SubmitForm
+from empo_news.models import Contribution, User
 
 
 def submit(request):
