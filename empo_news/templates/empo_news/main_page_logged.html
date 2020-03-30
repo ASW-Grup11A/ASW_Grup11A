@@ -57,11 +57,11 @@
                                     <tr class='athing' id='22677970'>
                                         <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter }}.</span></td>
                                         <td valign="top" class="votelinks">
-                                           <center>
+                                           <div style="text-align: center;">
                                               <a id='up_22677970' href={% url 'empo_news:not_implemented' %}>
                                                  <div class='votearrow' title='upvote'></div>
                                               </a>
-                                           </center>
+                                           </div>
                                         </td>
                                         <td class="title">
                                             {% if contribution|get_class == "url" %}
@@ -98,12 +98,12 @@
                             </tr>
                         </table>
                         <br>
-                        <center><a href={% url 'empo_news:not_implemented' %}>
+                        <div style="text-align: center;"><a href={% url 'empo_news:not_implemented' %}>
                              Applications are open for YC Summer 2020
                              </a>
-                        </center>
+                        </div>
                         <br>
-                        <center>
+                        <div style="text-align: center;">
                              <span class="yclinks">
                                  <a href={% url 'empo_news:not_implemented' %}>Guidelines</a>
                                  | <a href={% url 'empo_news:not_implemented' %}>FAQ</a>
@@ -119,7 +119,7 @@
                              <form method="get" action="{% url 'empo_news:not_implemented' %}">Search:
                                 <input type="text" name="q" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="false">
                              </form>
-                        </center>
+                        </div>
                     </td>
                 </tr>
             </table>
