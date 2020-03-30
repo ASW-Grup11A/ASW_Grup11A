@@ -27,6 +27,9 @@
                     <form action="" method="post">
                     {% csrf_token %}
                     <table>
+                        {% if form.errors %}
+                            {{ form.non_field_errors }}
+                        {% endif %}
                         <tr><th>{{ form.title.label_tag }}</th><td>{{ form.title }}</td></tr>
                         <tr><th>{{ form.url.label_tag }}</th><td>{{ form.url }}</td></tr>
                         <tr><th></th><td>or</td></tr>

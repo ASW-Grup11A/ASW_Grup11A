@@ -1,6 +1,10 @@
+import re
+
 from django import forms
-from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+
+
+def valid_url(url):
+    return re.match("")
 
 
 class SubmitForm(forms.Form):
@@ -11,11 +15,13 @@ class SubmitForm(forms.Form):
     text = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "cols": 56}), label='text', label_suffix=" ",
                            required=False)
 
-    def clean_url(self):
-        text_data = self.cleaned_data['text']
+    def clean(self):
+        cleaned_data = super().clean()
+        url = cleaned_data['url']
+        text = cleaned_data['text']
 
-        if text_data:
-            raise ValidationError(_('Text field should be empty'))
-
-        return self.cleaned_data['url']
-
+        if url and text and valid_url(url):
+            raise forms.ValidationError('Submissions can\'t have both urls and text, so you need to pick one. '
+                                        'If you keep the url, you can always post your text as a comment in the '
+                                        'thread.')
+        return cleaned_data
