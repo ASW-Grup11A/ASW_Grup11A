@@ -30,7 +30,7 @@ def main_page(request):
         "list": most_points_list,
         "user": User(username="Pepe05")
     }
-    return render(request, 'empo_news/main_page_logged.html', context);
+    return render(request, 'empo_news/main_page_logged.html', context)
 
 
 def new_page(request):
@@ -40,8 +40,8 @@ def new_page(request):
         "user": User(username="Pepe05"),
         "highlight": "new"
     }
-    return render(request, 'empo_news/main_page_logged.html', context);
+    return render(request, 'empo_news/main_page_logged.html', context)
 
 
 def not_implemented(request):
-    return HttpResponse('View not yet implemented');
+    return HttpResponse('View not yet implemented')
