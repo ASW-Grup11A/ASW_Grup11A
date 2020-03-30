@@ -24,4 +24,4 @@ class SubmitForm(forms.Form):
 
     @staticmethod
     def valid_url(url):
-        return re.match("\.[a-zA-z0-9]+$", url)
+        return "." in url
