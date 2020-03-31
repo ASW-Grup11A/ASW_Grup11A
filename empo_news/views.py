@@ -35,9 +35,9 @@ def main_page(request):
     most_points_list = Contribution.objects.order_by('-points')[:29]
     context = {
         "list": most_points_list,
-        "user": User(username="Pepe05")
+        #"user": User(username="Pepe05")
     }
-    return render(request, 'empo_news/main_page_logged.html', context)
+    return render(request, 'empo_news/main_page.html', context)
 
 
 def new_page(request):
@@ -52,3 +52,7 @@ def new_page(request):
 
 def not_implemented(request):
     return HttpResponse('View not yet implemented')
+
+
+def login(request):
+    return render(request, 'empo_news/index.html')
