@@ -52,3 +52,7 @@ def new_page(request):
 
 def not_implemented(request):
     return HttpResponse('View not yet implemented')
+
+
+def login(request):
+    return render(request, 'empo_news/index.html')
