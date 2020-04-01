@@ -9,7 +9,7 @@ from empo_news.models import Contribution, User
 
 
 def submit(request):
-    form = SubmitForm()
+    form = SubmitForm() # New
 
     if request.method == 'POST':
         form = SubmitForm(request.POST)
