@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -16,7 +16,7 @@ def submit(request):
 
         if form.is_valid():
             contribution = Contribution(user=User(username="Pepe05"), title=form.cleaned_data['title'],
-                                        publication_time=date.today(), text='')
+                                        publication_time=datetime.today(), text='')
             if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
                 contribution.url = form.cleaned_data['url']
             else:
