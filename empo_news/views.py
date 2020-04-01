@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -16,7 +16,7 @@ def submit(request):
 
         if form.is_valid():
             contribution = Contribution(user=User(username="Pepe05"), title=form.cleaned_data['title'],
-                                        publication_time=date.today())
+                                        publication_time=datetime.today(), text='')
             if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
                 contribution.url = form.cleaned_data['url']
             else:
@@ -52,3 +52,18 @@ def new_page(request):
 
 def not_implemented(request):
     return HttpResponse('View not yet implemented')
+
+def item(request):
+    if request.method == 'GET':
+        contribution_id = int(request.GET.get('id', -1))
+        try:
+            contribution = Contribution.objects.get(id=contribution_id)
+            context = {
+                "contribution": contribution
+            }
+            return render(request, 'empo_news/contribution.html', context)
+        except Contribution.DoesNotExist:
+            return HttpResponse('No such item.')
+
+    return HttpResponseRedirect(reverse('empo_news:main_page'))
+
