@@ -9,7 +9,7 @@ from empo_news.models import Contribution, User
 
 
 def submit(request):
-    form = SubmitForm() # New
+    form = SubmitForm()
 
     if request.method == 'POST':
         form = SubmitForm(request.POST)
@@ -52,3 +52,15 @@ def new_page(request):
 
 def not_implemented(request):
     return HttpResponse('View not yet implemented')
+
+def item(request):
+    if request.method == 'GET':
+        contribution_id = request.GET.get('id', '')
+        contribution = Contribution.objects.get(id=contribution_id)
+        context = {
+            "contribution": contribution
+        }
+        return render(request, 'empo_news/contribution.html', context)
+
+    return HttpResponseRedirect(reverse('empo_news:main_page'))
+
