@@ -1,11 +1,11 @@
 from datetime import datetime
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from empo_news.forms import SubmitForm
-from empo_news.models import Contribution, User
+from empo_news.models import Contribution
 
 
 def submit(request):
@@ -15,7 +15,7 @@ def submit(request):
         form = SubmitForm(request.POST)
 
         if form.is_valid():
-            contribution = Contribution(user=User(username="Pepe05"), title=form.cleaned_data['title'],
+            contribution = Contribution(user=request.user, title=form.cleaned_data['title'],
                                         publication_time=datetime.today(), text='')
             if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
                 contribution.url = form.cleaned_data['url']
@@ -33,9 +33,13 @@ def submit(request):
 
 def main_page(request):
     most_points_list = Contribution.objects.order_by('-points')[:29]
+    for contribution in most_points_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+
     context = {
         "list": most_points_list,
-        "user": User(username="Pepe05")
+        "user": request.user,
     }
     return render(request, 'empo_news/main_page_logged.html', context)
 
@@ -44,14 +48,26 @@ def new_page(request):
     most_recent_list = Contribution.objects.order_by('-publication_time')[:29]
     context = {
         "list": most_recent_list,
-        "user": User(username="Pepe05"),
+        "user": request.user,
         "highlight": "new"
     }
     return render(request, 'empo_news/main_page_logged.html', context)
 
 
+def likes(request, contribution_id):
+    contribution = get_object_or_404(Contribution, id=contribution_id)
+    if contribution.likes.filter(id=request.user.id).exists():
+        contribution.likes.remove(request.user);
+        contribution.points = contribution.total_likes()
+    else:
+        contribution.likes.add(request.user)
+        contribution.points = contribution.total_likes()
+    return HttpResponseRedirect(reverse('empo_news:main_page'))
+
+
 def not_implemented(request):
     return HttpResponse('View not yet implemented')
+
 
 def item(request):
     if request.method == 'GET':
@@ -66,4 +82,3 @@ def item(request):
             return HttpResponse('No such item.')
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
-

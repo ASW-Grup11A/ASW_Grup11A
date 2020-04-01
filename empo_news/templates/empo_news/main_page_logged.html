@@ -58,13 +58,18 @@
                                         <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter }}.</span></td>
                                         <td valign="top" class="votelinks">
                                            <div style="text-align: center;">
-                                              <a id='up_22677970' href={% url 'empo_news:not_implemented' %}>
-                                                 <div class='votearrow' title='upvote'></div>
-                                              </a>
+                                                    {%  csrf_token %}
+                                                   {% if contribution|is_liked %}
+                                                          <a id='up_22677970' href={% url 'empo_news:likes' contribution.id %}>
+                                                             <div class='votearrow' title='upvote'></div>
+                                                          </a>
+                                                   {% else %}
+                                                       <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                                                   {% endif %}
                                            </div>
                                         </td>
                                         <td class="title">
-                                            {% if contribution|get_class == "url" %}
+                                            {% if not contribution|get_class == "url" %}
                                                 <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
                                             {% else %}
                                                 <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
@@ -80,7 +85,18 @@
                                     <tr>
                                         <td colspan="2"></td>
                                         <td class="subtext">
-                                           <span class="score" id="score_22677970">{{ contribution.points }} points</span> by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a> <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time}} minutes ago</a></span> <span id="unv_22677970"></span> | <a href="hide?id=22677970&amp;goto=news">hide</a> | <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}&nbsp;comments</a>
+                                           <span class="score" id="score_22677970">{{ contribution|get_total_likes }} points</span>
+                                            by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a>
+                                            <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time}} minutes ago</a></span>
+                                            <span id="unv_22677970"></span> |
+
+                                               {% if not contribution|is_liked %}
+                                                   {%  csrf_token %}
+                                                   <a href={% url 'empo_news:likes' contribution.id %}>unvote</a> |
+                                               {% endif %}
+
+                                            <a href="hide?id=22677970&amp;goto=news">hide</a> |
+                                            <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}&nbsp;comments</a>
                                         </td>
                                     </tr>
                                     <tr class="spacer" style="height:5px"></tr>
@@ -91,7 +107,6 @@
                 </tr>
                 <tr>
                     <td>
-                        <img src="s.gif" height="10" width="0">
                         <table width="100%" cellspacing="0" cellpadding="1">
                             <tr>
                                 <td bgcolor="#ff6600"></td>
