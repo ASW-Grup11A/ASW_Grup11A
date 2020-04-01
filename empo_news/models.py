@@ -12,6 +12,7 @@ class UserFields(models.Model):
     minaway = models.IntegerField(default=180)
     delay = models.IntegerField(default=0)
 
+
 class Contribution(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=2000)
