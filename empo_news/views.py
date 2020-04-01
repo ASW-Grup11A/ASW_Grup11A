@@ -1,7 +1,8 @@
 from datetime import date
 
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.contrib.auth import logout as do_logout
+from django.http import HttpResponse, HttpResponseRedirect, request
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from empo_news.forms import SubmitForm
@@ -35,7 +36,7 @@ def main_page(request):
     most_points_list = Contribution.objects.order_by('-points')[:29]
     context = {
         "list": most_points_list,
-        #"user": User(username="Pepe05")
+        # "user": User(username="Pepe05")
     }
     return render(request, 'empo_news/main_page.html', context)
 
@@ -54,5 +55,8 @@ def not_implemented(request):
     return HttpResponse('View not yet implemented')
 
 
-def login(request):
-    return render(request, 'empo_news/index.html')
+def logout(request):
+    # Finalizamos la sesión
+    do_logout(request)
+    # Redireccionamos a la portada
+    return redirect('/')
