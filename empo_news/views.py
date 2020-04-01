@@ -55,12 +55,15 @@ def not_implemented(request):
 
 def item(request):
     if request.method == 'GET':
-        contribution_id = request.GET.get('id', '')
-        contribution = Contribution.objects.get(id=contribution_id)
-        context = {
-            "contribution": contribution
-        }
-        return render(request, 'empo_news/contribution.html', context)
+        contribution_id = int(request.GET.get('id', -1))
+        try:
+            contribution = Contribution.objects.get(id=contribution_id)
+            context = {
+                "contribution": contribution
+            }
+            return render(request, 'empo_news/contribution.html', context)
+        except Contribution.DoesNotExist:
+            return HttpResponse('No such item.')
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
 
