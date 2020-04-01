@@ -2,24 +2,31 @@ from datetime import date
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-
-from empo_news.models import Contribution, User
 from django.urls import reverse
+
 from empo_news.forms import SubmitForm
+from empo_news.models import Contribution, User
 
 
 def submit(request):
     form = SubmitForm()
-    submit_response = request.POST
 
-    if submit_response.get('submit_button'):
-        contribution = Contribution(user=User(username="Pepe05"), title=submit_response.get('title'),
-                                    publication_time=date.today(), url=submit_response.get('url'))
-        contribution.save()
-        return HttpResponseRedirect(reverse('empo_news:main_page'))
+    if request.method == 'POST':
+        form = SubmitForm(request.POST)
+
+        if form.is_valid():
+            contribution = Contribution(user=User(username="Pepe05"), title=form.cleaned_data['title'],
+                                        publication_time=date.today())
+            if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
+                contribution.url = form.cleaned_data['url']
+            else:
+                contribution.text = form.cleaned_data['text']
+            contribution.save()
+
+            return HttpResponseRedirect(reverse('empo_news:main_page'))
 
     context = {
-        'form': form,
+        'form': form
     }
     return render(request, 'empo_news/submit.html', context)
 
@@ -30,7 +37,7 @@ def main_page(request):
         "list": most_points_list,
         "user": User(username="Pepe05")
     }
-    return render(request, 'empo_news/main_page_logged.html', context);
+    return render(request, 'empo_news/main_page_logged.html', context)
 
 
 def new_page(request):
@@ -40,8 +47,8 @@ def new_page(request):
         "user": User(username="Pepe05"),
         "highlight": "new"
     }
-    return render(request, 'empo_news/main_page_logged.html', context);
+    return render(request, 'empo_news/main_page_logged.html', context)
 
 
 def not_implemented(request):
-    return HttpResponse('View not yet implemented');
+    return HttpResponse('View not yet implemented')
