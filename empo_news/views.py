@@ -1,12 +1,13 @@
 from datetime import date
 
 from django.contrib.auth import logout as do_logout
+from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect, request
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from empo_news.forms import SubmitForm
-from empo_news.models import Contribution, User
+from empo_news.models import Contribution, UserFields
 
 
 def submit(request):
@@ -45,7 +46,7 @@ def new_page(request):
     most_recent_list = Contribution.objects.order_by('-publication_time')[:29]
     context = {
         "list": most_recent_list,
-        "user": User(username="Pepe05"),
+        # "user": User(username="Pepe05"),
         "highlight": "new"
     }
     return render(request, 'empo_news/main_page_logged.html', context)
@@ -60,3 +61,25 @@ def logout(request):
     do_logout(request)
     # Redireccionamos a la portada
     return redirect('/')
+
+
+def profile(request):
+    if date.today() != request.user.date_joined:
+        userFields = UserFields(user=request.user)
+        userFields.save()
+    else:
+        userFields = UserFields(user=request.user, karma=1, about="",
+                                showdead=False, noprocrast=False, maxvisit=20,
+                                minaway=180, delay=0)
+        userFields.save()
+    context = {
+        "userFields": userFields
+    }
+    return render(request, 'empo_news/profile.html', context)
+
+
+def updateUserFields(request, about, showdead, noprocast, maxvisit, minaway, delay):
+    context = {
+        "userFields": UserFields(request.user)
+    }
+    return render(request, 'empo_news/profile.html', context)
