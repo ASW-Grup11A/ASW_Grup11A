@@ -2,11 +2,9 @@ from datetime import date
 
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth.models import User
-from django.forms import Form
-from django.http import HttpResponse, HttpResponseRedirect, request
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from pyasn1.compat.octets import null
 
 from empo_news.forms import SubmitForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields
@@ -19,7 +17,7 @@ def submit(request):
         form = SubmitForm(request.POST)
 
         if form.is_valid():
-            contribution = Contribution(user=User(username="Pepe05"), title=form.cleaned_data['title'],
+            contribution = Contribution(user=User.objects.get(username=request.user.username), title=form.cleaned_data['title'],
                                         publication_time=date.today())
             if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
                 contribution.url = form.cleaned_data['url']
