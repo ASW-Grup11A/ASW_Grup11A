@@ -32,7 +32,7 @@ class Contribution(models.Model):
         elif self.text is not None:
             return "ask"
         return "failure"
-
+    
     def total_likes(self):
         return self.likes.count()
 
@@ -44,3 +44,14 @@ class Contribution(models.Model):
 
     def is_hidden(self):
         return not self.show
+
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    contribution = models.ForeignKey(Contribution, on_delete=models.CASCADE)
+    upvotes = models.IntegerField(default=1)
+    publication_date = models.DateTimeField('publication date')
+    text = models.CharField(max_length=2000)
+
+
