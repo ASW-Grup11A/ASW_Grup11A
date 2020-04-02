@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class User(models.Model):
+class User(models.Model): #Change
     username = models.CharField(max_length=15, primary_key=True)
     password = models.CharField(max_length=72)
     hidden = models.ManyToManyField('Contribution', related_name="hidden_contributions", blank=True)
