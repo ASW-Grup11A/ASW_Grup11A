@@ -24,7 +24,13 @@
                                 </td>
                                 <td style="text-align:right;padding-right:4px;">
                                     <span class="pagetop">
-                                        <a href={% url 'empo_news:not_implemented' %}>login</a>
+                                        {% if user.is_authenticated %}
+                                            <a href={% url 'empo_news:user_page' %}>{{ user.username }}</a>
+                                            (1) |
+                                            <a href="/logout">Logout</a>
+                                        {% else %}
+                                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login</a>
+                                        {% endif %}
                                     </span>
                                 </td>
                             </tr>

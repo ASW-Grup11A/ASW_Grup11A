@@ -23,3 +23,22 @@ class SubmitForm(forms.Form):
     @staticmethod
     def valid_url(url):
         return "." in url
+
+
+class UserUpdateForm(forms.Form):
+    about = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "cols": 56}), label='about', required=False)
+    email = forms.CharField(widget=forms.TextInput(attrs={"size": 40}), max_length=80, min_length=1, label='email',
+                            required=True)
+    showdead = forms.ChoiceField(choices=[('0', 'no'), ('1', 'yes')], label='showdead', required=True)
+    noprocrast = forms.ChoiceField(choices=[('0', 'no'), ('1', 'yes')], label='noprocrast', required=True)
+    maxvisit = forms.CharField(widget=forms.TextInput(attrs={"size": 10}), max_length=80, min_length=1,
+                               label='maxvisit',
+                               required=True)
+    minaway = forms.CharField(widget=forms.TextInput(attrs={"size": 10}), max_length=80, min_length=1, label='minaway',
+                              required=True)
+    delay = forms.CharField(widget=forms.TextInput(attrs={"size": 10}), max_length=80, min_length=0, label='delay',
+                            required=True)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data
