@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from django.contrib.auth import logout as do_logout
 from django.contrib.auth.models import User
@@ -55,7 +55,6 @@ def new_page(request):
 def not_implemented(request):
     return HttpResponse('View not yet implemented')
 
-
 def logout(request):
     do_logout(request)
     return redirect('/')
@@ -101,3 +100,19 @@ def profile(request):
         "userFields": userFields
     }
     return render(request, 'empo_news/profile.html', context)
+  
+  
+def item(request):
+    if request.method == 'GET':
+        contribution_id = int(request.GET.get('id', -1))
+        try:
+            contribution = Contribution.objects.get(id=contribution_id)
+            context = {
+                "contribution": contribution
+            }
+            return render(request, 'empo_news/contribution.html', context)
+        except Contribution.DoesNotExist:
+            return HttpResponse('No such item.')
+
+    return HttpResponseRedirect(reverse('empo_news:main_page'))
+

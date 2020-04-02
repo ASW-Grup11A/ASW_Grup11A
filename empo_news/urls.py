@@ -12,4 +12,5 @@ urlpatterns = [
     path('user_page', views.profile, name='user_page'),
     url('', include('social.apps.django_app.urls', namespace='social')),
     path('logout', views.logout),
+    path('item', views.item, name='item'),
 ]
