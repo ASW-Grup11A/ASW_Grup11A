@@ -1,9 +1,11 @@
 {% load functions %}
+{% load humanize %}
 <html op="news">
    <head>
        {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'empo_news/main_page.css' %}">
-        <title>Empo News</title>
+        <link rel="icon" src="{% static 'images/favicon.ico' %}"/>
+       <title>Empo News</title>
    </head>
    <body>
         <div align="center">
@@ -20,7 +22,23 @@
                                 <td style="line-height:12pt; height:10px;">
                                     <span class="pagetop">
                                         <b class="hnname"><a href={% url 'empo_news:main_page' %}>Empo News</a></b>
-                                        <a href={% url 'empo_news:new_page' %}>new</a> | <a href={% url 'empo_news:not_implemented' %}>past</a> | <a href={% url 'empo_news:not_implemented' %}>comments</a> | <a href={% url 'empo_news:not_implemented' %}>ask</a> | <a href={% url 'empo_news:not_implemented' %}>show</a> | <a href={% url 'empo_news:not_implemented' %}>jobs</a> | <a href={% url 'empo_news:submit' %}>submit</a>            </span>
+                                        <a href={% url 'empo_news:not_implemented' %}>welcome</a> |
+                                        {% if highlight == "new" %}
+                                            <span class="topsel">
+                                            <a href={% url 'empo_news:new_page' %}>new</a>
+                                            </span>
+                                        {% else %}
+                                            <a href={% url 'empo_news:new_page' %}>new</a>
+                                        {% endif %}
+                                         |
+                                        <a href={% url 'empo_news:not_implemented' %}>threads</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>past</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>comments</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>ask</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>show</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>jobs</a> |
+                                        <a href={% url 'empo_news:submit' %}>submit</a>
+                                    </span>
                                 </td>
                                 <td style="text-align:right;padding-right:4px;">
                                     <span class="pagetop">
@@ -43,16 +61,21 @@
                         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
                                 {% for contribution in list.all %}
                                     <tr class='athing' id='22677970'>
-                                        <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter }}.</span></td>
+                                        <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter|add:base_loop_count }}.</span></td>
                                         <td valign="top" class="votelinks">
                                            <div style="text-align: center;">
-                                              <a id='up_22677970' href={% url 'empo_news:not_implemented' %}>
-                                                 <div class='votearrow' title='upvote'></div>
-                                              </a>
+                                                    {%  csrf_token %}
+                                                   {% if contribution|is_liked %}
+                                                          <a id='up_22677970' href={% url 'empo_news:likes' path page_value contribution.id %}>
+                                                             <div class='votearrow' title='upvote'></div>
+                                                          </a>
+                                                   {% else %}
+                                                       <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                                                   {% endif %}
                                            </div>
                                         </td>
                                         <td class="title">
-                                            {% if contribution|get_class == "url" %}
+                                            {% if not contribution|get_class == "url" %}
                                                 <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
                                             {% else %}
                                                 <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
@@ -68,18 +91,35 @@
                                     <tr>
                                         <td colspan="2"></td>
                                         <td class="subtext">
-                                           <span class="score" id="score_22677970">{{ contribution.points }} points</span> by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a> <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time}} minutes ago</a></span> <span id="unv_22677970"></span> | <a href="hide?id=22677970&amp;goto=news">hide</a> | <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}&nbsp;comments</a>
+                                           <span class="score" id="score_22677970">{{ contribution.points }} points</span>
+                                            by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a>
+                                            <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
+                                            <span id="unv_22677970"></span> |
+
+                                               {% if not contribution|is_liked %}
+                                                   {%  csrf_token %}
+                                                   <a href={% url 'empo_news:likes' path page_value contribution.id %}>unvote</a> |
+                                               {% endif %}
+
+                                            {%  csrf_token %}
+                                            <a href={% url 'empo_news:hide' path page_value contribution.id %}>hide</a> |
+                                            <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}&nbsp;comments</a>
                                         </td>
                                     </tr>
                                     <tr class="spacer" style="height:5px"></tr>
                                 {% endfor %}
-                                <tr class="morespace" style="height:10px"></tr>
+                            <tr class="morespace" style="height:10px"></tr>
+                            <tr><td colspan="2"></td><td class="title">
+                                {% if more %}
+                                        <a href={% url next_page next_page_value %}>More</a>
+                                {% endif %}
+                            </td></tr>
+                            <tr class="morespace" style="height:10px"></tr>
                         </table>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <img src="s.gif" height="10" width="0">
                         <table width="100%" cellspacing="0" cellpadding="1">
                             <tr>
                                 <td bgcolor="#ff6600"></td>
