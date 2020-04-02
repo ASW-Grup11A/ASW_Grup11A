@@ -2,6 +2,17 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+class UserFields(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    karma = models.IntegerField(default=1)
+    about = models.CharField(max_length=2000)
+    showdead = models.BooleanField(default=False)
+    noprocrast = models.BooleanField(default=False)
+    maxvisit = models.IntegerField(default=1)
+    minaway = models.IntegerField(default=180)
+    delay = models.IntegerField(default=0)
+
+    
 class Contribution(models.Model):
     user = models.ForeignKey(User, related_name="user", on_delete=models.CASCADE)
     title = models.CharField(max_length=2000)

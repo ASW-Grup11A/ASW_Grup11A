@@ -1,4 +1,5 @@
-from django.urls import path
+from django.conf.urls import url
+from django.urls import path, include
 
 from . import views
 
@@ -12,6 +13,8 @@ urlpatterns = [
     path('item', views.item, name='item'),
     path('like/<str:view>/<int:pg>/<int:contribution_id>', views.likes, name='likes'),
     path('hide/<str:view>/<int:pg>/<int:contribution_id>', views.hide, name='hide'),
-    path('notimplemented', views.not_implemented, name='not_implemented')
+    path('notimplemented', views.not_implemented, name='not_implemented'),
+    path('user_page', views.profile, name='user_page'),
+    url('', include('social.apps.django_app.urls', namespace='social')),
+    path('logout', views.logout),
 ]
-
