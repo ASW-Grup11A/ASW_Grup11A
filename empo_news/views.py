@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from empo_news.forms import SubmitForm, CommentForm
-from empo_news.models import Contribution, User
+from empo_news.models import Contribution, User, Comment
 
 
 def submit(request):
@@ -53,19 +53,28 @@ def new_page(request):
 def not_implemented(request):
     return HttpResponse('View not yet implemented')
 
+
 def item(request):
+    contrib_id = int(request.GET.get('id', -1))
+    contrib = Contribution.objects.get(id=contrib_id)
+    context = {
+        "contribution": contrib,
+        "comment_form": CommentForm()
+    }
+
     if request.method == 'GET':
-        contribution_id = int(request.GET.get('id', -1))
         try:
-            contribution = Contribution.objects.get(id=contribution_id)
-            comment_form = CommentForm()
-            context = {
-                "contribution": contribution,
-                "comment_form": comment_form
-            }
             return render(request, 'empo_news/contribution.html', context)
         except Contribution.DoesNotExist:
             return HttpResponse('No such item.')
+    elif request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+
+        if comment_form.is_valid():
+            comment = Comment(user=User(username="Pepe05"), contribution=contrib,
+                              publication_date=datetime.today(),
+                              text=comment_form.cleaned_data['comment'])
+            comment.save()
+            return render(request, 'empo_news/contribution.html', context)
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
-

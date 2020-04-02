@@ -30,7 +30,7 @@ class Contribution(models.Model):
 
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    contribution_id = models.ForeignKey(Contribution, on_delete=models.CASCADE)
+    contribution = models.ForeignKey(Contribution, on_delete=models.CASCADE)
     upvotes = models.IntegerField(default=1)
     publication_date = models.DateTimeField('publication date')
     text = models.CharField(max_length=2000)

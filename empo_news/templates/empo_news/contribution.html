@@ -81,19 +81,19 @@
                                 {{ contribution.text }}
                                 </td>
                             </tr>
-                        <tr>
-                            <td colspan="1"></td>
-                            {% block content %}
-                                <form action="" method="post">
-                                    {% csrf_token %}
-                                    <td style="padding-top: 10px">{{ comment_form.comment }}</td>
-                                </form>
-                            {% endblock %}
-                        </tr>
-                        <tr>
-                            <td colspan="1"></td>
-                            <td style="padding-top: 15px; padding-bottom: 35px"><input type="submit" value="add comment" name="comment_button"/></td>
-                        </tr>
+                        {% block content %}
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <tr>
+                                <td colspan="1"></td>
+                                <td style="padding-top: 10px">{{ comment_form.comment }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="1"></td>
+                                <td style="padding-top: 15px; padding-bottom: 35px"><input type="submit" value="add comment" name="comment_button"/></td>
+                            </tr>
+                        </form>
+                        {% endblock %}
                             <tr class="spacer" style="height:5px"></tr>
                         <tr class="morespace" style="height:10px"></tr>
                         </table>
