@@ -6,6 +6,7 @@ from django.forms import Form
 from django.http import HttpResponse, HttpResponseRedirect, request
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from pyasn1.compat.octets import null
 
 from empo_news.forms import SubmitForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields
@@ -58,49 +59,42 @@ def not_implemented(request):
 
 
 def logout(request):
-    # Finalizamos la sesión
     do_logout(request)
-    # Redireccionamos a la portada
     return redirect('/')
 
 
 def profile(request):
-    print(request.user.last_login)
-    print(request.user.date_joined)
-    if request.user.last_login.day == request.user.date_joined.day:
-        userFields = UserFields(user=request.user, karma=1, about="", showdead=False, noprocrast=False,maxvisit=20,
+    if UserFields.objects.filter(user=request.user).count() == 0:
+        userFields = UserFields(user=request.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
     else:
         userFields = UserFields.objects.get(user=request.user)
-    form = UserUpdateForm(initial={'email':request.user.email, 'karma':userFields.karma, 'about':userFields.about,
-                                   'showdead':userFields.showdead, 'noprocrast':userFields.noprocrast,
-                                   'maxvisit':userFields.maxvisit, 'minaway':userFields.minaway,
-                                   'delay':userFields.delay})
+
+    if userFields.showdead == 0:
+        posS = '0'
+    else:
+        posS = '1'
+
+    if userFields.noprocrast == 0:
+        posN = '0'
+    else:
+        posN = '1'
+    form = UserUpdateForm(initial={'email': request.user.email, 'karma': userFields.karma, 'about': userFields.about,
+                                   'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
+                                   'minaway': userFields.minaway, 'delay': userFields.delay})
 
     if request.method == 'POST':
         form = UserUpdateForm(request.POST)
         if form.is_valid():
-            userFields.delete()
-            print(form.changed_data['delay'])
-            if form.cleaned_data['showdead'] == 'yes':
-                posSd = 0
-            else:
-                posSd = 1
-            if form.cleaned_data['noprocrast'] == 'yes':
-                posP = 0
-            else:
-                posP = 1
-            userFields = UserFields(user=request.user, about=form.cleaned_data['about'],
-                                    showdead=posSd,
-                                    noprocrast=posP,
-                                    maxvisit=type(int(form.cleaned_data['maxvisit'])),
-                                    minaway=type(int(form.cleaned_data['minaway'])),
-                                    delay=type(int(form.changed_data['delay'])))
-            userFields.save()
-
-            user = User.objects.get(user=request.user)
-            user.email = form.cleaned_data['email']
+            print(form.cleaned_data['showdead'])
+            UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
+                                                                showdead=form.cleaned_data['showdead'],
+                                                                noprocrast=form.cleaned_data['noprocrast'],
+                                                                maxvisit=int(form.cleaned_data['maxvisit']),
+                                                                minaway=int(form.cleaned_data['minaway']),
+                                                                delay=int(form.cleaned_data['delay']))
+            User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
 
             return HttpResponseRedirect(reverse('empo_news:user_page'))
     context = {
@@ -108,4 +102,3 @@ def profile(request):
         "userFields": userFields
     }
     return render(request, 'empo_news/profile.html', context)
-
