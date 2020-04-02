@@ -94,6 +94,31 @@
                             </tr>
                         </form>
                         {% endblock %}
+                        {% for comment in contrib_comments %}
+                            <table>
+                                <tr class='athing' id='22677970'>
+                                    <td valign="top" class="votelinks">
+                                       <div style="text-align: center;">
+                                          <a id='up_22677970' href={% url 'empo_news:not_implemented' %}>
+                                             <div class='votearrow' title='upvote'></div>
+                                          </a>
+                                       </div>
+                                    </td>
+                                    <td style="">
+                                        <a href="empo_news:not_implemented">{{ comment.user.username }}</a>
+                                        <a href="empo_news:not_implemented">{{ comment.publication_date }}</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1"></td>
+                                    <td>{{ comment.text }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1"></td>
+                                    <td><u><a href="empo_news:not_implemented">reply</a></u></td>
+                                </tr>
+                            </table>
+                        {% endfor %}
                             <tr class="spacer" style="height:5px"></tr>
                         <tr class="morespace" style="height:10px"></tr>
                         </table>

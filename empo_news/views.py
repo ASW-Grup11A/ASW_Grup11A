@@ -57,9 +57,12 @@ def not_implemented(request):
 def item(request):
     contrib_id = int(request.GET.get('id', -1))
     contrib = Contribution.objects.get(id=contrib_id)
+    contrib_comments = Comment.objects.filter(contribution_id=contrib_id)
+
     context = {
         "contribution": contrib,
-        "comment_form": CommentForm()
+        "comment_form": CommentForm(),
+        "contrib_comments": contrib_comments
     }
 
     if request.method == 'GET':
@@ -69,12 +72,13 @@ def item(request):
             return HttpResponse('No such item.')
     elif request.method == 'POST':
         comment_form = CommentForm(request.POST)
+        print("POST")
 
         if comment_form.is_valid():
             comment = Comment(user=User(username="Pepe05"), contribution=contrib,
                               publication_date=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
-            return render(request, 'empo_news/contribution.html', context)
+            return HttpResponseRedirect("")
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
