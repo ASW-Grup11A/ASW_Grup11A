@@ -4,12 +4,5 @@ register = template.Library()
 
 
 @register.filter
-def get_class(contribution):
-    return contribution.get_type()
-
-
-@register.filter
-def is_liked(contribution):
-    return contribution.is_liked()
-
-# {% if request.user.is_authenticated %} per tenir un unic main
+def get_class(obj):
+    return obj.get_type()
