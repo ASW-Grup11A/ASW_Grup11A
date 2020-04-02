@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class User(models.Model): #Change
+class User(models.Model):
     username = models.CharField(max_length=15, primary_key=True)
     password = models.CharField(max_length=72)
     hidden = models.ManyToManyField('Contribution', related_name="hidden_contributions", blank=True)
@@ -26,3 +26,12 @@ class Contribution(models.Model):
         elif self.text is not None:
             return "ask"
         return "failure"
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    contribution_id = models.ForeignKey(Contribution, on_delete=models.CASCADE)
+    upvotes = models.IntegerField(default=1)
+    publication_date = models.DateTimeField('publication date')
+    text = models.CharField(max_length=2000)
+

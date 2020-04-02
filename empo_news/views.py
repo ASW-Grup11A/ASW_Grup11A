@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from empo_news.forms import SubmitForm
+from empo_news.forms import SubmitForm, CommentForm
 from empo_news.models import Contribution, User
 
 
@@ -58,8 +58,10 @@ def item(request):
         contribution_id = int(request.GET.get('id', -1))
         try:
             contribution = Contribution.objects.get(id=contribution_id)
+            comment_form = CommentForm()
             context = {
-                "contribution": contribution
+                "contribution": contribution,
+                "comment_form": comment_form
             }
             return render(request, 'empo_news/contribution.html', context)
         except Contribution.DoesNotExist:

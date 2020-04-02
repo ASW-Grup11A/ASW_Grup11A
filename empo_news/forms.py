@@ -23,3 +23,16 @@ class SubmitForm(forms.Form):
     @staticmethod
     def valid_url(url):
         return "." in url
+
+
+class CommentForm(forms.Form):
+    comment = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "cols": 56}), label='', label_suffix=" ",
+                              required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        comment = cleaned_data['comment']
+
+        if not comment:
+            raise forms.ValidationError('Please try again.')
+        return cleaned_data
