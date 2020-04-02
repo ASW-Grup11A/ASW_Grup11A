@@ -10,8 +10,8 @@ urlpatterns = [
     path('newest', views.new_page, name='new_page'),
     path('newest/pg/<int:pg>', views.new_page_pg, name='new_page_pg'),
     path('item', views.item, name='item'),
-    path('like/<str:view>/<int:contribution_id>', views.likes, name='likes'),
-    path('hide/<str:view>/<int:contribution_id>', views.hide, name='hide'),
+    path('like/<str:view>/<int:pg>/<int:contribution_id>', views.likes, name='likes'),
+    path('hide/<str:view>/<int:pg>/<int:contribution_id>', views.hide, name='hide'),
     path('notimplemented', views.not_implemented, name='not_implemented')
 ]
 
