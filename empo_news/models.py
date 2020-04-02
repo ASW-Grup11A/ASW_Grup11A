@@ -10,6 +10,7 @@ class Contribution(models.Model):
     url = models.CharField(max_length=500, blank=True, null=True)
     text = models.CharField(max_length=2000, blank=True, null=True)
     likes = models.ManyToManyField(User, related_name="likes", blank=True)
+    hidden = models.ManyToManyField(User, related_name="hide", blank=True)
     comments = models.IntegerField(default=0)
     liked = models.BooleanField(default=True)
     show = models.BooleanField(default=True)
@@ -24,5 +25,11 @@ class Contribution(models.Model):
     def total_likes(self):
         return self.likes.count()
 
+    def total_hidden(self):
+        return self.hidden.count()
+
     def is_liked(self):
         return self.liked
+
+    def is_hidden(self):
+        return not self.show

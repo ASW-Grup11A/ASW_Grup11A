@@ -8,7 +8,8 @@ urlpatterns = [
     path('', views.main_page, name='main_page'),
     path('newest', views.new_page, name='new_page'),
     path('item', views.item, name='item'),
-    path('like/<int:contribution_id>', views.likes, name='likes'),
+    path('like/<str:view>/<int:contribution_id>', views.likes, name='likes'),
+    path('hide/<str:view>/<int:contribution_id>', views.hide, name='hide'),
     path('notimplemented', views.not_implemented, name='not_implemented')
 ]
 
