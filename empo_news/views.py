@@ -32,8 +32,9 @@ def submit(request):
 
 
 def main_page(request):
-    update_show(Contribution.objects.order_by('-points'), request.user.id, 30)
+    update_show(Contribution.objects.order_by('-points'), request.user.id, 29)
     most_points_list = Contribution.objects.filter(show=True).order_by('-points')[:29]
+    more = len(Contribution.objects.filter(show=True)) > 29
     for contribution in most_points_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
@@ -41,13 +42,37 @@ def main_page(request):
         "list": most_points_list,
         "user": request.user,
         "path": "main_page",
+        "more": more,
+        "next_page": "empo_news:main_page_pg",
+        "page_value": 2,
+    }
+    return render(request, 'empo_news/main_page.html', context)
+
+
+def main_page_pg(request, pg):
+    if pg <= 1:
+        return HttpResponseRedirect(reverse('empo_news:main_page'))
+    update_show(Contribution.objects.order_by('-points'), request.user.id, (pg * 30) - 1)
+    most_points_list = Contribution.objects.filter(show=True).order_by('-points')[((pg - 1) * 30):(pg * 30) - 1]
+    more = len(Contribution.objects.filter(show=True)) > (pg * 30) - 1
+    for contribution in most_points_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_points_list,
+        "user": request.user,
+        "path": "main_page_pg",
+        "more": more,
+        "next_page": "empo_news:main_page_pg",
+        "page_value": pg + 1,
     }
     return render(request, 'empo_news/main_page.html', context)
 
 
 def new_page(request):
-    update_show(Contribution.objects.order_by('-publication_time'), request.user.id, 30)
+    update_show(Contribution.objects.order_by('-publication_time'), request.user.id, 29)
     most_recent_list = Contribution.objects.filter(show=True).order_by('-publication_time')[:29]
+    more = len(Contribution.objects.filter(show=True)) > 29
     for contribution in most_recent_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
@@ -56,6 +81,30 @@ def new_page(request):
         "user": request.user,
         "path": "new_page",
         "highlight": "new",
+        "more": more,
+        "next_page": "empo_news:new_page_pg",
+        "page_value": 2,
+    }
+    return render(request, 'empo_news/main_page.html', context)
+
+
+def new_page_pg(request, pg):
+    if pg <= 1:
+        return HttpResponseRedirect(reverse('empo_news:new_page'))
+    update_show(Contribution.objects.order_by('-publication_time'), request.user.id, (pg * 30) - 1)
+    most_recent_list = Contribution.objects.filter(show=True).order_by('-publication_time')[((pg - 1) * 30):(pg * 30) - 1]
+    more = len(Contribution.objects.filter(show=True)) > (pg * 30) - 1
+    for contribution in most_recent_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_recent_list,
+        "user": request.user,
+        "path": "new_page",
+        "highlight": "new",
+        "more": more,
+        "next_page": "empo_news:new_page_pg",
+        "page_value": pg+1,
     }
     return render(request, 'empo_news/main_page.html', context)
 
@@ -101,7 +150,7 @@ def item(request):
 
 
 def update_show(all_contributions, userid, border):
-    count_shown = 1
+    count_shown = 0
     i = 0
     length = len(all_contributions)
     while count_shown < border and i < length:

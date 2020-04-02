@@ -4,7 +4,8 @@
    <head>
        {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'empo_news/main_page.css' %}">
-        <title>Empo News</title>
+        <link rel="icon" src="{% static 'images/favicon.ico' %}"/>
+       <title>Empo News</title>
    </head>
    <body>
         <div align="center">
@@ -103,7 +104,13 @@
                                     </tr>
                                     <tr class="spacer" style="height:5px"></tr>
                                 {% endfor %}
-                                <tr class="morespace" style="height:10px"></tr>
+                            <tr class="morespace" style="height:10px"></tr>
+                            <tr><td colspan="2"></td><td class="title">
+                                {% if more %}
+                                        <a href={% url next_page page_value %}>More</a>
+                                {% endif %}
+                            </td></tr>
+                            <tr class="morespace" style="height:10px"></tr>
                         </table>
                     </td>
                 </tr>
