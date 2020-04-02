@@ -80,6 +80,7 @@ def profile(request):
         posN = '0'
     else:
         posN = '1'
+
     form = UserUpdateForm(initial={'email': request.user.email, 'karma': userFields.karma, 'about': userFields.about,
                                    'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
                                    'minaway': userFields.minaway, 'delay': userFields.delay})
