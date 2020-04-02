@@ -72,13 +72,42 @@ def item(request):
             return HttpResponse('No such item.')
     elif request.method == 'POST':
         comment_form = CommentForm(request.POST)
-        print("POST")
 
         if comment_form.is_valid():
             comment = Comment(user=User(username="Pepe05"), contribution=contrib,
                               publication_date=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
+            return HttpResponseRedirect("")
+        else:
+            return HttpResponseRedirect(reverse('empo_news:addcomment') + '?id=' + str(contrib_id))
+
+    return HttpResponseRedirect(reverse('empo_news:main_page'))
+
+
+def addcomment(request):
+    contrib_id = int(request.GET.get('id', -1))
+    contrib = Contribution.objects.get(id=contrib_id)
+    context = {
+        "contribution": contrib,
+        "comment_form": CommentForm()
+    }
+
+    if request.method == 'GET':
+        try:
+            return render(request, 'empo_news/add_comment.html', context)
+        except Contribution.DoesNotExist:
+            return HttpResponse('No such item.')
+    elif request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+
+        if comment_form.is_valid():
+            comment = Comment(user=User(username="Pepe05"), contribution=contrib,
+                              publication_date=datetime.today(),
+                              text=comment_form.cleaned_data['comment'])
+            comment.save()
+            return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
+        else:
             return HttpResponseRedirect("")
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
