@@ -10,7 +10,6 @@ from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 
 
-
 def submit(request):
     form = SubmitForm()
 
@@ -58,7 +57,7 @@ def main_page_pg(request, pg):
     if pg <= 1:
         return HttpResponseRedirect(reverse('empo_news:main_page'))
     update_show(Contribution.objects.order_by('-points'), request.user.id, pg * 30)
-    most_points_list = Contribution.objects.filter(show=True).order_by('-points')[((pg - 1) * 30)+1:(pg * 30)]
+    most_points_list = Contribution.objects.filter(show=True).order_by('-points')[((pg - 1) * 30) + 1:(pg * 30)]
     more = len(Contribution.objects.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
@@ -70,11 +69,10 @@ def main_page_pg(request, pg):
         "more": more,
         "next_page": "empo_news:main_page_pg",
         "page_value": pg,
-        "next_page_value": pg+1,
-        "base_loop_count": (pg-1)*30,
+        "next_page_value": pg + 1,
+        "base_loop_count": (pg - 1) * 30,
     }
     return render(request, 'empo_news/main_page.html', context)
-
 
 
 def new_page(request):
@@ -116,8 +114,8 @@ def new_page_pg(request, pg):
         "more": more,
         "next_page": "empo_news:new_page_pg",
         "page_value": pg,
-        "next_page_value": pg+1,
-        "base_loop_count": (pg-1)*30,
+        "next_page_value": pg + 1,
+        "base_loop_count": (pg - 1) * 30,
     }
     return render(request, 'empo_news/main_page.html', context)
 
@@ -155,7 +153,7 @@ def logout(request):
     do_logout(request)
     return redirect('/')
 
-  
+
 def profile(request):
     if UserFields.objects.filter(user=request.user).count() == 0:
         userFields = UserFields(user=request.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
@@ -196,7 +194,7 @@ def profile(request):
         "userFields": userFields
     }
     return render(request, 'empo_news/profile.html', context)
-  
+
 
 def item(request):
     contrib_id = int(request.GET.get('id', -1))
@@ -218,16 +216,15 @@ def item(request):
         comment_form = CommentForm(request.POST)
 
         if comment_form.is_valid():
-            comment = Comment(user=User(username="Pepe05"), contribution=contrib,
+            comment = Comment(user=request.user, contribution=contrib,
                               publication_date=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
-            return HttpResponseRedirect("")
+            return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
         else:
             return HttpResponseRedirect(reverse('empo_news:addcomment') + '?id=' + str(contrib_id))
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
-
 
 
 def addcomment(request):
@@ -247,17 +244,17 @@ def addcomment(request):
         comment_form = CommentForm(request.POST)
 
         if comment_form.is_valid():
-            comment = Comment(user=User(username="Pepe05"), contribution=contrib,
+            comment = Comment(user=request.user, contribution=contrib,
                               publication_date=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
         else:
-            return HttpResponseRedirect("")
+            return HttpResponseRedirect(reverse('empo_news:addcomment') + '?id=' + str(contrib_id))
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
 
-  
+
 def update_show(all_contributions, userid, border):
     count_shown = 0
     i = 0

@@ -86,7 +86,7 @@
                                            </div>
                                         </td>
                                         <td class="title">
-                                            {% if not contribution|get_class == "url" %}
+                                            {% if contribution|get_class == "url" %}
                                                 <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
                                             {% else %}
                                                 <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
@@ -102,7 +102,7 @@
                                     <tr>
                                         <td colspan="2"></td>
                                         <td class="subtext">
-                                           <span class="score" id="score_22677970">{{ contribution.points }} points</span>
+                                           <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
                                             by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a>
                                             <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
                                             <span id="unv_22677970"></span> |

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load functions %}
+{% load humanize %}
 <html op="item">
     <head>
         {% load static %}
@@ -72,7 +73,7 @@
                                     <span class="score" id="score_{{ contribution.id }}">{{contribution.points}} points</span>
                                         by <a href="{% url 'empo_news:not_implemented' %}" class="hnuser">{{contribution.user.username}}</a>
                                     <span class="age">
-                                        <a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time }} minutes ago</a>
+                                        <a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a>
                                     </span>
                                         <span id="unv_{{ contribution.id }}"></span>
                                         | <a href={% url 'empo_news:not_implemented' %}>hide</a>
@@ -126,7 +127,7 @@
                                                     <span class="comhead">
                                                         <a href="{% url 'empo_news:not_implemented' %}" class="hnuser">{{comment.user.username}}</a>
                                                         <span class="age">
-                                                            <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_date}} minutes ago</a>
+                                                            <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_date|naturaltime}}</a>
                                                         </span>
                                                         <span id="unv_{{ comment.id }}"></span>
                                                         <span class="par"></span>
