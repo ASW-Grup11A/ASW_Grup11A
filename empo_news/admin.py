@@ -1,8 +1,5 @@
 from django.contrib import admin
+from empo_news.models import Contribution, UserFields
 
-
-from empo_news.models import User, Contribution
-
-admin.site.register(User)
+admin.site.register(UserFields)
 admin.site.register(Contribution)
-
