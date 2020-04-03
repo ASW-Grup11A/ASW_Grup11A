@@ -10,4 +10,4 @@ Albert Pinto i Gil
 
 Marc Simó Guzmán
 
-heroku link: ___________________________________-
+heroku link: https://empo-news.herokuapp.com/
