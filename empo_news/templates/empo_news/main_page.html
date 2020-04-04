@@ -103,7 +103,12 @@
                                         <td colspan="2"></td>
                                         <td class="subtext">
                                            <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
-                                            by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a>
+                                            by
+                                            {% if user.is_authenticated and contribution.user == user %}
+                                                <a href={% url 'empo_news:user_page' %} class="hnuser">{{ contribution.user.username }}</a>
+                                            {% else %}
+                                                <a href={% url 'empo_news:users_profile' contribution.user.username %} class="hnuser">{{ contribution.user.username }}</a>
+                                            {% endif %}
                                             <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
                                             <span id="unv_22677970"></span> |
 

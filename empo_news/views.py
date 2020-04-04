@@ -154,6 +154,14 @@ def logout(request):
     return redirect('/')
 
 
+def users_profile(request, username):
+    userFields = UserFields.objects.get(User.objects.get(username=username))
+    context = {
+        "userFields": userFields
+    }
+    return render(request, 'empo_news/users_profile.html', context)
+
+
 def profile(request):
     if UserFields.objects.filter(user=request.user).count() == 0:
         userFields = UserFields(user=request.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
