@@ -96,6 +96,8 @@ def new_page(request):
     return render(request, 'empo_news/main_page.html', context)
 
 
+
+
 def new_page_pg(request, pg):
     if pg <= 1:
         return HttpResponseRedirect(reverse('empo_news:new_page'))
@@ -280,3 +282,21 @@ def update_show(all_contributions, userid, border):
             count_shown += 1
         contribution.save()
         i += 1
+
+
+def threads(request):
+    comments = Comment.objects.filter(user=request.user)
+    context = {
+        "userComments": comments,
+    }
+    return render(request, 'empo_news/user_comments.html', context)
+
+
+def delete_comment(request, commentid):
+    Comment.objects.filter(id=commentid).delete()
+    comments = Comment.objects.filter(user=request.user)
+    context = {
+        "userComments": comments,
+    }
+    return render(request, 'empo_news/user_comments.html', context)
+
