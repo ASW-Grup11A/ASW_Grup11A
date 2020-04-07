@@ -30,7 +30,7 @@
                                         {% endif %}
                                          |
                                         {% if request.user.is_authenticated %}
-                                            <a href={% url 'empo_news:threads' %}>threads</a> |
+                                            <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
                                         {% endif %}
                                         <a href={% url 'empo_news:not_implemented' %}>past</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>comments</a> |
@@ -59,7 +59,7 @@
                         </table>
                 </tr>
 
-                <tr id="pagespace" title="empo_simo&#x27;s comments" style="height:10px"></tr>
+                <tr id="pagespace" title={{ user.username }}"&#x27;s comments" style="height:10px"></tr>
                 <tr>
                     <td>
                         <tr class='athing comtr ' id='22805568'>
@@ -77,11 +77,12 @@
                                             <td class="default">
                                                 <div style="margin-top:2px; margin-bottom:-10px;">
                                                     <span class="comhead">
-                                                        <span class="score">{{ comment.upvotes }}</span> by <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
-                                                        <span class="age"><a>{{ comment.publication_date|naturaltime }}</a></span>
+                                                        <span class="score">{{ comment.upvotes }}</span>
+                                                        by <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
+                                                        {{ comment.publication_date|naturaltime }}
                                                         <span id="unv_22805568"></span>
                                                         <span class="par"> |
-                                                            <a href="item?id=22804149">parent</a></span> |
+                                                            <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}">parent</a></span> |
                                                             <a href={% url 'empo_news:update_comment' comment.id %}>edit</a> |
                                                             <a href={% url 'empo_news:delete_comment' comment.id %}>delete</a>
                                                             <a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, 22805568)"></a>
@@ -95,7 +96,7 @@
                                                         <span class="commtext c00">{{ comment.text }}</span>
                                                         <div class='reply'>        <p>
                                                             <font size="1">
-                                                                <u><a href="reply?id=22805568&amp;goto=threads%3Fid%3Dempo_simo%2322805568">reply</a></u>
+                                                                <u><a href={% url 'empo_news:not_implemented' %}>reply</a></u>
                                                             </font>
                                                         </div>
                                                     </div>

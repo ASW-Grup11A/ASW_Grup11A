@@ -280,8 +280,9 @@ def update_show(all_contributions, userid, border):
         i += 1
 
 
-def threads(request):
-    comments = Comment.objects.filter(user=request.user)
+def threads(request, username):
+    userSelected = User.objects.get(username=username)
+    comments = Comment.objects.filter(user=userSelected)
     context = {
         "userComments": comments,
     }
