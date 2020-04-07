@@ -4,7 +4,45 @@
 {% load humanize %}
    <td>
       <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
+        {% for contribution in list.all %}
+                    <tr class='athing' >
+                        <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter|add:base_loop_count }}.</span></td>
+                        <td valign="top" class="votelinks">
+                           <div align="center">
+                               <span color="#ff6600">*</span><br>
+                               <img src="s.gif" height="1" width="14">
+                           </div>
+                        </td>
+                        <td class="title">
+                            {% if contribution|get_class == "url" %}
+                                <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
+                            {% else %}
+                                <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
+                            {% endif %}
 
+                            <span class="sitebit comhead">
+                                {% if contribution|get_class == "url" %}
+                                    (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td class="subtext">
+                           <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
+                            by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a>
+                            <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
+
+
+
+
+
+
+                        </td>
+                    </tr>
+                    <tr class="spacer" style="height:5px"></tr>
+                {% endfor %}
       </table>
    </td>
 {% endblock %}
