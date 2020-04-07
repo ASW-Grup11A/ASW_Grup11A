@@ -154,13 +154,22 @@ def logout(request):
     return redirect('/')
 
 
-def profile(request):
-    if UserFields.objects.filter(user=request.user).count() == 0:
-        userFields = UserFields(user=request.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+def users_profile(request, username):
+    userFields = UserFields.objects.get(user=User.objects.get(username=username))
+    context = {
+        "userFields": userFields
+    }
+    return render(request, 'empo_news/users_profile.html', context)
+
+
+def profile(request, username):
+    userSelected = User.objects.get(username=username)
+    if UserFields.objects.filter(user=userSelected).count() == 0:
+        userFields = UserFields(user=userSelected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
     else:
-        userFields = UserFields.objects.get(user=request.user)
+        userFields = UserFields.objects.get(user=userSelected)
 
     if userFields.showdead == 0:
         posS = '0'
@@ -171,26 +180,29 @@ def profile(request):
         posN = '0'
     else:
         posN = '1'
+    form = UserUpdateForm(
+        initial={'email': userSelected.email, 'karma': userFields.karma, 'about': userFields.about,
+                 'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
+                 'minaway': userFields.minaway, 'delay': userFields.delay})
 
-    form = UserUpdateForm(initial={'email': request.user.email, 'karma': userFields.karma, 'about': userFields.about,
-                                   'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
-                                   'minaway': userFields.minaway, 'delay': userFields.delay})
 
-    if request.method == 'POST':
-        form = UserUpdateForm(request.POST)
-        if form.is_valid():
-            print(form.cleaned_data['showdead'])
-            UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
-                                                                showdead=form.cleaned_data['showdead'],
-                                                                noprocrast=form.cleaned_data['noprocrast'],
-                                                                maxvisit=int(form.cleaned_data['maxvisit']),
-                                                                minaway=int(form.cleaned_data['minaway']),
-                                                                delay=int(form.cleaned_data['delay']))
-            User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
+    if (userSelected == request.user):
+        if request.method == 'POST':
+            form = UserUpdateForm(request.POST)
+            if form.is_valid():
+                print(form.cleaned_data['showdead'])
+                UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
+                                                                    showdead=form.cleaned_data['showdead'],
+                                                                    noprocrast=form.cleaned_data['noprocrast'],
+                                                                    maxvisit=int(form.cleaned_data['maxvisit']),
+                                                                    minaway=int(form.cleaned_data['minaway']),
+                                                                    delay=int(form.cleaned_data['delay']))
+                User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
 
-            return HttpResponseRedirect(reverse('empo_news:user_page'))
+                return HttpResponseRedirect(reverse('empo_news:user_page',  kwargs={"username": userSelected.username}))
     context = {
         "form": form,
+        "userSelected": userSelected,
         "userFields": userFields
     }
     return render(request, 'empo_news/profile.html', context)
