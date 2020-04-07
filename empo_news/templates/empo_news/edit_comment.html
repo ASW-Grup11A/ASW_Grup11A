@@ -65,7 +65,6 @@
                         <tr class='athing comtr ' id='22805568'>
                             <td>
                                 <table border='0'>
-                                    {% for comment in userComments.all %}
                                         <tr>
                                             <td class='ind'>
                                                 <img src="s.gif" height="1" width="0">
@@ -77,12 +76,13 @@
                                             <td class="default">
                                                 <div style="margin-top:2px; margin-bottom:-10px;">
                                                     <span class="comhead">
-                                                        <span class="score">{{ comment.upvotes }}</span> by <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
+                                                        <span class="score">{{ comment.upvotes }}</span>
+                                                        by <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
                                                         <span class="age"><a>{{ comment.publication_date|naturaltime }}</a></span>
                                                         <span id="unv_22805568"></span>
                                                         <span class="par"> |
                                                             <a href="item?id=22804149">parent</a></span> |
-                                                            <a href={% url 'empo_news:update_comment' comment.id %}>edit</a> |
+                                                            <a href="edit?id=22805568">edit</a> |
                                                             <a href={% url 'empo_news:delete_comment' comment.id %}>delete</a>
                                                             <a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, 22805568)"></a>
                                                             <span> | on:
@@ -93,15 +93,22 @@
                                                 <br>
                                                     <div class="comment">
                                                         <span class="commtext c00">{{ comment.text }}</span>
-                                                        <div class='reply'>        <p>
-                                                            <font size="1">
-                                                                <u><a href="reply?id=22805568&amp;goto=threads%3Fid%3Dempo_simo%2322805568">reply</a></u>
-                                                            </font>
-                                                        </div>
                                                     </div>
+                                                <br>
+                                                {% block content %}
+                                                <form method="post" action="">
+                                                    {% csrf_token %}
+                                                    <table>
+                                                        <tr>
+                                                            <td valign="top">{{ form.text.label_tag }}</td>
+                                                            <td>{{ form.text }}</td>
+                                                        </tr>
+                                                        <td valign="top"><input type="submit" value="Update" name="update_button" style="margin-left: 0px; margin-top: 5px; margin-bottom: 10px"/></td>
+                                                    </table>
+                                                </form>
+                                                {% endblock %}
                                             </td>
                                         </tr>
-                                    {% endfor %}
                                 </table>
                             </td>
                         </tr>

@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
+from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm, EditCommentForm
 from empo_news.models import Contribution, UserFields, Comment
 
 
@@ -94,8 +94,6 @@ def new_page(request):
         "base_loop_count": 0,
     }
     return render(request, 'empo_news/main_page.html', context)
-
-
 
 
 def new_page_pg(request, pg):
@@ -187,8 +185,7 @@ def profile(request, username):
                  'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
                  'minaway': userFields.minaway, 'delay': userFields.delay})
 
-
-    if (userSelected == request.user):
+    if userSelected == request.user:
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
             if form.is_valid():
@@ -201,7 +198,7 @@ def profile(request, username):
                                                                     delay=int(form.cleaned_data['delay']))
                 User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
 
-                return HttpResponseRedirect(reverse('empo_news:user_page',  kwargs={"username": userSelected.username}))
+                return HttpResponseRedirect(reverse('empo_news:user_page', kwargs={"username": userSelected.username}))
     context = {
         "form": form,
         "userSelected": userSelected,
@@ -300,3 +297,14 @@ def delete_comment(request, commentid):
     }
     return render(request, 'empo_news/user_comments.html', context)
 
+
+def update_comment(request, commentid):
+    comment = Comment.objects.get(id=commentid)
+    form = EditCommentForm(
+        initial={'text': comment.text})
+
+    context = {
+        "comment": comment,
+        "form": form,
+    }
+    return render(request, 'empo_news/edit_comment.html', context)

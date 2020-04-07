@@ -20,4 +20,5 @@ urlpatterns = [
     path('logout', views.logout),
     path('threads', views.threads, name='threads'),
     path('delete_comment/<int:commentid>', views.delete_comment, name='delete_comment'),
+    path('update_comment/<int:commentid>', views.update_comment, name='update_comment'),
 ]
