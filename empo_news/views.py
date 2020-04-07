@@ -189,7 +189,6 @@ def profile(request, username):
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
             if form.is_valid():
-                print(form.cleaned_data['showdead'])
                 UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
                                                                     showdead=form.cleaned_data['showdead'],
                                                                     noprocrast=form.cleaned_data['noprocrast'],
@@ -299,6 +298,11 @@ def delete_comment(request, commentid):
 
 
 def update_comment(request, commentid):
+    if request.method == 'POST':
+        form = EditCommentForm(request.POST)
+        if form.is_valid():
+            Comment.objects.filter(id=commentid).update(text=form.cleaned_data['text'])
+
     comment = Comment.objects.get(id=commentid)
     form = EditCommentForm(
         initial={'text': comment.text})
