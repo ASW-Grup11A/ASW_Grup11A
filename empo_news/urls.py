@@ -8,6 +8,7 @@ urlpatterns = [
     path('submit', views.submit, name='submit'),
     path('', views.main_page, name='main_page'),
     path('newest', views.new_page, name='new_page'),
+    path('submitted', views.submitted, name='submitted'),
     path('item', views.item, name='item'),
     path('addcomment', views.addcomment, name='addcomment'),
     path('like/<str:view>/<int:pg>/<int:contribution_id>', views.likes, name='likes'),

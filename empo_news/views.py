@@ -69,8 +69,8 @@ def new_page(request):
     elif pg == 1:
         list_base = 0
 
-    update_show(Contribution.objects.order_by('-publication_time'), request.user.id, pg * 30)
-    most_recent_list = Contribution.objects.filter(show=True).order_by('-publication_time')[list_base:(pg * 30)]
+    update_show(Contribution.objects.order_by('publication_time'), request.user.id, pg * 30)
+    most_recent_list = Contribution.objects.filter(show=True).order_by('publication_time')[list_base:(pg * 30)]
     more = len(Contribution.objects.filter(show=True)) > (pg * 30)
     for contribution in most_recent_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
@@ -86,6 +86,22 @@ def new_page(request):
         "base_loop_count": (pg - 1) * 30,
     }
     return render(request, 'empo_news/main_page.html', context)
+
+
+def submitted(request):
+    user_id = request.GET.get('id', "")
+    if not User.objects.filter(username=user_id).exists():
+        return HttpResponse('No such user')
+    req_user = User(username=user_id)
+
+    submitted_list = Contribution.objects.filter(user=req_user).order_by('publication_time')
+    context = {
+        "list": submitted_list,
+        "user": request.user,
+        "submitted_id": user_id,
+        "highlight": "submitted",
+    }
+    return render(request, 'empo_news/submitted.html', context)
 
 
 def likes(request, view, pg, contribution_id):
