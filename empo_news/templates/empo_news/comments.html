@@ -33,7 +33,7 @@
                                             <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
                                         {% endif %}
                                         <a href={% url 'empo_news:not_implemented' %}>past</a> |
-                                        <a href={% url 'empo_news:not_implemented' %}>comments</a> |
+                                        <a href={% url 'empo_news:comments' %}>comments</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>ask</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>show</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>jobs</a> |
@@ -59,31 +59,30 @@
                         </table>
                 </tr>
 
-                <tr id="pagespace" title="empo_simo&#x27;s comments" style="height:10px"></tr>
+                <tr id="pagespace" title={{ user.username }}"&#x27;s comments" style="height:10px"></tr>
                 <tr>
                     <td>
                         <tr class='athing comtr ' id='22805568'>
                             <td>
                                 <table border='0'>
+                                    {% for comment in list.all %}
                                         <tr>
-                                            <td class='ind'>
-                                                <img src="s.gif" height="1" width="0">
-                                            </td>
                                             <td valign="top" class="votelinks">
-                                                <center><font color="#ff6600">*</font><br>
-                                                    <img src="s.gif" height="1" width="14"></center>
+                                               <div align="center">
+                                                    <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
+                                                        <div class='votearrow' title='upvote'></div>
+                                                    </a>
+                                               </div>
                                             </td>
                                             <td class="default">
                                                 <div style="margin-top:2px; margin-bottom:-10px;">
                                                     <span class="comhead">
                                                         <span class="score">{{ comment.upvotes }}</span>
                                                         by <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
-                                                        <span class="age"><a>{{ comment.publication_date|naturaltime }}</a></span>
+                                                        {{ comment.publication_date|naturaltime }}
                                                         <span id="unv_22805568"></span>
                                                         <span class="par"> |
-                                                            <a href="item?id=22804149">parent</a></span> |
-                                                            <a href="edit?id=22805568">edit</a> |
-                                                            <a href={% url 'empo_news:delete_comment' comment.id %}>delete</a>
+                                                            <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}">parent</a></span>
                                                             <a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, 22805568)"></a>
                                                             <span> | on:
                                                                 <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}" >{{ comment.contribution.title }}</a>
@@ -93,22 +92,22 @@
                                                 <br>
                                                     <div class="comment">
                                                         <span class="commtext c00">{{ comment.text }}</span>
+                                                        <div class='reply'>        <p>
+                                                            <font size="1">
+                                                                <u><a href={% url 'empo_news:not_implemented' %}>reply</a></u>
+                                                            </font>
+                                                        </div>
                                                     </div>
-                                                <br>
-                                                {% block content %}
-                                                <form method="post" action="">
-                                                    {% csrf_token %}
-                                                    <table>
-                                                        <tr>
-                                                            <td valign="top">{{ form.text.label_tag }}</td>
-                                                            <td>{{ form.text }}</td>
-                                                        </tr>
-                                                        <td valign="top"><input type="submit" value="Update" name="update_button" style="margin-left: 0px; margin-top: 5px; margin-bottom: 10px"/></td>
-                                                    </table>
-                                                </form>
-                                                {% endblock %}
                                             </td>
                                         </tr>
+                                        <tr class="morespace" style="height:10px"></tr>
+                                    {% endfor %}
+                                    <td colspan="1"></td><td class="title">
+                                        {% if more %}
+                                                <a href={% url next_page next_page_value %}>More</a>
+                                        {% endif %}
+                                    </td>
+                                    <tr class="morespace" style="height:10px"></tr>
                                 </table>
                             </td>
                         </tr>

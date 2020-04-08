@@ -313,3 +313,37 @@ def update_comment(request, commentid):
         "form": form,
     }
     return render(request, 'empo_news/edit_comment.html', context)
+
+
+def comments(request):
+    most_recent_list = Comment.objects.all().order_by('-publication_date')[:30]
+    more = len(Comment.objects.all()) > 30
+    context = {
+        "list": most_recent_list,
+        "user": request.user,
+        "path": "comments",
+        "more": more,
+        "next_page": "empo_news:comments_pg",
+        "page_value": 1,
+        "next_page_value": 2,
+        "base_loop_count": 0,
+    }
+    return render(request, 'empo_news/comments.html', context)
+
+
+def comments_pg(request, pg):
+    if pg <= 1:
+        return HttpResponseRedirect(reverse('empo_news:comments'))
+    most_recent_list = Comment.objects.all().order_by('-publication_date')[((pg - 1) * 30) + 1:(pg * 30)]
+    more = len(Comment.objects.all()) > (pg * 30)
+    context = {
+        "list": most_recent_list,
+        "user": request.user,
+        "path": "comments_pg",
+        "more": more,
+        "next_page": "empo_news:comments_pg",
+        "page_value": pg,
+        "next_page_value": pg + 1,
+        "base_loop_count": (pg - 1) * 30,
+    }
+    return render(request, 'empo_news/comments.html', context)
