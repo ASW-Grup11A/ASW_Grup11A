@@ -36,6 +36,8 @@ class CommentForm(forms.Form):
 
         if not comment:
             raise forms.ValidationError('Please try again.')
+
+        return cleaned_data
         
         
 class UserUpdateForm(forms.Form):

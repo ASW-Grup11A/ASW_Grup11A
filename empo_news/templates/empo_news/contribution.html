@@ -57,7 +57,7 @@
                                     {% if contribution|get_class == "url" %}
                                         <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
                                     {% else %}
-                                        <a href={% url 'empo_news:not_implemented' %} class="storylink">{{ contribution.title }}</a>
+                                        <a href="{% url 'empo_news:item' %}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
                                     {% endif %}
 
                                     <span class="sitebit comhead">
@@ -127,7 +127,7 @@
                                                     <span class="comhead">
                                                         <a href="{% url 'empo_news:not_implemented' %}" class="hnuser">{{comment.user.username}}</a>
                                                         <span class="age">
-                                                            <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_date|naturaltime}}</a>
+                                                            <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_time|naturaltime}}</a>
                                                         </span>
                                                         <span id="unv_{{ comment.id }}"></span>
                                                         <span class="par"></span>
@@ -141,7 +141,7 @@
                                                         <div class='reply'>
                                                             <p>
                                                                 <span style="font-size: 7pt; ">
-                                                                    <u><a href={% url 'empo_news:not_implemented' %}>reply</a></u>
+                                                                    <u><a href="{% url 'empo_news:addreply' %}?id={{ comment.id }}">reply</a></u>
                                                                 </span>
                                                             </p>
                                                         </div>

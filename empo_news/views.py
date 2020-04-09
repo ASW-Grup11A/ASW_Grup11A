@@ -34,9 +34,10 @@ def submit(request):
 
 
 def main_page(request):
-    update_show(Contribution.objects.order_by('-points'), request.user.id, 30)
-    most_points_list = Contribution.objects.filter(show=True).order_by('-points')[:30]
-    more = len(Contribution.objects.filter(show=True)) > 30
+    contributions = Contribution.objects.exclude(title__isnull=True)
+    update_show(contributions.order_by('-points'), request.user.id, 30)
+    most_points_list = contributions.filter(show=True).order_by('-points')[:30]
+    more = len(contributions.filter(show=True)) > 30
     for contribution in most_points_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
@@ -217,9 +218,13 @@ def item(request):
 
         if comment_form.is_valid():
             comment = Comment(user=request.user, contribution=contrib,
-                              publication_date=datetime.today(),
+                              publication_time=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
+
+            contrib.comments += 1
+            contrib.save()
+
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
         else:
             return HttpResponseRedirect(reverse('empo_news:addcomment') + '?id=' + str(contrib_id))
@@ -227,7 +232,7 @@ def item(request):
     return HttpResponseRedirect(reverse('empo_news:main_page'))
 
 
-def addcomment(request):
+def add_comment(request):
     contrib_id = int(request.GET.get('id', -1))
     contrib = Contribution.objects.get(id=contrib_id)
     context = {
@@ -268,3 +273,30 @@ def update_show(all_contributions, userid, border):
             count_shown += 1
         contribution.save()
         i += 1
+
+
+def add_reply(request):
+    comment_id = int(request.GET.get('id', -1))
+    comment = Comment.objects.get(id=comment_id)
+    context = {
+        "comment": comment,
+        "comment_form": CommentForm()
+    }
+
+    if request.method == 'GET':
+        try:
+            return render(request, 'empo_news/add_reply.html', context)
+        except Contribution.DoesNotExist:
+            return HttpResponse('No such item.')
+    elif request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+
+        if comment_form.is_valid():
+            comment = Comment(user=request.user, contribution=comment.contribution, parent=comment,
+                              publication_date=datetime.today(),
+                              text=comment_form.cleaned_data['comment'])
+            comment.save()
+            return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(comment.contribution.id)
+                                        + '#' + str(comment.parent.id))
+
+    return HttpResponseRedirect(reverse('empo_news:main_page'))

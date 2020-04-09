@@ -47,5 +47,5 @@ class Contribution(models.Model):
 
 
 class Comment(Contribution):
-    contribution = models.ForeignKey(Contribution, on_delete=models.CASCADE)
+    contribution = models.ForeignKey(Contribution, related_name="contrib", on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
