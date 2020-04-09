@@ -314,14 +314,15 @@ def add_reply(request):
         comment_form = CommentForm(request.POST)
 
         if comment_form.is_valid():
-            comment = Comment(user=request.user, contribution=comment.contribution, parent=comment,
+            new_comment = Comment(user=request.user, contribution=comment.contribution, parent=comment,
                               publication_time=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
-            comment.save()
+            new_comment.save()
 
+            increment_comments_number(comment)
             comment.contribution.comments += 1
             comment.contribution.save()
-            return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(comment.contribution.id)
-                                        + '#' + str(comment.parent.id))
+            return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(new_comment.contribution.id)
+                                        + '#' + str(new_comment.parent.id))
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
