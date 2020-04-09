@@ -197,9 +197,19 @@ def profile(request):
     return render(request, 'empo_news/profile.html', context)
 
 
+def increment_comments_number(contrib):
+    contrib.comments += 1
+    contrib.save()
+    if contrib.parent is not None:
+        increment_comments_number(contrib.parent)
+
+
 def item(request):
     contrib_id = int(request.GET.get('id', -1))
-    contrib = Contribution.objects.get(id=contrib_id)
+    if Comment.objects.filter(id=contrib_id).count() > 0:
+        contrib = Comment.objects.get(id=contrib_id)
+    else:
+        contrib = Contribution.objects.get(id=contrib_id)
     contrib_comments = Comment.objects.filter(contribution_id=contrib_id)
 
     context = {
@@ -217,13 +227,22 @@ def item(request):
         comment_form = CommentForm(request.POST)
 
         if comment_form.is_valid():
-            comment = Comment(user=request.user, contribution=contrib,
-                              publication_time=datetime.today(),
-                              text=comment_form.cleaned_data['comment'])
-            comment.save()
+            if contrib.get_class() == "Contribution":
+                comment = Comment(user=request.user, contribution=contrib,
+                                  publication_time=datetime.today(),
+                                  text=comment_form.cleaned_data['comment'])
+                comment.save()
 
-            contrib.comments += 1
-            contrib.save()
+                contrib.comments += 1
+                contrib.save()
+            else:
+                comment = Comment(user=request.user, contribution=contrib.contribution, parent=contrib,
+                                  publication_time=datetime.today(),
+                                  text=comment_form.cleaned_data['comment'])
+                comment.save()
+                increment_comments_number(contrib)
+                contrib.contribution.comments += 1
+                contrib.contribution.save()
 
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
         else:
@@ -250,9 +269,12 @@ def add_comment(request):
 
         if comment_form.is_valid():
             comment = Comment(user=request.user, contribution=contrib,
-                              publication_date=datetime.today(),
+                              publication_time=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
+
+            contrib.comments += 1
+            contrib.save()
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
         else:
             return HttpResponseRedirect(reverse('empo_news:addcomment') + '?id=' + str(contrib_id))
@@ -293,9 +315,12 @@ def add_reply(request):
 
         if comment_form.is_valid():
             comment = Comment(user=request.user, contribution=comment.contribution, parent=comment,
-                              publication_date=datetime.today(),
+                              publication_time=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
+
+            comment.contribution.comments += 1
+            comment.contribution.save()
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(comment.contribution.id)
                                         + '#' + str(comment.parent.id))
 

@@ -33,6 +33,9 @@ class Contribution(models.Model):
             return "ask"
         return "failure"
 
+    def get_class(self):
+        return self.__class__.__name__
+
     def total_likes(self):
         return self.likes.count()
 
@@ -49,3 +52,4 @@ class Contribution(models.Model):
 class Comment(Contribution):
     contribution = models.ForeignKey(Contribution, related_name="contrib", on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+

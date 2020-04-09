@@ -64,14 +64,20 @@
                                             <span id="unv_{{ comment.id }}"></span>
                                             <span class="par">
                                                  |
-                                                <a href="{% url 'empo_news:item' %}?id={{ comment.parent.id }}">
-                                                    parent
-                                                </a>
+                                                {% if comment.parent.id == None %}
+                                                    <a href="{% url 'empo_news:item' %}?id={{ comment.contribution.id }}">
+                                                        parent
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{% url 'empo_news:item' %}?id={{ comment.parent.id }}">
+                                                        parent
+                                                    </a>
+                                                {% endif %}
                                             </span>
                                             <span class="storyon">
                                                  | on:
-                                                <a href="{% url 'empo_news:item' %}?id={{ comment.parent.id }}">
-                                                    {{ comment.parent.title }}
+                                                <a href="{% url 'empo_news:item' %}?id={{ comment.contribution.id }}">
+                                                    {{ comment.contribution|short_text }}
                                                 </a>
                                             </span>
                                         </span>

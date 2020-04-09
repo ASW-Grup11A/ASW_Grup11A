@@ -5,7 +5,11 @@
     <head>
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'empo_news/main_page.css' %}">
-        <title>{{ contribution.title }} | Empo News</title>
+        {% if contribution|get_type == "Contribution" %}
+            <title>{{ contribution|short_title }} | Empo News</title>
+        {% else %}
+            <title>{{ contribution|short_text }} | Empo News</title>
+        {% endif %}
     </head>
     <body>
         <div align="center">
@@ -44,52 +48,105 @@
                 <tr>
                     <td>
                         <table class="fatitem" border="0">
-                            <tr class='athing' id='{{ contribution.id }}'>
-                                <td align="right" valign="top" class="title">
-                                    <span class="rank"></span>
-                                </td>
-                                <td valign="top" class="votelinks" style="text-align: center;">
-                                    <a id='up_{{ contribution.id }}' href={% url 'empo_news:not_implemented' %}>
-                                        <div class='votearrow' title='upvote'></div>
-                                    </a>
-                                </td>
-                                <td class="title">
-                                    {% if contribution|get_class == "url" %}
-                                        <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
-                                    {% else %}
-                                        <a href="{% url 'empo_news:item' %}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
-                                    {% endif %}
+                            {% if contribution|get_type == "Contribution" %}
+                                <tr class='athing' id='{{ contribution.id }}'>
+                                    <td align="right" valign="top" class="title">
+                                        <span class="rank"></span>
+                                    </td>
+                                    <td valign="top" class="votelinks" style="text-align: center;">
+                                        <a id='up_{{ contribution.id }}' href={% url 'empo_news:not_implemented' %}>
+                                            <div class='votearrow' title='upvote'></div>
+                                        </a>
+                                    </td>
+                                    <td class="title">
+                                        {% if contribution|get_class == "url" %}
+                                            <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
+                                        {% else %}
+                                            <a href="{% url 'empo_news:item' %}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
+                                        {% endif %}
 
-                                    <span class="sitebit comhead">
-                                        {% if contribution|get_class == "url" %}
-                                            (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
-                                        {% endif %}
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2"></td>
-                                <td class="subtext">
-                                    <span class="score" id="score_{{ contribution.id }}">{{contribution.points}} points</span>
-                                        by <a href="{% url 'empo_news:not_implemented' %}" class="hnuser">{{contribution.user.username}}</a>
-                                    <span class="age">
-                                        <a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a>
-                                    </span>
-                                        <span id="unv_{{ contribution.id }}"></span>
-                                        | <a href={% url 'empo_news:not_implemented' %}>hide</a>
-                                        | <a href="{% url 'empo_news:not_implemented' %}" class="hnpast">past</a>
-                                        {% if contribution|get_class == "url" %}
-                                            | <a href={% url 'empo_news:not_implemented' %}>web</a>
-                                        {% endif %}
-                                        | <a href={% url 'empo_news:not_implemented' %}>favorite</a>
-                                        | <a href={% url 'empo_news:not_implemented' %}>{{ contribution.comments }} comment</a>
-                                </td>
-                            </tr>
-                            <tr style="height:2px"></tr>
-                            <tr>
-                                <td colspan="2"></td>
-                                <td>{{ contribution.text }}</td>
-                            </tr>
+                                        <span class="sitebit comhead">
+                                            {% if contribution|get_class == "url" %}
+                                                (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td class="subtext">
+                                        <span class="score" id="score_{{ contribution.id }}">{{contribution.points}} points</span>
+                                            by <a href="{% url 'empo_news:not_implemented' %}" class="hnuser">{{contribution.user.username}}</a>
+                                        <span class="age">
+                                            <a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a>
+                                        </span>
+                                            <span id="unv_{{ contribution.id }}"></span>
+                                            | <a href={% url 'empo_news:not_implemented' %}>hide</a>
+                                            | <a href="{% url 'empo_news:not_implemented' %}" class="hnpast">past</a>
+                                            {% if contribution|get_class == "url" %}
+                                                | <a href={% url 'empo_news:not_implemented' %}>web</a>
+                                            {% endif %}
+                                            | <a href={% url 'empo_news:not_implemented' %}>favorite</a>
+                                            | <a href={% url 'empo_news:not_implemented' %}>{{ contribution.comments }} comment</a>
+                                    </td>
+                                </tr>
+                                <tr style="height:2px"></tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td>{{ contribution.text }}</td>
+                                </tr>
+                            {% else %}
+                                <tr class='athing' id='{{ contribution.id }}'>
+                                    <td align="right" valign="top" class="title">
+                                        <span class="rank"></span>
+                                    </td>
+                                    <td valign="top" class="votelinks" style="text-align: center;">
+                                        <a id='up_{{ contribution.id }}' href={% url 'empo_news:not_implemented' %}>
+                                            <div class='votearrow' title='upvote'></div>
+                                        </a>
+                                    </td>
+                                    <td class="default">
+                                        <div>
+                                            <span class="comhead">
+                                                <a href="{% url 'empo_news:not_implemented' %}">
+                                                    {{ contribution.user.username }}
+                                                </a>
+                                                <span class="age">
+                                                    <a href="{% url 'empo_news:item' %}?id={{ contribution.id }}">
+                                                        {{ contribution.publication_time|naturaltime }}
+                                                    </a>
+                                                </span>
+                                                <span id="unv_{{ contribution.id }}"></span>
+                                                <span class="par">
+                                                     |
+                                                    {% if contribution.parent.id == None %}
+                                                        <a href="{% url 'empo_news:item' %}?id={{ contribution.contribution.id }}">
+                                                            parent
+                                                        </a>
+                                                    {% else %}
+                                                        <a href="{% url 'empo_news:item' %}?id={{ contribution.parent.id }}">
+                                                            parent
+                                                        </a>
+                                                    {% endif %}
+                                                </span>
+                                                <span class="storyon">
+                                                     | on:
+                                                    <a href="{% url 'empo_news:item' %}?id={{ contribution.contribution.id }}">
+                                                        {{ contribution.contribution|short_text }}
+                                                    </a>
+                                                </span>
+                                            </span>
+                                        </div>
+                                        <br>
+                                        <div class="comment">
+                                            <span class="commtext c00">
+                                                {{ contribution.text }}
+                                            </span>
+                                            <div class="reply"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
                             <tr style="height:10px"></tr>
                             <tr>
                                 <td colspan="2"></td>
@@ -98,10 +155,18 @@
                                     <form method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="parent" value="{{ contribution.id }}">
-                                        <input type="hidden" name="goto" value="item?id={{ contribution.id }}">
+                                        {% if contribution|get_type == "Contribution" %}
+                                            <input type="hidden" name="goto" value="item?id={{ contribution.id }}">
+                                        {% else %}
+                                            <input type="hidden" name="goto" value="item?id={{ contribution.contribution.id }}#{{ contribution.id }}">
+                                        {% endif %}
                                         {{ comment_form.comment }}
-                                    <br><br>
-                                        <input type="submit" value="add comment">
+                                        <br><br>
+                                        {% if contribution|get_type == "Contribution" %}
+                                            <input type="submit" value="add comment">
+                                        {% else %}
+                                            <input type="submit" value="reply">
+                                        {% endif %}
                                     </form>
                                     {% endblock %}
                                 </td>
