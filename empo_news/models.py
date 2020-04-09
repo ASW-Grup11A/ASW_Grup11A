@@ -46,9 +46,6 @@ class Contribution(models.Model):
         return not self.show
 
 
-class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    contribution = models.ForeignKey(Contribution, on_delete=models.CASCADE)
-    upvotes = models.IntegerField(default=1)
-    publication_date = models.DateTimeField('publication date')
-    text = models.CharField(max_length=2000)
+class Comment(Contribution):
+    contribution = models.ForeignKey(Contribution, related_name="contrib", on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)

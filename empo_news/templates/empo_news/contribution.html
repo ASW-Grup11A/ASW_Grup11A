@@ -1,13 +1,12 @@
-<!DOCTYPE html>
 {% load functions %}
 {% load humanize %}
-<html op="item">
-    <head>
-        {% load static %}
+<html op="news">
+   <head>
+       {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'empo_news/main_page.css' %}">
-        <title>{{ contribution.title }} | Empo News</title>
-    </head>
-    <body>
+        <title>Empo News</title>
+   </head>
+   <body>
         <div align="center">
             <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
                 <tr>
@@ -22,23 +21,35 @@
                                 <td style="line-height:12pt; height:10px;">
                                     <span class="pagetop">
                                         <b class="hnname"><a href={% url 'empo_news:main_page' %}>Empo News</a></b>
-                                        <a href={% url 'empo_news:new_page' %}>new</a>
-                                        | <a href={% url 'empo_news:not_implemented' %}>past</a>
-                                        | <a href={% url 'empo_news:comments' %}>comments</a>
-                                        | <a href={% url 'empo_news:not_implemented' %}>ask</a>
-                                        | <a href={% url 'empo_news:not_implemented' %}>show</a>
-                                        | <a href={% url 'empo_news:not_implemented' %}>jobs</a>
-                                        | <a href={% url 'empo_news:submit' %}>submit</a>
+                                        <a href={% url 'empo_news:new_page' %}>new</a> |
+                                        {% if request.user.is_authenticated %}
+                                            <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
+                                        {% endif %}
+                                        <a href={% url 'empo_news:not_implemented' %}>past</a> |
+                                        <a href={% url 'empo_news:comments' %}>comments</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>ask</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>show</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>jobs</a> |
+                                        {% if request.user.is_authenticated %}
+                                            <a href={% url 'empo_news:submit' %}>submit</a>
+                                        {% else %}
+                                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">submit</a>
+                                        {% endif %}
                                     </span>
                                 </td>
                                 <td style="text-align:right;padding-right:4px;">
                                     <span class="pagetop">
-                                        <a href={% url 'empo_news:not_implemented' %}>login</a>
+                                        {% if user.is_authenticated %}
+                                            <a href={% url 'empo_news:user_page' user.username %}>{{ user.username }}</a>
+                                            (1) |
+                                            <a href="/logout">Logout</a>
+                                        {% else %}
+                                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login</a>
+                                        {% endif %}
                                     </span>
                                 </td>
                             </tr>
                         </table>
-                    </td>
                 </tr>
                 <tr id="pagespace" title="{{ contribution.title }}" style="height:10px"></tr>
                 <tr>

@@ -21,19 +21,14 @@
                                 <td style="line-height:12pt; height:10px;">
                                     <span class="pagetop">
                                         <b class="hnname"><a href={% url 'empo_news:main_page' %}>Empo News</a></b>
-                                        {% if highlight == "new" %}
-                                            <span class="topsel">
-                                            <a href={% url 'empo_news:new_page' %}>new</a>
-                                            </span>
-                                        {% else %}
-                                            <a href={% url 'empo_news:new_page' %}>new</a>
-                                        {% endif %}
-                                         |
+                                        <a href={% url 'empo_news:new_page' %}>new</a> |
                                         {% if request.user.is_authenticated %}
                                             <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
                                         {% endif %}
                                         <a href={% url 'empo_news:not_implemented' %}>past</a> |
-                                        <a href={% url 'empo_news:comments' %}>comments</a> |
+                                        <span class="topsel">
+                                            <a href={% url 'empo_news:comments' %}>comments</a>
+                                        </span> |
                                         <a href={% url 'empo_news:not_implemented' %}>ask</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>show</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>jobs</a> |
@@ -69,20 +64,41 @@
                                         <tr>
                                             <td valign="top" class="votelinks">
                                                <div align="center">
-                                                    <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
-                                                        <div class='votearrow' title='upvote'></div>
-                                                    </a>
+                                                   {% if request.user == comment.user %}
+                                                       <center><font color="#ff6600">*</font><br>
+                                                           <img src="s.gif" height="1" width="14"></center>
+                                                   {% else %}
+                                                       {% if comment|is_liked %}
+                                                              <a href={% url 'empo_news:likes' path page_value comment.id %}>
+                                                                 <div class='votearrow' title='upvote'></div>
+                                                              </a>
+                                                       {% else %}
+                                                           <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                                                       {% endif %}
+                                                   {% endif %}
                                                </div>
                                             </td>
                                             <td class="default">
                                                 <div style="margin-top:2px; margin-bottom:-10px;">
                                                     <span class="comhead">
-                                                        <span class="score">{{ comment.upvotes }}</span>
-                                                        by <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
-                                                        {{ comment.publication_date|naturaltime }}
+                                                        {% if request.user == comment.user %}
+                                                            <span class="score">{{ comment.points }} points by </span>
+                                                        {% endif %}
+                                                        <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
+                                                        {{ comment.publication_time|naturaltime }} |
+                                                        {% if request.user != comment.user %}
+                                                            {% if not comment|is_liked %}
+                                                               {%  csrf_token %}
+                                                                <a href={% url 'empo_news:likes' path page_value comment.id %}>unvote</a> |
+                                                            {% endif %}
+                                                        {% endif %}
                                                         <span id="unv_22805568"></span>
-                                                        <span class="par"> |
-                                                            <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}">parent</a></span>
+                                                        <span class="par">
+                                                            {% if comment.parent == null %}
+                                                                <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}">parent</a></span>
+                                                            {% else %}
+                                                                <a href="{% url 'empo_news:item'%}?id={{ comment.parent.id }}">parent</a></span>
+                                                            {% endif %}
                                                             <a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, 22805568)"></a>
                                                             <span> | on:
                                                                 <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}" >{{ comment.contribution.title }}</a>

@@ -227,7 +227,7 @@ def item(request):
 
         if comment_form.is_valid():
             comment = Comment(user=request.user, contribution=contrib,
-                              publication_date=datetime.today(),
+                              publication_time=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
@@ -282,9 +282,9 @@ def update_show(all_contributions, userid, border):
 
 def threads(request, username):
     userSelected = User.objects.get(username=username)
-    comments = Comment.objects.filter(user=userSelected)
+    commentsUser = Comment.objects.filter(user=userSelected)
     context = {
-        "userComments": comments,
+        "userComments": commentsUser,
     }
     return render(request, 'empo_news/user_comments.html', context)
 
@@ -316,8 +316,11 @@ def update_comment(request, commentid):
 
 
 def comments(request):
-    most_recent_list = Comment.objects.all().order_by('-publication_date')[:30]
+    most_recent_list = Comment.objects.all().order_by('-publication_time')[:30]
     more = len(Comment.objects.all()) > 30
+    for contribution in most_recent_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
     context = {
         "list": most_recent_list,
         "user": request.user,
@@ -334,8 +337,11 @@ def comments(request):
 def comments_pg(request, pg):
     if pg <= 1:
         return HttpResponseRedirect(reverse('empo_news:comments'))
-    most_recent_list = Comment.objects.all().order_by('-publication_date')[((pg - 1) * 30) + 1:(pg * 30)]
+    most_recent_list = Comment.objects.all().order_by('-publication_time')[((pg - 1) * 30) + 1:(pg * 30)]
     more = len(Comment.objects.all()) > (pg * 30)
+    for contribution in most_recent_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
     context = {
         "list": most_recent_list,
         "user": request.user,
