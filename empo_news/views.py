@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
+from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm, EditCommentForm
 from empo_news.models import Contribution, UserFields, Comment
 
 
@@ -185,12 +185,10 @@ def profile(request, username):
                  'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
                  'minaway': userFields.minaway, 'delay': userFields.delay})
 
-
-    if (userSelected == request.user):
+    if userSelected == request.user:
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
             if form.is_valid():
-                print(form.cleaned_data['showdead'])
                 UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
                                                                     showdead=form.cleaned_data['showdead'],
                                                                     noprocrast=form.cleaned_data['noprocrast'],
@@ -199,7 +197,7 @@ def profile(request, username):
                                                                     delay=int(form.cleaned_data['delay']))
                 User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
 
-                return HttpResponseRedirect(reverse('empo_news:user_page',  kwargs={"username": userSelected.username}))
+                return HttpResponseRedirect(reverse('empo_news:user_page', kwargs={"username": userSelected.username}))
     context = {
         "form": form,
         "userSelected": userSelected,
@@ -229,7 +227,7 @@ def item(request):
 
         if comment_form.is_valid():
             comment = Comment(user=request.user, contribution=contrib,
-                              publication_date=datetime.today(),
+                              publication_time=datetime.today(),
                               text=comment_form.cleaned_data['comment'])
             comment.save()
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
@@ -280,3 +278,78 @@ def update_show(all_contributions, userid, border):
             count_shown += 1
         contribution.save()
         i += 1
+
+
+def threads(request, username):
+    userSelected = User.objects.get(username=username)
+    commentsUser = Comment.objects.filter(user=userSelected)
+    context = {
+        "userComments": commentsUser,
+    }
+    return render(request, 'empo_news/user_comments.html', context)
+
+
+def delete_comment(request, commentid):
+    Comment.objects.filter(id=commentid).delete()
+    comments = Comment.objects.filter(user=request.user)
+    context = {
+        "userComments": comments,
+    }
+    return render(request, 'empo_news/user_comments.html', context)
+
+
+def update_comment(request, commentid):
+    if request.method == 'POST':
+        form = EditCommentForm(request.POST)
+        if form.is_valid():
+            Comment.objects.filter(id=commentid).update(text=form.cleaned_data['text'])
+
+    comment = Comment.objects.get(id=commentid)
+    form = EditCommentForm(
+        initial={'text': comment.text})
+
+    context = {
+        "comment": comment,
+        "form": form,
+    }
+    return render(request, 'empo_news/edit_comment.html', context)
+
+
+def comments(request):
+    most_recent_list = Comment.objects.all().order_by('-publication_time')[:30]
+    more = len(Comment.objects.all()) > 30
+    for contribution in most_recent_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_recent_list,
+        "user": request.user,
+        "path": "comments",
+        "more": more,
+        "next_page": "empo_news:comments_pg",
+        "page_value": 1,
+        "next_page_value": 2,
+        "base_loop_count": 0,
+    }
+    return render(request, 'empo_news/comments.html', context)
+
+
+def comments_pg(request, pg):
+    if pg <= 1:
+        return HttpResponseRedirect(reverse('empo_news:comments'))
+    most_recent_list = Comment.objects.all().order_by('-publication_time')[((pg - 1) * 30) + 1:(pg * 30)]
+    more = len(Comment.objects.all()) > (pg * 30)
+    for contribution in most_recent_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_recent_list,
+        "user": request.user,
+        "path": "comments_pg",
+        "more": more,
+        "next_page": "empo_news:comments_pg",
+        "page_value": pg,
+        "next_page_value": pg + 1,
+        "base_loop_count": (pg - 1) * 30,
+    }
+    return render(request, 'empo_news/comments.html', context)

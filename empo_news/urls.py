@@ -18,4 +18,9 @@ urlpatterns = [
     path('user_page/<str:username>', views.profile, name='user_page'),
     url('', include('social.apps.django_app.urls', namespace='social')),
     path('logout', views.logout),
+    path('threads/<str:username>', views.threads, name='threads'),
+    path('delete_comment/<int:commentid>', views.delete_comment, name='delete_comment'),
+    path('update_comment/<int:commentid>', views.update_comment, name='update_comment'),
+    path('comments', views.comments, name='comments'),
+    path('comments/<int:pg>', views.comments_pg, name='comments_pg'),
 ]
