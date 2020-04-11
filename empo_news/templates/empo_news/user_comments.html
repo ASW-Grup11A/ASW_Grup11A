@@ -22,10 +22,12 @@
                                     <span class="pagetop">
                                         <b class="hnname"><a href={% url 'empo_news:main_page' %}>Empo News</a></b>
                                         <a href={% url 'empo_news:new_page' %}>new</a> |
-                                        {% if request.user.is_authenticated %}
+                                        {% if request.user.is_authenticated and request.user == userSelected %}
                                             <span class="topsel">
                                                 <a href={% url 'empo_news:threads' request.user.username %}>threads</a>
                                             </span> |
+                                        {% elif request.user.is_authenticated %}
+                                            <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
                                         {% endif %}
                                         <a href={% url 'empo_news:not_implemented' %}>past</a> |
                                         <a href={% url 'empo_news:comments' %}>comments</a> |
@@ -36,6 +38,11 @@
                                             <a href={% url 'empo_news:submit' %}>submit</a>
                                         {% else %}
                                             <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">submit</a>
+                                        {% endif %}
+                                        {% if not userSelected == request.user %}
+                                            | <span class="topsel">
+                                                <a href="">{{ userSelected.username }}'s comments</a>
+                                            </span>
                                         {% endif %}
                                     </span>
                                 </td>
@@ -62,12 +69,8 @@
                                 <table border='0'>
                                     {% for comment in userComments.all %}
                                         <tr>
-                                            <td class='ind'>
-                                                <img src="s.gif" height="1" width="0">
-                                            </td>
                                             <td valign="top" class="votelinks">
-                                                <center><font color="#ff6600">*</font><br>
-                                                    <img src="s.gif" height="1" width="14"></center>
+                                                <center><font color="#ff6600">*</font></center>
                                             </td>
                                             <td class="default">
                                                 <div style="margin-top:2px; margin-bottom:-10px;">
@@ -75,32 +78,35 @@
                                                         <span class="score">{{ comment.points }} points </span>
                                                         by <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
                                                         {{ comment.publication_time|naturaltime }}
-                                                        <span id="unv_22805568"></span>
-                                                        <span class="par"> |
-                                                            {% if comment.parent == null %}
-                                                                <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}">parent</a></span>
-                                                            {% else %}
-                                                                <a href="{% url 'empo_news:item'%}?id={{ comment.parent.id }}">parent</a></span>
-                                                            {% endif %} |
-                                                            <a href={% url 'empo_news:update_comment' comment.id %}>edit</a> |
-                                                            <a href={% url 'empo_news:delete_comment' comment.id %}>delete</a>
-                                                            <a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, 22805568)"></a>
-                                                            <span> | on:
-                                                                <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}" >{{ comment.contribution.title }}</a>
-                                                            </span>
+                                                        | <span class="par">
+                                                        {% if comment.parent == null %}
+                                                            <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}">parent</a></span>
+                                                        {% else %}
+                                                            <a href="{% url 'empo_news:item'%}?id={{ comment.parent.id }}">parent</a></span>
+                                                        {% endif %} |
+                                                        <a href={% url 'empo_news:update_comment' comment.id %}>edit</a>
+                                                        {% if userSelected == request.user %}
+                                                            | <a href={% url 'empo_news:delete_comment' comment.id %}>delete</a>
+                                                        {% endif %}
+                                                        <span> | on:
+                                                            <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}" >{{ comment.contribution.title }}</a>
+                                                        </span>
                                                     </span>
                                                 </div>
                                                 <br>
                                                     <div class="comment">
-                                                        <span class="commtext c00">{{ comment.contribution.text }}</span>
-                                                        <div class='reply'>        <p>
-                                                            <font size="1">
-                                                                <u><a href={% url 'empo_news:not_implemented' %}>reply</a></u>
-                                                            </font>
-                                                        </div>
+                                                        <span class="commtext c00">{{ comment.text }}</span>
+                                                        {% if not userSelected == request.user %}
+                                                            <div class='reply'>        <p>
+                                                                <font size="1">
+                                                                    <u><a href="{% url 'empo_news:item' %}?id={{ comment.id }}">reply</a></u>
+                                                                </font>
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
                                             </td>
                                         </tr>
+                                        <tr class="morespace" style="height:10px"></tr>
                                     {% endfor %}
                                 </table>
                             </td>

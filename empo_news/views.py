@@ -43,7 +43,7 @@ def main_page(request):
         return HttpResponseRedirect(base_path)
     elif pg == 1:
         list_base = 0
-        
+
     update_show(Contribution.objects.order_by('-points'), request.user.id, pg * 30)
     most_points_list = Contribution.objects.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(Contribution.objects.filter(show=True)) > (pg * 30)
@@ -293,7 +293,7 @@ def item(request):
                 increment_comments_number(contrib)
                 contrib.contribution.comments += 1
                 contrib.contribution.save()
-            
+
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
         else:
             return HttpResponseRedirect(reverse('empo_news:addcomment') + '?id=' + str(contrib_id))
@@ -378,11 +378,12 @@ def add_reply(request):
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
 
-  
+
 def threads(request, username):
     userSelected = User.objects.get(username=username)
     commentsUser = Comment.objects.filter(user=userSelected)
     context = {
+        "userSelected":userSelected,
         "userComments": commentsUser,
     }
     return render(request, 'empo_news/user_comments.html', context)
@@ -392,6 +393,7 @@ def delete_comment(request, commentid):
     Comment.objects.filter(id=commentid).delete()
     comments = Comment.objects.filter(user=request.user)
     context = {
+        "userSelected":request.user,
         "userComments": comments,
     }
     return render(request, 'empo_news/user_comments.html', context)
