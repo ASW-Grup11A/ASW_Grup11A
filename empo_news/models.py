@@ -15,7 +15,7 @@ class UserFields(models.Model):
 
 class Contribution(models.Model):
     user = models.ForeignKey(User, related_name="user", on_delete=models.CASCADE)
-    title = models.CharField(max_length=2000)
+    title = models.CharField(max_length=2000, null=True)
     points = models.IntegerField(default=1)
     publication_time = models.DateTimeField('publication date')
     url = models.CharField(max_length=500, blank=True, null=True)
@@ -32,6 +32,10 @@ class Contribution(models.Model):
         elif self.text is not None:
             return "ask"
         return "failure"
+
+    def get_class(self):
+        return self.__class__.__name__
+
 
     def total_likes(self):
         return self.likes.count()

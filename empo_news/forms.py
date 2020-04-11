@@ -36,7 +36,9 @@ class CommentForm(forms.Form):
         if not comment:
             raise forms.ValidationError('Please try again.')
 
-
+        return cleaned_data
+        
+     
 class UserUpdateForm(forms.Form):
     about = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "cols": 56}), label='about', required=False)
     email = forms.CharField(widget=forms.TextInput(attrs={"size": 40}), max_length=80, min_length=1, label='email',
