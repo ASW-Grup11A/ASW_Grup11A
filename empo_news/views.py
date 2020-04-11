@@ -124,7 +124,7 @@ def new_page_pg(request, pg):
 def likes(request, view, pg, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
     if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user);
+        contribution.likes.remove(request.user)
     else:
         contribution.likes.add(request.user)
     contribution.points = contribution.total_likes()
@@ -132,6 +132,17 @@ def likes(request, view, pg, contribution_id):
     if pg == 1:
         return HttpResponseRedirect(reverse('empo_news:' + view))
     return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,)))
+
+
+def likes_reply(request, contribution_id, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.likes.filter(id=request.user.id).exists():
+        comment.likes.remove(request.user)
+    else:
+        comment.likes.add(request.user)
+    comment.points = comment.total_likes()
+    comment.save()
+    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
 
 
 def hide(request, view, pg, contribution_id):
@@ -210,7 +221,8 @@ def item(request):
         contrib = Comment.objects.get(id=contrib_id)
     else:
         contrib = Contribution.objects.get(id=contrib_id)
-    contrib_comments = Comment.objects.filter(contribution_id=contrib_id, parent__isnull=True)
+    contrib_comments = Comment.objects.filter(contribution_id=contrib_id, parent__isnull=True)\
+        .order_by('-publication_time')
 
     context = {
         "contribution": contrib,

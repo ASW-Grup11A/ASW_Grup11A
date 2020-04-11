@@ -34,8 +34,14 @@ def short_text_format(text):
 def is_liked(contribution):
     return contribution.is_liked()
 
+
+@register.filter
+def is_comment_liked(comment, user_id):
+    return comment.likes.filter(id=user_id).exists()
+
+
 # {% if request.user.is_authenticated %} per tenir un unic main
 
 @register.filter
 def all_replies(comment):
-    return comment.comment_set.all()
+    return comment.comment_set.all().order_by('-publication_time')

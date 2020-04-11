@@ -17,6 +17,7 @@ urlpatterns = [
     path('hide/<str:view>/<int:pg>/<int:contribution_id>', views.hide, name='hide'),
     path('notimplemented', views.not_implemented, name='not_implemented'),
     path('user_page', views.profile, name='user_page'),
+    path('like_reply/<int:contribution_id>/<int:comment_id>', views.likes_reply, name='likes_reply'),
     url('', include('social.apps.django_app.urls', namespace='social')),
     path('logout', views.logout),
 ]
