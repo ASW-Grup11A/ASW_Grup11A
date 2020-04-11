@@ -1,0 +1,167 @@
+{% load functions %}
+{% load humanize %}
+<html op="news">
+   <head>
+       {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'empo_news/main_page.css' %}">
+        <title>Empo News</title>
+   </head>
+   <body>
+        <div align="center">
+            <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
+                <tr>
+                    <td bgcolor="#ff6600">
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
+                            <tr>
+                                <td style="width:18px;padding-right:4px">
+                                    <a href={% url 'empo_news:main_page' %}>
+                                        <img src="{% static 'empo_news/images/y18.gif' %}" width="18" height="18" style="border:1px white solid;">
+                                    </a>
+                                </td>
+                                <td style="line-height:12pt; height:10px;">
+                                    <span class="pagetop">
+                                        <b class="hnname"><a href={% url 'empo_news:main_page' %}>Empo News</a></b>
+                                        <a href={% url 'empo_news:new_page' %}>new</a> |
+                                        {% if request.user.is_authenticated %}
+                                            <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
+                                        {% endif %}
+                                        <a href={% url 'empo_news:not_implemented' %}>past</a> |
+                                        <span class="topsel">
+                                            <a href={% url 'empo_news:comments' %}>comments</a>
+                                        </span> |
+                                        <a href={% url 'empo_news:not_implemented' %}>ask</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>show</a> |
+                                        <a href={% url 'empo_news:not_implemented' %}>jobs</a> |
+                                        {% if request.user.is_authenticated %}
+                                            <a href={% url 'empo_news:submit' %}>submit</a>
+                                        {% else %}
+                                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">submit</a>
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td style="text-align:right;padding-right:4px;">
+                                    <span class="pagetop">
+                                        {% if user.is_authenticated %}
+                                            <a href={% url 'empo_news:user_page' user.username %}>{{ user.username }}</a>
+                                            (1) |
+                                            <a href="/logout">Logout</a>
+                                        {% else %}
+                                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login</a>
+                                        {% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                </tr>
+
+                <tr id="pagespace" title={{ user.username }}"&#x27;s comments" style="height:10px"></tr>
+                <tr>
+                    <td>
+                        <tr class='athing comtr ' id='22805568'>
+                            <td>
+                                <table border='0'>
+                                    {% for comment in list.all %}
+                                        <tr>
+                                            <td valign="top" class="votelinks">
+                                               <div align="center">
+                                                   {% if request.user == comment.user %}
+                                                       <center><font color="#ff6600">*</font><br>
+                                                           <img src="s.gif" height="1" width="14"></center>
+                                                   {% else %}
+                                                       {% if comment|is_liked %}
+                                                              <a href={% url 'empo_news:likes' path page_value comment.id %}>
+                                                                 <div class='votearrow' title='upvote'></div>
+                                                              </a>
+                                                       {% else %}
+                                                           <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                                                       {% endif %}
+                                                   {% endif %}
+                                               </div>
+                                            </td>
+                                            <td class="default">
+                                                <div style="margin-top:2px; margin-bottom:-10px;">
+                                                    <span class="comhead">
+                                                        {% if request.user == comment.user %}
+                                                            <span class="score">{{ comment.points }} points by </span>
+                                                        {% endif %}
+                                                        <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
+                                                        {{ comment.publication_time|naturaltime }} |
+                                                        {% if request.user != comment.user %}
+                                                            {% if not comment|is_liked %}
+                                                               {%  csrf_token %}
+                                                                <a href={% url 'empo_news:likes' path page_value comment.id %}>unvote</a> |
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        <span id="unv_22805568"></span>
+                                                        <span class="par">
+                                                            {% if comment.parent == null %}
+                                                                <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}">parent</a></span>
+                                                            {% else %}
+                                                                <a href="{% url 'empo_news:item'%}?id={{ comment.parent.id }}">parent</a></span>
+                                                            {% endif %}
+                                                            <a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, 22805568)"></a>
+                                                            <span> | on:
+                                                                <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}" >{{ comment.contribution.title }}</a>
+                                                            </span>
+                                                    </span>
+                                                </div>
+                                                <br>
+                                                    <div class="comment">
+                                                        <span class="commtext c00">{{ comment.text }}</span>
+                                                        <div class='reply'>        <p>
+                                                            <font size="1">
+                                                                <u><a href={% url 'empo_news:not_implemented' %}>reply</a></u>
+                                                            </font>
+                                                        </div>
+                                                    </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="morespace" style="height:10px"></tr>
+                                    {% endfor %}
+                                    <td colspan="1"></td><td class="title">
+                                        {% if more %}
+                                                <a href={% url next_page next_page_value %}>More</a>
+                                        {% endif %}
+                                    </td>
+                                    <tr class="morespace" style="height:10px"></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table width="100%" cellspacing="0" cellpadding="1">
+                            <tr>
+                                <td bgcolor="#ff6600"></td>
+                            </tr>
+                        </table>
+                        <br>
+                        <div align="center"><a href={% url 'empo_news:main_page' %}>
+                             You are welcome to Empo News, enjoy your stay
+                             </a>
+                        </div>
+                        <br>
+                        <div align="center">
+                             <span class="yclinks">
+                                 <a href={% url 'empo_news:not_implemented' %}>Guidelines</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>FAQ</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Support</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>API</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Security</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Lists</a>
+                                 | <a href={% url 'empo_news:not_implemented' %} rel="nofollow">Bookmarklet</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Legal</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Apply to YC</a>
+                                 | <a href={% url 'empo_news:not_implemented' %}>Contact</a>
+                             </span><br><br>
+                             <form method="get" action="{% url 'empo_news:not_implemented' %}">Search:
+                                <input type="text" name="q" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="false">
+                             </form>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+   </body>
+</html>

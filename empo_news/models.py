@@ -12,7 +12,7 @@ class UserFields(models.Model):
     minaway = models.IntegerField(default=180)
     delay = models.IntegerField(default=0)
 
-    
+
 class Contribution(models.Model):
     user = models.ForeignKey(User, related_name="contribution", on_delete=models.CASCADE)
     title = models.CharField(max_length=2000)
@@ -32,7 +32,11 @@ class Contribution(models.Model):
         elif self.text is not None:
             return "ask"
         return "failure"
-    
+
+    def get_class(self):
+        return self.__class__.__name__
+
+
     def total_likes(self):
         return self.likes.count()
 
@@ -46,12 +50,6 @@ class Contribution(models.Model):
         return not self.show
 
 
-
-class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    contribution = models.ForeignKey(Contribution, on_delete=models.CASCADE)
-    upvotes = models.IntegerField(default=1)
-    publication_date = models.DateTimeField('publication date')
-    text = models.CharField(max_length=2000)
-
-
+class Comment(Contribution):
+    contribution = models.ForeignKey(Contribution, related_name="contrib", on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
