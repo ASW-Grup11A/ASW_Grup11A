@@ -35,3 +35,7 @@ def is_liked(contribution):
     return contribution.is_liked()
 
 # {% if request.user.is_authenticated %} per tenir un unic main
+
+@register.filter
+def all_replies(comment):
+    return comment.comment_set.all()

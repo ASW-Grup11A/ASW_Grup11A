@@ -174,50 +174,7 @@
                         </table>
                         <br><br>
                         <table border="0" class='comment-tree'>
-                            {% for comment in contrib_comments %}
-                                <tr class='athing comtr' id='{{ comment.id }}'>
-                                    <td>
-                                        <table border='0'>
-                                            <tr>
-                                                <td class='ind'>
-                                                    <img src="{% static 'empo_news/images/s.gif' %}" height="1" width="0">
-                                                </td>
-                                                <td valign="top" class="votelinks" style="text-align: center;">
-                                                    <a id='up_{{ comment.id }}' href={% url 'empo_news:not_implemented' %}>
-                                                        <div class='votearrow' title='upvote'></div>
-                                                    </a>
-                                                </td>
-                                                <td class="default">
-                                                    <div>
-                                                        <span class="comhead">
-                                                            <a href="{% url 'empo_news:not_implemented' %}" class="hnuser">{{comment.user.username}}</a>
-                                                            <span class="age">
-                                                                <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_time|naturaltime}}</a>
-                                                            </span>
-                                                            <span id="unv_{{ comment.id }}"></span>
-                                                            <span class="par"></span>
-                                                            <span class='storyon'></span>
-                                                        </span>
-                                                    </div>
-                                                    <br>
-                                                    <div class="comment">
-                                                        <span class="commtext c00">
-                                                            {{ comment.text }}
-                                                            <div class='reply'>
-                                                                <p>
-                                                                    <span style="font-size: 7pt; ">
-                                                                        <u><a href="{% url 'empo_news:addreply' %}?id={{ comment.id }}">reply</a></u>
-                                                                    </span>
-                                                                </p>
-                                                            </div>
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                            {% include "./reply.html" with comments=contrib_comments indent=0 %}
                         </table>
                     <br><br>
                     </td>

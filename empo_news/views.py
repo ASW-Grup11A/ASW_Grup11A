@@ -210,7 +210,7 @@ def item(request):
         contrib = Comment.objects.get(id=contrib_id)
     else:
         contrib = Contribution.objects.get(id=contrib_id)
-    contrib_comments = Comment.objects.filter(contribution_id=contrib_id)
+    contrib_comments = Comment.objects.filter(contribution_id=contrib_id, parent__isnull=True)
 
     context = {
         "contribution": contrib,
