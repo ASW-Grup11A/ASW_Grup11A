@@ -38,10 +38,9 @@ def is_liked(contribution):
 @register.filter
 def is_contribution_liked(contribution, user_id):
     return contribution.likes.filter(id=user_id).exists()
-
-
-# {% if request.user.is_authenticated %} per tenir un unic main
+  
 
 @register.filter
 def all_replies(comment):
     return comment.comment_set.all().order_by('-publication_time')
+

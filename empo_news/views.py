@@ -36,10 +36,17 @@ def submit(request):
 
 
 def main_page(request):
-    contributions = Contribution.objects.exclude(title__isnull=True)
-    update_show(contributions.order_by('-points'), request.user.id, 30)
-    most_points_list = contributions.filter(show=True).order_by('-points')[:30]
-    more = len(contributions.filter(show=True)) > 30
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('?')[0]
+    list_base = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_base = 0
+        
+    update_show(Contribution.objects.order_by('-points'), request.user.id, pg * 30)
+    most_points_list = Contribution.objects.filter(show=True).order_by('-points')[list_base:(pg * 30)]
+    more = len(Contribution.objects.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
@@ -48,40 +55,25 @@ def main_page(request):
         "user": request.user,
         "path": "main_page",
         "more": more,
-        "next_page": "empo_news:main_page_pg",
-        "page_value": 1,
-        "next_page_value": 2,
-        "base_loop_count": 0,
-    }
-    return render(request, 'empo_news/main_page.html', context)
-
-
-def main_page_pg(request, pg):
-    if pg <= 1:
-        return HttpResponseRedirect(reverse('empo_news:main_page'))
-    update_show(Contribution.objects.order_by('-points'), request.user.id, pg * 30)
-    most_points_list = Contribution.objects.filter(show=True).order_by('-points')[((pg - 1) * 30) + 1:(pg * 30)]
-    more = len(Contribution.objects.filter(show=True)) > (pg * 30)
-    for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
-        contribution.save()
-    context = {
-        "list": most_points_list,
-        "user": request.user,
-        "path": "main_page_pg",
-        "more": more,
-        "next_page": "empo_news:main_page_pg",
+        "next_page": base_path + "?pg=" + str(pg + 1),
         "page_value": pg,
-        "next_page_value": pg + 1,
         "base_loop_count": (pg - 1) * 30,
     }
     return render(request, 'empo_news/main_page.html', context)
 
 
 def new_page(request):
-    update_show(Contribution.objects.order_by('-publication_time'), request.user.id, 30)
-    most_recent_list = Contribution.objects.filter(show=True).order_by('-publication_time')[:30]
-    more = len(Contribution.objects.filter(show=True)) > 30
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('?')[0]
+    list_base = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_base = 0
+
+    update_show(Contribution.objects.order_by('publication_time'), request.user.id, pg * 30)
+    most_recent_list = Contribution.objects.filter(show=True).order_by('publication_time')[list_base:(pg * 30)]
+    more = len(Contribution.objects.filter(show=True)) > (pg * 30)
     for contribution in most_recent_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
@@ -91,36 +83,59 @@ def new_page(request):
         "path": "new_page",
         "highlight": "new",
         "more": more,
-        "next_page": "empo_news:new_page_pg",
-        "page_value": 1,
-        "next_page_value": 2,
-        "base_loop_count": 0,
-    }
-    return render(request, 'empo_news/main_page.html', context)
-
-
-def new_page_pg(request, pg):
-    if pg <= 1:
-        return HttpResponseRedirect(reverse('empo_news:new_page'))
-    update_show(Contribution.objects.order_by('-publication_time'), request.user.id, (pg * 30))
-    most_recent_list = Contribution.objects.filter(show=True).order_by('-publication_time')[
-                       ((pg - 1) * 30) + 1:(pg * 30)]
-    more = len(Contribution.objects.filter(show=True)) > (pg * 30)
-    for contribution in most_recent_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
-        contribution.save()
-    context = {
-        "list": most_recent_list,
-        "user": request.user,
-        "path": "new_page_pg",
-        "highlight": "new",
-        "more": more,
-        "next_page": "empo_news:new_page_pg",
+        "next_page": base_path + "?pg=" + str(pg + 1),
         "page_value": pg,
-        "next_page_value": pg + 1,
         "base_loop_count": (pg - 1) * 30,
     }
     return render(request, 'empo_news/main_page.html', context)
+
+
+def submitted(request):
+    user_id = request.GET.get('id', "")
+    if not User.objects.filter(username=user_id).exists():
+        return HttpResponse('No such user')
+    base_list = User.objects.get(username=user_id).contribution
+
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('&')[0]
+    list_start = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_start = 0
+
+    submitted_list = base_list.order_by('publication_time')[list_start:(pg * 30)]
+    more = len(base_list.all()) > (pg * 30)
+    for contribution in submitted_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+
+    context = {
+        "list": submitted_list,
+        "user": request.user,
+        "mine": (request.user.username == user_id),
+        "path": "submitted",
+        "submitted_id": user_id,
+        "highlight": "submitted",
+        "more": more,
+        "next_page": base_path + "&pg=" + str(pg + 1),
+        "page_value": pg,
+        "base_loop_count": (pg - 1) * 30,
+    }
+    return render(request, 'empo_news/submitted.html', context)
+
+
+def likes_submit(request, view, id, pg, contribution_id):
+    contribution = get_object_or_404(Contribution, id=contribution_id)
+    if contribution.likes.filter(id=request.user.id).exists():
+        contribution.likes.remove(request.user);
+    else:
+        contribution.likes.add(request.user)
+    contribution.points = contribution.total_likes()
+    contribution.save()
+    if pg == 1:
+        return HttpResponseRedirect(reverse('empo_news:' + view) + '?id=' + id)
+    return HttpResponseRedirect(reverse('empo_news:' + view) + '?id=' + id + '&pg=' + str(pg))
 
 
 def likes(request, view, pg, contribution_id):
@@ -133,7 +148,7 @@ def likes(request, view, pg, contribution_id):
     contribution.save()
     if pg == 1:
         return HttpResponseRedirect(reverse('empo_news:' + view))
-    return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,)))
+    return HttpResponseRedirect(reverse('empo_news:' + view) + '?pg=' + str(pg))
 
 
 def likes_reply(request, contribution_id, comment_id):
@@ -330,6 +345,7 @@ def update_show(all_contributions, userid, border):
             count_shown += 1
         contribution.save()
         i += 1
+
 
 
 def add_reply(request):

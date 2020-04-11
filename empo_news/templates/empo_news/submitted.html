@@ -1,0 +1,111 @@
+{% extends "./bars_base.html" %}
+{% block main_body %}
+{% load functions %}
+{% load humanize %}
+    {% if mine %}
+       <td>
+          <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
+            {% for contribution in list.all %}
+                        <tr class='athing' >
+                            <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter|add:base_loop_count }}.</span></td>
+                            <td valign="top" class="votelinks">
+                               <div align="center">
+                                   <span style="color:#ff6600; margin-left:2px; margin-right: 4px">*</span>
+                               </div>
+                            </td>
+                            <td class="title">
+                                {% if contribution|get_class == "url" %}
+                                    <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
+                                {% else %}
+                                    <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
+                                {% endif %}
+
+                                <span class="sitebit comhead">
+                                    {% if contribution|get_class == "url" %}
+                                        (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"></td>
+                            <td class="subtext">
+                               <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
+                                by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a>
+                                <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span> |
+                                <a href={% url 'empo_news:not_implemented' %} > past </a> |
+                                <a href={% url 'empo_news:not_implemented' %} > web </a>
+                            </td>
+                        </tr>
+                        <tr class="spacer" style="height:5px"></tr>
+                    {% endfor %}
+          </table>
+       </td>
+    {% else %}
+        <td>
+        <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
+                {% for contribution in list.all %}
+                    <tr class='athing' id='22677970'>
+                        <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter|add:base_loop_count }}.</span></td>
+                        <td valign="top" class="votelinks">
+                           <div align="center">
+                                {% if request.user.is_authenticated %}
+                                    {%  csrf_token %}
+                                   {% if contribution|is_liked %}
+                                          <a id='up_22677970' href={% url 'empo_news:likes_submit' path submitted_id page_value contribution.id %}>
+                                             <div class='votearrow' title='upvote'></div>
+                                          </a>
+                                   {% else %}
+                                       <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                                   {% endif %}
+                                {% else %}
+                                    <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
+                                        <div class='votearrow' title='upvote'></div>
+                                    </a>
+                                {% endif %}
+                           </div>
+                        </td>
+                        <td class="title">
+                            {% if contribution|get_class == "url" %}
+                                <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
+                            {% else %}
+                                <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
+                            {% endif %}
+
+                            <span class="sitebit comhead">
+                                {% if contribution|get_class == "url" %}
+                                    (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td class="subtext">
+                           <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
+                            by <a href={% url 'empo_news:not_implemented' %} >{{ contribution.user.username }}</a> on
+                            <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
+                            <span id="unv_22677970"></span> |
+
+                               {% if not contribution|is_liked %}
+                                   {%  csrf_token %}
+                                   <a href={% url 'empo_news:likes_submit' path submitted_id page_value contribution.id %}>unvote</a> |
+                               {% endif %}
+                            <a href={% url 'empo_news:not_implemented' %} > past </a> |
+                            <a href={% url 'empo_news:not_implemented' %} > web </a> |
+                            <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}&nbsp;comments</a>
+                        </td>
+                    </tr>
+                    <tr class="spacer" style="height:5px"></tr>
+                {% endfor %}
+            <tr class="morespace" style="height:10px"></tr>
+            <tr><td colspan="2"></td><td class="title">
+                {% if more %}
+                        <a href="{{ next_page }}">More</a>
+                {% endif %}
+            </td></tr>
+            <tr class="morespace" style="height:10px"></tr>
+        </table>
+    </td>
+    {% endif %}
+{% endblock %}
