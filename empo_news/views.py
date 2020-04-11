@@ -24,6 +24,8 @@ def submit(request):
             else:
                 contribution.text = form.cleaned_data['text']
             contribution.save()
+            contribution.likes.add(request.user)
+            contribution.save()
 
             return HttpResponseRedirect(reverse('empo_news:main_page'))
 
@@ -145,10 +147,21 @@ def likes_reply(request, contribution_id, comment_id):
     return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
 
 
+def likes_contribution(request, contribution_id):
+    contribution = get_object_or_404(Contribution, id=contribution_id)
+    if contribution.likes.filter(id=request.user.id).exists():
+        contribution.likes.remove(request.user)
+    else:
+        contribution.likes.add(request.user)
+    contribution.points = contribution.total_likes()
+    contribution.save()
+    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id))
+
+
 def hide(request, view, pg, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
     if contribution.hidden.filter(id=request.user.id).exists():
-        contribution.hidden.remove(request.user);
+        contribution.hidden.remove(request.user)
     else:
         contribution.hidden.add(request.user)
     contribution.save()

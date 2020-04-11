@@ -12,7 +12,7 @@
                     <td valign="top" class="votelinks" style="text-align: center;">
                         {% if request.user == comment.user %}
                             <span style="color: #ff6600; ">*</span>
-                        {% elif comment|is_comment_liked:request.user.id %}
+                        {% elif comment|is_contribution_liked:request.user.id %}
                             <div class='votearrow' title='upvote' style="opacity: 0" ></div>
                         {% else %}
                             <a id='up_{{ comment.id }}' href={% url 'empo_news:likes_reply' comment.contribution.id comment.id %}>
@@ -28,7 +28,7 @@
                                     <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_time|naturaltime}}</a>
                                 </span>
                                 <span id="unv_{{ comment.id }}">
-                                    {% if comment|is_comment_liked:request.user.id %}
+                                    {% if comment|is_contribution_liked:request.user.id %}
                                          |
                                         <a id="unv_{{ comment.id }}" href="{% url 'empo_news:likes_reply' comment.contribution.id comment.id %}">
                                             unvote

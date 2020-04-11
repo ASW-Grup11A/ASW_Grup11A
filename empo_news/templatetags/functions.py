@@ -36,8 +36,8 @@ def is_liked(contribution):
 
 
 @register.filter
-def is_comment_liked(comment, user_id):
-    return comment.likes.filter(id=user_id).exists()
+def is_contribution_liked(contribution, user_id):
+    return contribution.likes.filter(id=user_id).exists()
 
 
 # {% if request.user.is_authenticated %} per tenir un unic main

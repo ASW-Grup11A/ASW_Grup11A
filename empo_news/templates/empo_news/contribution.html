@@ -54,9 +54,15 @@
                                         <span class="rank"></span>
                                     </td>
                                     <td valign="top" class="votelinks" style="text-align: center;">
-                                        <a id='up_{{ contribution.id }}' href={% url 'empo_news:not_implemented' %}>
-                                            <div class='votearrow' title='upvote'></div>
-                                        </a>
+                                        {% if request.user == contribution.user %}
+                                            <span style="color: #ff6600; ">*</span>
+                                        {% elif contribution|is_contribution_liked:request.user.id %}
+                                            <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                                        {% else %}
+                                            <a id='up_{{ contribution.id }}' href={% url 'empo_news:likes_contribution' contribution.id %}>
+                                                <div class='votearrow' title='upvote'></div>
+                                            </a>
+                                        {% endif %}
                                     </td>
                                     <td class="title">
                                         {% if contribution|get_class == "url" %}
@@ -80,7 +86,14 @@
                                         <span class="age">
                                             <a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a>
                                         </span>
-                                            <span id="unv_{{ contribution.id }}"></span>
+                                            <span id="unv_{{ contribution.id }}">
+                                                {% if contribution|is_contribution_liked:request.user.id %}
+                                                     |
+                                                    <a id="unv_{{ contribution.id }}" href="{% url 'empo_news:likes_contribution' contribution.id %}">
+                                                        unvote
+                                                    </a>
+                                                {% endif %}
+                                            </span>
                                             | <a href={% url 'empo_news:not_implemented' %}>hide</a>
                                             | <a href="{% url 'empo_news:not_implemented' %}" class="hnpast">past</a>
                                             {% if contribution|get_class == "url" %}
