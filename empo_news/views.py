@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
+from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm, EditCommentForm
 from empo_news.models import Contribution, UserFields, Comment
 
 
@@ -179,13 +179,22 @@ def logout(request):
     return redirect('/')
 
 
-def profile(request):
-    if UserFields.objects.filter(user=request.user).count() == 0:
-        userFields = UserFields(user=request.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+def users_profile(request, username):
+    userFields = UserFields.objects.get(user=User.objects.get(username=username))
+    context = {
+        "userFields": userFields
+    }
+    return render(request, 'empo_news/users_profile.html', context)
+
+
+def profile(request, username):
+    userSelected = User.objects.get(username=username)
+    if UserFields.objects.filter(user=userSelected).count() == 0:
+        userFields = UserFields(user=userSelected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
     else:
-        userFields = UserFields.objects.get(user=request.user)
+        userFields = UserFields.objects.get(user=userSelected)
 
     if userFields.showdead == 0:
         posS = '0'
@@ -196,26 +205,27 @@ def profile(request):
         posN = '0'
     else:
         posN = '1'
+    form = UserUpdateForm(
+        initial={'email': userSelected.email, 'karma': userFields.karma, 'about': userFields.about,
+                 'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
+                 'minaway': userFields.minaway, 'delay': userFields.delay})
 
-    form = UserUpdateForm(initial={'email': request.user.email, 'karma': userFields.karma, 'about': userFields.about,
-                                   'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
-                                   'minaway': userFields.minaway, 'delay': userFields.delay})
+    if userSelected == request.user:
+        if request.method == 'POST':
+            form = UserUpdateForm(request.POST)
+            if form.is_valid():
+                UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
+                                                                    showdead=form.cleaned_data['showdead'],
+                                                                    noprocrast=form.cleaned_data['noprocrast'],
+                                                                    maxvisit=int(form.cleaned_data['maxvisit']),
+                                                                    minaway=int(form.cleaned_data['minaway']),
+                                                                    delay=int(form.cleaned_data['delay']))
+                User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
 
-    if request.method == 'POST':
-        form = UserUpdateForm(request.POST)
-        if form.is_valid():
-            print(form.cleaned_data['showdead'])
-            UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
-                                                                showdead=form.cleaned_data['showdead'],
-                                                                noprocrast=form.cleaned_data['noprocrast'],
-                                                                maxvisit=int(form.cleaned_data['maxvisit']),
-                                                                minaway=int(form.cleaned_data['minaway']),
-                                                                delay=int(form.cleaned_data['delay']))
-            User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
-
-            return HttpResponseRedirect(reverse('empo_news:user_page'))
+                return HttpResponseRedirect(reverse('empo_news:user_page', kwargs={"username": userSelected.username}))
     context = {
         "form": form,
+        "userSelected": userSelected,
         "userFields": userFields
     }
     return render(request, 'empo_news/profile.html', context)
@@ -268,7 +278,7 @@ def item(request):
                 increment_comments_number(contrib)
                 contrib.contribution.comments += 1
                 contrib.contribution.save()
-
+            
             return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contrib_id))
         else:
             return HttpResponseRedirect(reverse('empo_news:addcomment') + '?id=' + str(contrib_id))
@@ -351,3 +361,78 @@ def add_reply(request):
                                         + '#' + str(new_comment.parent.id))
 
     return HttpResponseRedirect(reverse('empo_news:main_page'))
+
+  
+def threads(request, username):
+    userSelected = User.objects.get(username=username)
+    commentsUser = Comment.objects.filter(user=userSelected)
+    context = {
+        "userComments": commentsUser,
+    }
+    return render(request, 'empo_news/user_comments.html', context)
+
+
+def delete_comment(request, commentid):
+    Comment.objects.filter(id=commentid).delete()
+    comments = Comment.objects.filter(user=request.user)
+    context = {
+        "userComments": comments,
+    }
+    return render(request, 'empo_news/user_comments.html', context)
+
+
+def update_comment(request, commentid):
+    if request.method == 'POST':
+        form = EditCommentForm(request.POST)
+        if form.is_valid():
+            Comment.objects.filter(id=commentid).update(text=form.cleaned_data['text'])
+
+    comment = Comment.objects.get(id=commentid)
+    form = EditCommentForm(
+        initial={'text': comment.text})
+
+    context = {
+        "comment": comment,
+        "form": form,
+    }
+    return render(request, 'empo_news/edit_comment.html', context)
+
+
+def comments(request):
+    most_recent_list = Comment.objects.all().order_by('-publication_time')[:30]
+    more = len(Comment.objects.all()) > 30
+    for contribution in most_recent_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_recent_list,
+        "user": request.user,
+        "path": "comments",
+        "more": more,
+        "next_page": "empo_news:comments_pg",
+        "page_value": 1,
+        "next_page_value": 2,
+        "base_loop_count": 0,
+    }
+    return render(request, 'empo_news/comments.html', context)
+
+
+def comments_pg(request, pg):
+    if pg <= 1:
+        return HttpResponseRedirect(reverse('empo_news:comments'))
+    most_recent_list = Comment.objects.all().order_by('-publication_time')[((pg - 1) * 30) + 1:(pg * 30)]
+    more = len(Comment.objects.all()) > (pg * 30)
+    for contribution in most_recent_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_recent_list,
+        "user": request.user,
+        "path": "comments_pg",
+        "more": more,
+        "next_page": "empo_news:comments_pg",
+        "page_value": pg,
+        "next_page_value": pg + 1,
+        "base_loop_count": (pg - 1) * 30,
+    }
+    return render(request, 'empo_news/comments.html', context)
