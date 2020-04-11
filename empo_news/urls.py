@@ -12,6 +12,7 @@ urlpatterns = [
     path('item', views.item, name='item'),
     path('addcomment', views.addcomment, name='addcomment'),
     path('like/<str:view>/<int:pg>/<int:contribution_id>', views.likes, name='likes'),
+    path('likesubmit/<str:view>/<str:id>/<int:pg>/<int:contribution_id>', views.likes_submit, name='likes_submit'),
     path('hide/<str:view>/<int:pg>/<int:contribution_id>', views.hide, name='hide'),
     path('notimplemented', views.not_implemented, name='not_implemented'),
     path('user_page', views.profile, name='user_page'),

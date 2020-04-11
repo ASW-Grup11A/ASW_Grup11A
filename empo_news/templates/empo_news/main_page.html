@@ -10,14 +10,18 @@
                         <td valign="top" class="votelinks">
                            <div align="center">
                                 {% if request.user.is_authenticated %}
-                                    {%  csrf_token %}
-                                   {% if contribution|is_liked %}
-                                          <a id='up_22677970' href={% url 'empo_news:likes' path page_value contribution.id %}>
-                                             <div class='votearrow' title='upvote'></div>
-                                          </a>
-                                   {% else %}
-                                       <div class='votearrow' title='upvote' style="opacity: 0" ></div>
-                                   {% endif %}
+                                    {% if contribution.user != request.user %}
+                                        {%  csrf_token %}
+                                       {% if contribution|is_liked %}
+                                              <a id='up_22677970' href={% url 'empo_news:likes' path page_value contribution.id %}>
+                                                 <div class='votearrow' title='upvote'></div>
+                                              </a>
+                                       {% else %}
+                                           <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                                       {% endif %}
+                                    {% else %}
+                                        <span style="color: #ff6600; ">*</span>
+                                    {% endif %}
                                 {% else %}
                                     <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
                                         <div class='votearrow' title='upvote'></div>

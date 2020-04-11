@@ -14,7 +14,7 @@ class UserFields(models.Model):
 
     
 class Contribution(models.Model):
-    user = models.ForeignKey(User, related_name="user", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="contribution", on_delete=models.CASCADE)
     title = models.CharField(max_length=2000)
     points = models.IntegerField(default=1)
     publication_time = models.DateTimeField('publication date')

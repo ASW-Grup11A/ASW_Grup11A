@@ -92,16 +92,48 @@ def submitted(request):
     user_id = request.GET.get('id', "")
     if not User.objects.filter(username=user_id).exists():
         return HttpResponse('No such user')
-    req_user = User(username=user_id)
+    base_list = User.objects.get(username=user_id).contribution
 
-    submitted_list = Contribution.objects.filter(user=req_user).order_by('publication_time')
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('&')[0]
+    list_start = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_start = 0
+
+    submitted_list = base_list.order_by('publication_time')[list_start:(pg * 30)]
+    more = len(base_list.all()) > (pg * 30)
+    for contribution in submitted_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+
     context = {
         "list": submitted_list,
         "user": request.user,
+        "mine": (request.user.username == user_id),
+        "path": "submitted",
         "submitted_id": user_id,
         "highlight": "submitted",
+        "more": more,
+        "next_page": base_path + "&pg=" + str(pg + 1),
+        "page_value": pg,
+        "base_loop_count": (pg - 1) * 30,
     }
     return render(request, 'empo_news/submitted.html', context)
+
+
+def likes_submit(request, view, id, pg, contribution_id):
+    contribution = get_object_or_404(Contribution, id=contribution_id)
+    if contribution.likes.filter(id=request.user.id).exists():
+        contribution.likes.remove(request.user);
+    else:
+        contribution.likes.add(request.user)
+    contribution.points = contribution.total_likes()
+    contribution.save()
+    if pg == 1:
+        return HttpResponseRedirect(reverse('empo_news:' + view) + '?id=' + id)
+    return HttpResponseRedirect(reverse('empo_news:' + view) + '?id=' + id + '&pg=' + str(pg))
 
 
 def likes(request, view, pg, contribution_id):
@@ -114,7 +146,7 @@ def likes(request, view, pg, contribution_id):
     contribution.save()
     if pg == 1:
         return HttpResponseRedirect(reverse('empo_news:' + view))
-    return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,)))
+    return HttpResponseRedirect(reverse('empo_news:' + view) + '?pg=' + str(pg))
 
 
 def hide(request, view, pg, contribution_id):
@@ -252,3 +284,4 @@ def update_show(all_contributions, userid, border):
             count_shown += 1
         contribution.save()
         i += 1
+

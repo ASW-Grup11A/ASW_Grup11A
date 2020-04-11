@@ -11,5 +11,3 @@ def get_class(contribution):
 @register.filter
 def is_liked(contribution):
     return contribution.is_liked()
-
-# {% if request.user.is_authenticated %} per tenir un unic main
