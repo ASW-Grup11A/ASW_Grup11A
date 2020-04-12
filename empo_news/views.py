@@ -511,7 +511,6 @@ def comments(request):
     for contribution in most_recent_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
-    userFields = UserFields.objects.filter(user=request.user)
     context = {
         "list": most_recent_list,
         "user": request.user,
@@ -520,7 +519,6 @@ def comments(request):
         "next_page": base_path + "?pg=" + str(pg + 1),
         "page_value": pg,
         "base_loop_count": (pg - 1) * 30,
-        "userFields": userFields,
         "karma": karma,
     }
     return render(request, 'empo_news/comments.html', context)
@@ -538,8 +536,7 @@ def ask_list(request):
     elif pg == 1:
         list_base = 0
 
-    contributions = Contribution.objects.filter(comment__isnull=True)
-    contributions = contributions.filter(url__isnull=True)
+    contributions = Contribution.objects.filter(comment__isnull=True, url__isnull=True)
     update_show(contributions.order_by('-points'), request.user.id, pg * 30)
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
