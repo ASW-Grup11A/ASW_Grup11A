@@ -37,7 +37,13 @@
                                         {% endif %}
                                         <a href={% url 'empo_news:not_implemented' %}>past</a> |
                                         <a href={% url 'empo_news:comments' %}>comments</a> |
-                                        <a href={% url 'empo_news:not_implemented' %}>ask</a> |
+                                        {% if highlight == "ask" %}
+                                            <span class="topsel">
+                                            <a href={% url 'empo_news:ask_list' %}>ask</a>
+                                            </span>
+                                        {% else %}
+                                            <a href={% url 'empo_news:ask_list' %}>ask</a>
+                                        {% endif %} |
                                         <a href={% url 'empo_news:not_implemented' %}>show</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>jobs</a> |
                                         {% if request.user.is_authenticated %}
