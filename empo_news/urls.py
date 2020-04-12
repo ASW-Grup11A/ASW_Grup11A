@@ -16,6 +16,7 @@ urlpatterns = [
     path('likesubmit/<str:view>/<str:id>/<int:pg>/<int:contribution_id>', views.likes_submit, name='likes_submit'),
     path('hide/<str:view>/<int:pg>/<int:contribution_id>', views.hide, name='hide'),
     path('notimplemented', views.not_implemented, name='not_implemented'),
+    path('like_comment/<int:comment_id>/<str:username>', views.likes_comment, name='likes_comment'),
     path('like_reply/<int:contribution_id>/<int:comment_id>', views.likes_reply, name='likes_reply'),
     path('like_contribution/<int:contribution_id>', views.likes_contribution, name='likes_contribution'),
     path('user_page/<str:username>', views.profile, name='user_page'),
@@ -25,5 +26,4 @@ urlpatterns = [
     path('delete_comment/<int:commentid>', views.delete_comment, name='delete_comment'),
     path('update_comment/<int:commentid>', views.update_comment, name='update_comment'),
     path('comments', views.comments, name='comments'),
-    path('comments/<int:pg>', views.comments_pg, name='comments_pg'),
 ]
