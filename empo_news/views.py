@@ -36,7 +36,9 @@ def submit(request):
 
 
 def main_page(request):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -66,7 +68,9 @@ def main_page(request):
 
 
 def new_page(request):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -252,7 +256,9 @@ def logout(request):
 
 
 def profile(request, username):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     userSelected = User.objects.get(username=username)
     if UserFields.objects.filter(user=userSelected).count() == 0:
         userFields = UserFields(user=userSelected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
@@ -305,7 +311,9 @@ def increment_comments_number(contrib):
 
 
 def item(request):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     contrib_id = int(request.GET.get('id', -1))
     if Comment.objects.filter(id=contrib_id).count() > 0:
         contrib = Comment.objects.get(id=contrib_id)
@@ -355,7 +363,9 @@ def item(request):
 
 
 def add_comment(request):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     contrib_id = int(request.GET.get('id', -1))
     contrib = Contribution.objects.get(id=contrib_id)
     context = {
@@ -403,7 +413,9 @@ def update_show(all_contributions, userid, border):
 
 
 def add_reply(request):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     comment_id = int(request.GET.get('id', -1))
     comment = Comment.objects.get(id=comment_id)
     context = {
@@ -436,7 +448,9 @@ def add_reply(request):
 
 
 def threads(request, username):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     userFields = UserFields.objects.filter(user=request.user)
     userSelected = User.objects.get(username=username)
     commentsUser = Comment.objects.filter(user=userSelected)
@@ -460,7 +474,9 @@ def delete_comment(request, commentid):
 
 
 def update_comment(request, commentid):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     if request.method == 'POST':
         form = EditCommentForm(request.POST)
         if form.is_valid():
@@ -479,7 +495,9 @@ def update_comment(request, commentid):
 
 
 def comments(request):
-    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
