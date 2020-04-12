@@ -23,7 +23,7 @@
                     <td class="default">
                         <div>
                             <span class="comhead">
-                                <a href="{% url 'empo_news:not_implemented' %}" class="hnuser">{{comment.user.username}}</a>
+                                <a href="{% url 'empo_news:user_page' comment.user.username %}" class="hnuser">{{comment.user.username}}</a>
                                 <span class="age">
                                     <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_time|naturaltime}}</a>
                                 </span>

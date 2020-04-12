@@ -31,7 +31,7 @@
                             <td colspan="2"></td>
                             <td class="subtext">
                                <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
-                                by <a href={% url 'empo_news:not_implemented' %} class="hnuser">{{ contribution.user.username }}</a>
+                                by <a href={% url 'empo_news:user_page' contribution.user.username %} class="hnuser">{{ contribution.user.username }}</a>
                                 <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span> |
                                 <a href={% url 'empo_news:not_implemented' %} > past </a> |
                                 <a href={% url 'empo_news:not_implemented' %} > web </a>
@@ -83,7 +83,7 @@
                         <td colspan="2"></td>
                         <td class="subtext">
                            <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
-                            by <a href={% url 'empo_news:not_implemented' %} >{{ contribution.user.username }}</a> on
+                            by <a href={% url 'empo_news:user_page' contribution.user.username %} >{{ contribution.user.username }}</a> on
                             <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
                             <span id="unv_22677970"></span> |
 

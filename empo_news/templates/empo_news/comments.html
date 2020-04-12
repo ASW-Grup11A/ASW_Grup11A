@@ -41,9 +41,9 @@
                                 </td>
                                 <td style="text-align:right;padding-right:4px;">
                                     <span class="pagetop">
-                                        {% if user.is_authenticated %}
+                                        {% if request.user.is_authenticated %}
                                             <a href={% url 'empo_news:user_page' user.username %}>{{ user.username }}</a>
-                                            (1) |
+                                            ({{ karma }}) |
                                             <a href="/logout">Logout</a>
                                         {% else %}
                                             <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login</a>
@@ -103,6 +103,10 @@
                                                         {% else %}
                                                             <a href="{% url 'empo_news:item'%}?id={{ comment.parent.id }}">parent</a></span>
                                                         {% endif %}
+                                                        {% if comment.user == request.user %}
+                                                            | <a href={% url 'empo_news:update_comment' comment.id %}>edit</a>
+                                                            | <a href={% url 'empo_news:delete_comment' comment.id %}>delete</a>
+                                                        {% endif %}
                                                         <span> | on:
                                                             <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}" >{{ comment.contribution.title }}</a>
                                                         </span>
@@ -116,11 +120,11 @@
                                         </tr>
                                         <tr class="morespace" style="height:10px"></tr>
                                     {% endfor %}
-                                    <td colspan="1"></td><td class="title">
+                                    <tr><td colspan="1"></td><td class="title">
                                         {% if more %}
-                                                <a href={% url next_page next_page_value %}>More</a>
+                                                <a href="{{ next_page }}">More</a>
                                         {% endif %}
-                                    </td>
+                                    </td></tr>
                                 </table>
                             </td>
                         </tr>

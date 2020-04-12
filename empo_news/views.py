@@ -36,6 +36,7 @@ def submit(request):
 
 
 def main_page(request):
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -44,7 +45,7 @@ def main_page(request):
     elif pg == 1:
         list_base = 0
 
-    contributions = Contribution.objects.exclude(title__isnull=True)
+    contributions = Contribution.objects.filter(comment__isnull=True)
     update_show(contributions.order_by('-points'), request.user.id, pg * 30)
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
@@ -59,11 +60,13 @@ def main_page(request):
         "next_page": base_path + "?pg=" + str(pg + 1),
         "page_value": pg,
         "base_loop_count": (pg - 1) * 30,
+        "karma": karma,
     }
     return render(request, 'empo_news/main_page.html', context)
 
 
 def new_page(request):
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -72,9 +75,9 @@ def new_page(request):
     elif pg == 1:
         list_base = 0
 
-    contributions = Contribution.objects.exclude(title__isnull=True)
-    update_show(contributions.order_by('publication_time'), request.user.id, pg * 30)
-    most_recent_list = contributions.filter(show=True).order_by('publication_time')[list_base:(pg * 30)]
+    contributions = Contribution.objects.filter(comment__isnull=True)
+    update_show(contributions.order_by('-publication_time'), request.user.id, pg * 30)
+    most_recent_list = contributions.filter(show=True).order_by('-publication_time')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_recent_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
@@ -88,6 +91,7 @@ def new_page(request):
         "next_page": base_path + "?pg=" + str(pg + 1),
         "page_value": pg,
         "base_loop_count": (pg - 1) * 30,
+        "karma": karma,
     }
     return render(request, 'empo_news/main_page.html', context)
 
@@ -129,10 +133,18 @@ def submitted(request):
 
 def likes_submit(request, view, id, pg, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
+    if UserFields.objects.filter(user=contribution.user).count() == 0:
+        userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+                                minaway=180, delay=0)
+        userFields.save()
     if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user);
+        contribution.likes.remove(request.user)
+        UserFields.objects.filter(user=contribution.user).update(
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) - 1)
     else:
         contribution.likes.add(request.user)
+        UserFields.objects.filter(user=contribution.user).update(
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) + 1)
     contribution.points = contribution.total_likes()
     contribution.save()
     if pg == 1:
@@ -142,10 +154,18 @@ def likes_submit(request, view, id, pg, contribution_id):
 
 def likes(request, view, pg, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
+    if UserFields.objects.filter(user=contribution.user).count() == 0:
+        userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+                                minaway=180, delay=0)
+        userFields.save()
     if contribution.likes.filter(id=request.user.id).exists():
         contribution.likes.remove(request.user)
+        UserFields.objects.filter(user=contribution.user).update(
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) - 1)
     else:
         contribution.likes.add(request.user)
+        UserFields.objects.filter(user=contribution.user).update(
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) + 1)
     contribution.points = contribution.total_likes()
     contribution.save()
     if pg == 1:
@@ -155,10 +175,18 @@ def likes(request, view, pg, contribution_id):
 
 def likes_reply(request, contribution_id, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
+    if UserFields.objects.filter(user=comment.user).count() == 0:
+        userFields = UserFields(user=comment.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+                                minaway=180, delay=0)
+        userFields.save()
     if comment.likes.filter(id=request.user.id).exists():
         comment.likes.remove(request.user)
+        UserFields.objects.filter(user=comment.user).update(
+            karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', None) - 1)
     else:
         comment.likes.add(request.user)
+        UserFields.objects.filter(user=comment.user).update(
+            karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', None) + 1)
     comment.points = comment.total_likes()
     comment.save()
     return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
@@ -166,13 +194,40 @@ def likes_reply(request, contribution_id, comment_id):
 
 def likes_contribution(request, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
+    if UserFields.objects.filter(user=contribution.user).count() == 0:
+        userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+                                minaway=180, delay=0)
+        userFields.save()
     if contribution.likes.filter(id=request.user.id).exists():
         contribution.likes.remove(request.user)
+        UserFields.objects.filter(user=contribution.user).update(
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) - 1)
     else:
         contribution.likes.add(request.user)
+        UserFields.objects.filter(user=contribution.user).update(
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) + 1)
     contribution.points = contribution.total_likes()
     contribution.save()
     return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id))
+
+
+def likes_comment(request, comment_id, username):
+    contribution = get_object_or_404(Contribution, id=comment_id)
+    if UserFields.objects.filter(user=contribution.user).count() == 0:
+        userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+                                minaway=180, delay=0)
+        userFields.save()
+    if contribution.likes.filter(id=request.user.id).exists():
+        contribution.likes.remove(request.user)
+        UserFields.objects.filter(user=contribution.user).update(
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) - 1)
+    else:
+        contribution.likes.add(request.user)
+        UserFields.objects.filter(user=contribution.user).update(
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) + 1)
+    contribution.points = contribution.total_likes()
+    contribution.save()
+    return HttpResponseRedirect(reverse('empo_news:threads', kwargs={'username': username}))
 
 
 def hide(request, view, pg, contribution_id):
@@ -196,15 +251,8 @@ def logout(request):
     return redirect('/')
 
 
-def users_profile(request, username):
-    userFields = UserFields.objects.get(user=User.objects.get(username=username))
-    context = {
-        "userFields": userFields
-    }
-    return render(request, 'empo_news/users_profile.html', context)
-
-
 def profile(request, username):
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     userSelected = User.objects.get(username=username)
     if UserFields.objects.filter(user=userSelected).count() == 0:
         userFields = UserFields(user=userSelected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
@@ -243,7 +291,8 @@ def profile(request, username):
     context = {
         "form": form,
         "userSelected": userSelected,
-        "userFields": userFields
+        "userFields": userFields,
+        "karma": karma,
     }
     return render(request, 'empo_news/profile.html', context)
 
@@ -256,18 +305,20 @@ def increment_comments_number(contrib):
 
 
 def item(request):
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     contrib_id = int(request.GET.get('id', -1))
     if Comment.objects.filter(id=contrib_id).count() > 0:
         contrib = Comment.objects.get(id=contrib_id)
     else:
         contrib = Contribution.objects.get(id=contrib_id)
-    contrib_comments = Comment.objects.filter(contribution_id=contrib_id, parent__isnull=True)\
+    contrib_comments = Comment.objects.filter(contribution_id=contrib_id, parent__isnull=True) \
         .order_by('-publication_time')
 
     context = {
         "contribution": contrib,
         "comment_form": CommentForm(),
-        "contrib_comments": contrib_comments
+        "contrib_comments": contrib_comments,
+        "karma": karma,
     }
 
     if request.method == 'GET':
@@ -304,11 +355,13 @@ def item(request):
 
 
 def add_comment(request):
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     contrib_id = int(request.GET.get('id', -1))
     contrib = Contribution.objects.get(id=contrib_id)
     context = {
         "contribution": contrib,
-        "comment_form": CommentForm()
+        "comment_form": CommentForm(),
+        "karma": karma,
     }
 
     if request.method == 'GET':
@@ -349,13 +402,14 @@ def update_show(all_contributions, userid, border):
         i += 1
 
 
-
 def add_reply(request):
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     comment_id = int(request.GET.get('id', -1))
     comment = Comment.objects.get(id=comment_id)
     context = {
         "comment": comment,
-        "comment_form": CommentForm()
+        "comment_form": CommentForm(),
+        "karma": karma,
     }
 
     if request.method == 'GET':
@@ -368,8 +422,8 @@ def add_reply(request):
 
         if comment_form.is_valid():
             new_comment = Comment(user=request.user, contribution=comment.contribution, parent=comment,
-                              publication_time=datetime.today(),
-                              text=comment_form.cleaned_data['comment'])
+                                  publication_time=datetime.today(),
+                                  text=comment_form.cleaned_data['comment'])
             new_comment.save()
 
             increment_comments_number(comment)
@@ -382,11 +436,15 @@ def add_reply(request):
 
 
 def threads(request, username):
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    userFields = UserFields.objects.filter(user=request.user)
     userSelected = User.objects.get(username=username)
     commentsUser = Comment.objects.filter(user=userSelected)
     context = {
-        "userSelected":userSelected,
+        "userSelected": userSelected,
         "userComments": commentsUser,
+        "userFields": userFields,
+        "karma": karma,
     }
     return render(request, 'empo_news/user_comments.html', context)
 
@@ -395,13 +453,14 @@ def delete_comment(request, commentid):
     Comment.objects.filter(id=commentid).delete()
     comments = Comment.objects.filter(user=request.user)
     context = {
-        "userSelected":request.user,
+        "userSelected": request.user,
         "userComments": comments,
     }
     return render(request, 'empo_news/user_comments.html', context)
 
 
 def update_comment(request, commentid):
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
     if request.method == 'POST':
         form = EditCommentForm(request.POST)
         if form.is_valid():
@@ -414,45 +473,36 @@ def update_comment(request, commentid):
     context = {
         "comment": comment,
         "form": form,
+        "karma": karma,
     }
     return render(request, 'empo_news/edit_comment.html', context)
 
 
 def comments(request):
-    most_recent_list = Comment.objects.all().order_by('-publication_time')[:30]
-    more = len(Comment.objects.all()) > 30
+    karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('?')[0]
+    list_base = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_base = 0
+
+    most_recent_list = Comment.objects.all().order_by('-publication_time')[list_base:(pg * 30)]
+    more = len(Comment.objects.all()) > (pg * 30)
     for contribution in most_recent_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
+    userFields = UserFields.objects.filter(user=request.user)
     context = {
         "list": most_recent_list,
         "user": request.user,
         "path": "comments",
         "more": more,
-        "next_page": "empo_news:comments_pg",
-        "page_value": 1,
-        "next_page_value": 2,
-        "base_loop_count": 0,
-    }
-    return render(request, 'empo_news/comments.html', context)
-
-
-def comments_pg(request, pg):
-    if pg <= 1:
-        return HttpResponseRedirect(reverse('empo_news:comments'))
-    most_recent_list = Comment.objects.all().order_by('-publication_time')[((pg - 1) * 30) + 1:(pg * 30)]
-    more = len(Comment.objects.all()) > (pg * 30)
-    for contribution in most_recent_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
-        contribution.save()
-    context = {
-        "list": most_recent_list,
-        "user": request.user,
-        "path": "comments_pg",
-        "more": more,
-        "next_page": "empo_news:comments_pg",
+        "next_page": base_path + "?pg=" + str(pg + 1),
         "page_value": pg,
-        "next_page_value": pg + 1,
         "base_loop_count": (pg - 1) * 30,
+        "userFields": userFields,
+        "karma": karma,
     }
     return render(request, 'empo_news/comments.html', context)
