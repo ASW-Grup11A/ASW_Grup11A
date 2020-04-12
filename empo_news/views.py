@@ -44,9 +44,10 @@ def main_page(request):
     elif pg == 1:
         list_base = 0
 
-    update_show(Contribution.objects.order_by('-points'), request.user.id, pg * 30)
-    most_points_list = Contribution.objects.filter(show=True).order_by('-points')[list_base:(pg * 30)]
-    more = len(Contribution.objects.filter(show=True)) > (pg * 30)
+    contributions = Contribution.objects.exclude(title__isnull=True)
+    update_show(contributions.order_by('-points'), request.user.id, pg * 30)
+    most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
+    more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
@@ -71,9 +72,10 @@ def new_page(request):
     elif pg == 1:
         list_base = 0
 
-    update_show(Contribution.objects.order_by('publication_time'), request.user.id, pg * 30)
-    most_recent_list = Contribution.objects.filter(show=True).order_by('publication_time')[list_base:(pg * 30)]
-    more = len(Contribution.objects.filter(show=True)) > (pg * 30)
+    contributions = Contribution.objects.exclude(title__isnull=True)
+    update_show(contributions.order_by('publication_time'), request.user.id, pg * 30)
+    most_recent_list = contributions.filter(show=True).order_by('publication_time')[list_base:(pg * 30)]
+    more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_recent_list:
         contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
         contribution.save()
