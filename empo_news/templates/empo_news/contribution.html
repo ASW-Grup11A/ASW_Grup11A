@@ -14,7 +14,7 @@
         <div align="center">
             <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
                 <tr>
-                    <td bgcolor="#ff6600">
+                    <td bgcolor="#00ccff">
                         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
                             <tr>
                                 <td style="width:18px;padding-right:4px">
@@ -66,7 +66,7 @@
                                     </td>
                                     <td valign="top" class="votelinks" style="text-align: center;">
                                         {% if request.user == contribution.user %}
-                                            <span style="color: #ff6600; ">*</span>
+                                            <span style="color: #00ccff; ">*</span>
                                         {% elif contribution|is_contribution_liked:request.user.id %}
                                             <div class='votearrow' title='upvote' style="opacity: 0" ></div>
                                         {% else %}
@@ -208,7 +208,7 @@
                         <img src="{% static 'empo_news/images/s.gif' %}" height="10" width="0">
                         <table width="100%" cellspacing="0" cellpadding="1">
                             <tr>
-                                <td bgcolor="#ff6600"></td>
+                                <td bgcolor="#00ccff"></td>
                             </tr>
                         </table>
                         <br>
