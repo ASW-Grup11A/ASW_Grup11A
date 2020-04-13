@@ -35,7 +35,7 @@
                                         <a href={% url 'empo_news:not_implemented' %}>past</a> |
                                         <a href={% url 'empo_news:comments' %}>comments</a> |
                                         <a href={% url 'empo_news:ask_list' %}>ask</a> |
-                                        <a href={% url 'empo_news:not_implemented' %}>show</a> |
+                                        <a href={% url 'empo_news:show_list' %}>show</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>jobs</a> |
                                         {% if request.user.is_authenticated %}
                                             <a href={% url 'empo_news:submit' %}>submit</a>

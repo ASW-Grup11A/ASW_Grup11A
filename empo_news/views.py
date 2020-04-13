@@ -555,3 +555,36 @@ def ask_list(request):
         "karma": karma,
     }
     return render(request, 'empo_news/main_page.html', context)
+
+
+def show_list(request):
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('?')[0]
+    list_base = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_base = 0
+
+    contributions = Contribution.objects.filter(comment__isnull=True, url__isnull=True, title__startswith='Show EN: ')
+    update_show(contributions.order_by('-points'), request.user.id, pg * 30)
+    most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
+    more = len(contributions.filter(show=True)) > (pg * 30)
+    for contribution in most_points_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_points_list,
+        "user": request.user,
+        "path": "main_page",
+        "highlight": "show",
+        "more": more,
+        "next_page": base_path + "?pg=" + str(pg + 1),
+        "page_value": pg,
+        "base_loop_count": (pg - 1) * 30,
+        "karma": karma,
+    }
+    return render(request, 'empo_news/main_page.html', context)

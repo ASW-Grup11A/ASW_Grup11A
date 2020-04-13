@@ -4,6 +4,11 @@
 {% load humanize %}
     <td>
         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
+                {% if highlight == 'show' %}
+                    <a style="padding: 20px">Show ENs can be found via show in the top bar. To post one yourself,
+                        simply submit a story whose title begins with "Show EN: ".</a>
+                    <tr class="morespace" style="height:10px"></tr>
+                {% endif %}
                 {% for contribution in list.all %}
                     <tr class='athing' id='22677970'>
                         <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter|add:base_loop_count }}.</span></td>
