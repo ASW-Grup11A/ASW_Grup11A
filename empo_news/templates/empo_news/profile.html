@@ -122,6 +122,14 @@
                                 <tr>
                                     <td></td>
                                     <td>
+                                        <a href="{% url 'empo_news:submitted' %}?username={{ userSelected.username }}" >
+                                            <u>submissions</u>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
                                         <a href={% url 'empo_news:threads' userSelected.username %}>
                                             <u>comments</u>
                                         </a>
@@ -133,6 +141,19 @@
                                         <td>
                                             <a href={% url 'empo_news:hidden' userSelected.id%}>
                                                 <u>hidden</u>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <a href={% url 'empo_news:voted_submissions' %}>
+                                                <u>	upvoted submissions</u>
+                                            </a> /
+                                            <a href={% url 'empo_news:voted_comments' %}>
+                                                <u>	comments</u>
+                                            </a>
+                                                <i>  (private)</i>
                                             </a>
                                         </td>
                                     </tr>

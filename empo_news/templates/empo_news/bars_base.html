@@ -57,10 +57,22 @@
                                         {% else %}
                                             <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">submit</a>
                                         {% endif %}
+                                        {% if highlight == "hidden" %}
+                                            |
+                                            <span class="topsel" style="color: white">
+                                            hidden
+                                            </span>
+                                        {% endif %}
                                         {% if highlight == "submitted" %}
                                             |
                                             <span class="topsel" style="color: white">
                                             {{ submitted_id }}'s submissions
+                                            </span>
+                                        {% endif %}
+                                        {% if highlight == "voted_submissions" %}
+                                            |
+                                            <span class="topsel" style="color: white">
+                                            upvoted
                                             </span>
                                         {% endif %}
                                     </span>

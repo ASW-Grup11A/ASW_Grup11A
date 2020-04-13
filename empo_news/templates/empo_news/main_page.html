@@ -56,7 +56,7 @@
                             by <a href={% url 'empo_news:user_page' contribution.user.username %} class="hnuser">{{ contribution.user.username }}</a>
                             <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
                             <span id="unv_22677970"></span> |
-                               {% if not contribution|is_liked %}
+                               {% if not contribution|is_liked and request.user != contribution.user %}
                                    {%  csrf_token %}
                                    <a href={% url 'empo_news:likes' path page_value contribution.id %}>unvote</a> |
                                {% endif %}

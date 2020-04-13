@@ -26,9 +26,13 @@
                                             <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
                                         {% endif %}
                                         <a href={% url 'empo_news:not_implemented' %}>past</a> |
-                                        <span class="topsel">
+                                        {% if highlight == 'comments' %}
+                                            <span class="topsel">
+                                                <a href={% url 'empo_news:comments' %}>comments</a>
+                                            </span>
+                                        {% else %}
                                             <a href={% url 'empo_news:comments' %}>comments</a>
-                                        </span> |
+                                        {% endif %}|
                                         <a href={% url 'empo_news:ask_list' %}>ask</a> |
                                         <a href={% url 'empo_news:show_list' %}>show</a> |
                                         <a href={% url 'empo_news:not_implemented' %}>jobs</a> |
@@ -37,6 +41,13 @@
                                         {% else %}
                                             <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">submit</a>
                                         {% endif %}
+                                        {% if highlight == "voted_comments" %}
+                                            |
+                                            <span class="topsel" style="color: white">
+                                            upvoted
+                                            </span>
+                                        {% endif %}
+
                                     </span>
                                 </td>
                                 <td style="text-align:right;padding-right:4px;">

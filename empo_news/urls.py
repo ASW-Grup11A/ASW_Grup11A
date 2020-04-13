@@ -30,4 +30,6 @@ urlpatterns = [
     path('ask_list', views.ask_list, name='ask_list'),
     path('show_list', views.show_list, name='show_list'),
     path('hidden/<int:userid>', views.hidden, name='hidden'),
+    path('voted_submissions', views.voted_submissions, name='voted_submissions'),
+    path('voted_comments', views.voted_comments, name='voted_comments'),
 ]
