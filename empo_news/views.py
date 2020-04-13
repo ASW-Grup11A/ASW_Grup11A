@@ -546,7 +546,7 @@ def ask_list(request):
     context = {
         "list": most_points_list,
         "user": request.user,
-        "path": "ask",
+        "path": "ask_list",
         "highlight": "ask",
         "more": more,
         "next_page": base_path + "?pg=" + str(pg + 1),
@@ -579,7 +579,7 @@ def show_list(request):
     context = {
         "list": most_points_list,
         "user": request.user,
-        "path": "show",
+        "path": "show_list",
         "highlight": "show",
         "more": more,
         "next_page": base_path + "?pg=" + str(pg + 1),
