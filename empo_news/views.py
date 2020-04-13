@@ -546,7 +546,7 @@ def ask_list(request):
     context = {
         "list": most_points_list,
         "user": request.user,
-        "path": "main_page",
+        "path": "ask",
         "highlight": "ask",
         "more": more,
         "next_page": base_path + "?pg=" + str(pg + 1),
@@ -579,7 +579,7 @@ def show_list(request):
     context = {
         "list": most_points_list,
         "user": request.user,
-        "path": "main_page",
+        "path": "show",
         "highlight": "show",
         "more": more,
         "next_page": base_path + "?pg=" + str(pg + 1),
@@ -588,3 +588,65 @@ def show_list(request):
         "karma": karma,
     }
     return render(request, 'empo_news/main_page.html', context)
+
+
+def update_show_hidden(all_contributions, userid, border):
+    count_shown = 0
+    i = 0
+    length = len(all_contributions)
+    while count_shown < border and i < length:
+        contribution = all_contributions[i]
+        if contribution.hidden.filter(id=userid).exists():
+            contribution.show = True
+            count_shown += 1
+        else:
+            contribution.show = False
+        contribution.save()
+        i += 1
+
+
+def hidden(request, userid):
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('?')[0]
+    list_base = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_base = 0
+
+    selectedUser = User.objects.filter(id=userid).first()
+    contributions = Contribution.objects.filter(comment__isnull=True)
+    update_show_hidden(contributions.order_by('-points'), userid, pg * 30)
+    most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
+    more = len(contributions.filter(show=True)) > (pg * 30)
+    for contribution in most_points_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_points_list,
+        "user": request.user,
+        "path": "hidden",
+        "highlight": "hidden",
+        "more": more,
+        "next_page": base_path + "?pg=" + str(pg + 1),
+        "page_value": pg,
+        "base_loop_count": (pg - 1) * 30,
+        "karma": karma,
+        "selectedUser": selectedUser,
+    }
+    return render(request, 'empo_news/main_page.html', context)
+
+
+def unhide(request, view, pg, contribution_id, userid):
+    contribution = get_object_or_404(Contribution, id=contribution_id)
+    if contribution.hidden.filter(id=request.user.id).exists():
+        contribution.hidden.remove(request.user)
+    else:
+        contribution.hidden.add(request.user)
+    contribution.save()
+    if pg == 1:
+        return HttpResponseRedirect(reverse('empo_news:' + view, kwargs={'userid': userid}))
+    return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,), kwargs={'userid': userid},))

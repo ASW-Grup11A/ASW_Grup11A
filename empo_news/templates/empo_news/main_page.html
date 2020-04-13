@@ -63,7 +63,11 @@
 
                             {% if request.user.is_authenticated %}
                                 {%  csrf_token %}
-                                <a href={% url 'empo_news:hide' path page_value contribution.id %}>hide</a> |
+                                {% if contribution|is_hidden:selectedUser.id %}
+                                    <a href={% url 'empo_news:unhide' path page_value contribution.id selectedUser.id %}>un-hide</a> |
+                                {% else %}
+                                    <a href={% url 'empo_news:hide' path page_value contribution.id %}>hide</a> |
+                                {% endif %}
                             {% else %}
                                 <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">hide</a> |
                             {% endif %}
