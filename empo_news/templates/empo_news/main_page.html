@@ -62,7 +62,7 @@
                                {% endif %}
 
                             {% if request.user.is_authenticated %}
-                                {%  csrf_token %}
+                                {% csrf_token %}
                                 {% if contribution|is_hidden:selectedUser.id %}
                                     <a href={% url 'empo_news:unhide' path page_value contribution.id selectedUser.id %}>un-hide</a> |
                                 {% else %}
