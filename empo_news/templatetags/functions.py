@@ -44,3 +44,7 @@ def is_contribution_liked(contribution, user_id):
 def all_replies(comment):
     return comment.comment_set.all().order_by('-publication_time')
 
+
+@register.filter
+def is_hidden(contribution, user_id):
+    return contribution.hidden.filter(id=user_id).exists()

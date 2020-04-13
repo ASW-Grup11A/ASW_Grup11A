@@ -113,27 +113,30 @@
                                         <td valign="top">{{ form.delay.label_tag }}</td>
                                         <td>{{ form.delay }}</td>
                                     </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td>
-                                            <a href={% url 'empo_news:threads' userSelected.username %}>
-                                                <u>comments</u>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <td valign="top"><input type="submit" value="Update" name="update_button" style="margin-left: 0px; margin-top: 5px; margin-bottom: 10px"/></td>
+
                                 {% else %}
                                     <tr><td valign="top">about:</td>
                                         <td>{{ userFields.about }}</td>
                                     </tr>
+                                {% endif %}
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <a href={% url 'empo_news:threads' userSelected.username %}>
+                                            <u>comments</u>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% if userSelected == request.user %}
                                     <tr>
                                         <td></td>
                                         <td>
-                                            <a href={% url 'empo_news:threads' userSelected.username %}>
-                                                <u>comments</u>
+                                            <a href={% url 'empo_news:hidden' userSelected.id%}>
+                                                <u>hidden</u>
                                             </a>
                                         </td>
                                     </tr>
+                                    <td valign="top"><input type="submit" value="Update" name="update_button" style="margin-left: 0px; margin-top: 5px; margin-bottom: 10px"/></td>
                                 {% endif %}
                             </table>
                         </form>
