@@ -25,7 +25,7 @@
                                            <div class='votearrow' title='upvote' style="opacity: 0" ></div>
                                        {% endif %}
                                     {% else %}
-                                        <span style="color: #ff6600; ">*</span>
+                                        <span style="color: #00ccff; ">*</span>
                                     {% endif %}
                                 {% else %}
                                     <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
@@ -56,7 +56,7 @@
                             by <a href={% url 'empo_news:user_page' contribution.user.username %} class="hnuser">{{ contribution.user.username }}</a>
                             <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
                             <span id="unv_22677970"></span> |
-                               {% if not contribution|is_liked %}
+                               {% if not contribution|is_liked and request.user != contribution.user %}
                                    {%  csrf_token %}
                                    <a href={% url 'empo_news:likes' path page_value contribution.id %}>unvote</a> |
                                {% endif %}

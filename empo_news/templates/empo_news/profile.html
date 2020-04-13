@@ -10,7 +10,7 @@
         <div align="center">
             <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
                 <tr>
-                    <td bgcolor="#ff6600">
+                    <td bgcolor="#00ccff">
                         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
                             <tr>
                                 <td style="width:18px;padding-right:4px">
@@ -73,8 +73,8 @@
                             <table>
                                 <tr>
                                     <td valign="top">user:</td>
-                                    <td timestamp="1585069593">
-                                        <a href={% url 'empo_news:user_page' userSelected.username %}>{{ userSelected.username }}<font color="#3c963c"></font></a>
+                                    <td>
+                                        <a href={% url 'empo_news:user_page' userSelected.username %}>{{ userSelected.username }}</a>
                                     </td>
                                 </tr>
                                 <tr>
@@ -122,6 +122,14 @@
                                 <tr>
                                     <td></td>
                                     <td>
+                                        <a href="{% url 'empo_news:submitted' %}?username={{ userSelected.username }}" >
+                                            <u>submissions</u>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
                                         <a href={% url 'empo_news:threads' userSelected.username %}>
                                             <u>comments</u>
                                         </a>
@@ -133,6 +141,19 @@
                                         <td>
                                             <a href={% url 'empo_news:hidden' userSelected.id%}>
                                                 <u>hidden</u>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <a href={% url 'empo_news:voted_submissions' %}>
+                                                <u>	upvoted submissions</u>
+                                            </a> /
+                                            <a href={% url 'empo_news:voted_comments' %}>
+                                                <u>	comments</u>
+                                            </a>
+                                                <i>  (private)</i>
                                             </a>
                                         </td>
                                     </tr>

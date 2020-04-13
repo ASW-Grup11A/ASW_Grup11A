@@ -101,10 +101,13 @@ def new_page(request):
 
 
 def submitted(request):
-    user_id = request.GET.get('id', "")
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    user_id = request.GET.get('username', "")
     if not User.objects.filter(username=user_id).exists():
         return HttpResponse('No such user')
-    base_list = User.objects.get(username=user_id).contribution
+    base_list = User.objects.get(username=user_id).contribution.filter(comment__isnull=True)
 
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('&')[0]
@@ -131,6 +134,7 @@ def submitted(request):
         "next_page": base_path + "&pg=" + str(pg + 1),
         "page_value": pg,
         "base_loop_count": (pg - 1) * 30,
+        "karma": karma,
     }
     return render(request, 'empo_news/submitted.html', context)
 
@@ -515,6 +519,7 @@ def comments(request):
         "list": most_recent_list,
         "user": request.user,
         "path": "comments",
+        "highlight": "comments",
         "more": more,
         "next_page": base_path + "?pg=" + str(pg + 1),
         "page_value": pg,
@@ -649,4 +654,71 @@ def unhide(request, view, pg, contribution_id, userid):
     contribution.save()
     if pg == 1:
         return HttpResponseRedirect(reverse('empo_news:' + view, kwargs={'userid': userid}))
-    return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,), kwargs={'userid': userid},))
+    return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,), kwargs={'userid': userid}, ))
+
+
+def voted_submissions(request):
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('?')[0]
+    list_base = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_base = 0
+
+    contributions = Contribution.objects.filter(comment__isnull=True,
+                                                likes__username__contains=request.user.username).exclude(
+                                                                                                    user=request.user)
+    update_show(contributions.order_by('-points'), request.user.id, pg * 30)
+    most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
+    more = len(contributions.filter(show=True)) > (pg * 30)
+    for contribution in most_points_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_points_list,
+        "user": request.user,
+        "path": "voted_submissions",
+        "highlight": "voted_submissions",
+        "more": more,
+        "next_page": base_path + "?pg=" + str(pg + 1),
+        "page_value": pg,
+        "base_loop_count": (pg - 1) * 30,
+        "karma": karma,
+    }
+    return render(request, 'empo_news/main_page.html', context)
+
+
+def voted_comments(request):
+    karma = 0
+    if request.user.is_authenticated:
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+    pg = int(request.GET.get('pg', 1))
+    base_path = request.get_full_path().split('?')[0]
+    list_base = ((pg - 1) * 30) + 1
+    if pg < 1:
+        return HttpResponseRedirect(base_path)
+    elif pg == 1:
+        list_base = 0
+
+    comments = Comment.objects.filter(likes__username__contains=request.user.username).exclude(user=request.user)
+    most_recent_list = comments.order_by('-publication_time')[list_base:(pg * 30)]
+    more = len(comments) > (pg * 30)
+    for contribution in most_recent_list:
+        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.save()
+    context = {
+        "list": most_recent_list,
+        "user": request.user,
+        "path": "voted_comments",
+        "highlight": "voted_comments",
+        "more": more,
+        "next_page": base_path + "?pg=" + str(pg + 1),
+        "page_value": pg,
+        "base_loop_count": (pg - 1) * 30,
+        "karma": karma,
+    }
+    return render(request, 'empo_news/comments.html', context)
