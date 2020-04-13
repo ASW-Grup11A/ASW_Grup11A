@@ -48,4 +48,3 @@ def all_replies(comment):
 @register.filter
 def is_hidden(contribution, user_id):
     return contribution.hidden.filter(id=user_id).exists()
-
