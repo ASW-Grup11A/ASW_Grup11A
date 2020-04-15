@@ -202,7 +202,6 @@ def likes_reply(request, contribution_id, comment_id, path):
     return HttpResponseRedirect(reverse('empo_news:addreply') + '?id=' + str(comment_id))
 
 
-
 def likes_contribution(request, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
     if UserFields.objects.filter(user=contribution.user).count() == 0:
@@ -687,7 +686,7 @@ def voted_submissions(request):
 
     contributions = Contribution.objects.filter(comment__isnull=True,
                                                 likes__username__contains=request.user.username).exclude(
-                                                                                                    user=request.user)
+        user=request.user)
     update_show(contributions.order_by('-points'), request.user.id, pg * 30)
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
