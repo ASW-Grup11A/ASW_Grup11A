@@ -250,6 +250,16 @@ def hide(request, view, pg, contribution_id):
     return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,)))
 
 
+def hide_no_page(request, view, contribution_id):
+    contribution = get_object_or_404(Contribution, id=contribution_id)
+    if contribution.hidden.filter(id=request.user.id).exists():
+        contribution.hidden.remove(request.user)
+    else:
+        contribution.hidden.add(request.user)
+    contribution.save()
+    return HttpResponseRedirect(reverse('empo_news:' + view) + "?id=" + str(contribution_id))
+
+
 def not_implemented(request):
     return HttpResponse('View not yet implemented')
 
@@ -303,6 +313,7 @@ def profile(request, username):
         "userSelected": userSelected,
         "userFields": userFields,
         "karma": karma,
+        "notBottom": True,
     }
     return render(request, 'empo_news/profile.html', context)
 
@@ -463,6 +474,7 @@ def threads(request, username):
         "userComments": commentsUser,
         "userFields": userFields,
         "karma": karma,
+        "highlight": "user_comments",
     }
     return render(request, 'empo_news/user_comments.html', context)
 
@@ -473,6 +485,7 @@ def delete_comment(request, commentid):
     context = {
         "userSelected": request.user,
         "userComments": comments,
+        "highlight": "user_comments",
     }
     return render(request, 'empo_news/user_comments.html', context)
 

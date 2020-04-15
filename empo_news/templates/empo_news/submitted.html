@@ -10,7 +10,7 @@
                             <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter|add:base_loop_count }}.</span></td>
                             <td valign="top" class="votelinks">
                                <div align="center">
-                                   <span style="color:#00ccff; margin-left:2px; margin-right: 4px">*</span>
+                                   <span style="color:#ff0080; margin-left:2px; margin-right: 4px">*</span>
                                </div>
                             </td>
                             <td class="title">
@@ -32,9 +32,8 @@
                             <td class="subtext">
                                <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
                                 by <a href={% url 'empo_news:user_page' contribution.user.username %} class="hnuser">{{ contribution.user.username }}</a>
-                                <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span> |
-                                <a href={% url 'empo_news:not_implemented' %} > past </a> |
-                                <a href={% url 'empo_news:not_implemented' %} > web </a>
+                                <span class="age"><a>{{ contribution.publication_time|naturaltime }}</a></span> |
+                                <a href= {{"http://www.google.com/search?q="|add:contribution.title|google_url}} > web </a>
                             </td>
                         </tr>
                         <tr class="spacer" style="height:5px"></tr>
@@ -84,15 +83,14 @@
                         <td class="subtext">
                            <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
                             by <a href={% url 'empo_news:user_page' contribution.user.username %} >{{ contribution.user.username }}</a> on
-                            <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
-                            <span id="unv_22677970"></span> |
+                            <span class="age">{{ contribution.publication_time|naturaltime }}</span>
+                            <span></span> |
 
                                {% if not contribution|is_liked %}
                                    {%  csrf_token %}
                                    <a href={% url 'empo_news:likes_submit' path submitted_id page_value contribution.id %}>unvote</a> |
                                {% endif %}
-                            <a href={% url 'empo_news:not_implemented' %} > past </a> |
-                            <a href={% url 'empo_news:not_implemented' %} > web </a> |
+                            <a href={{"http://www.google.com/search?q="|add:contribution.title|google_url}} > web </a> |
                             <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}&nbsp;comments</a>
                         </td>
                     </tr>
