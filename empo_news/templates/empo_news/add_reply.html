@@ -54,7 +54,7 @@
                                             {% if comment.user != request.user %}
                                                 {%  csrf_token %}
                                                {% if not comment|is_contribution_liked:request.user.id %}
-                                                      <a href={% url 'empo_news:likes_contribution' comment.id %}>
+                                                      <a href={% url 'empo_news:likes_reply' comment.contribution.id comment.id %}>
                                                          <div class='votearrow' title='upvote'></div>
                                                       </a>
                                                {% else %}
@@ -82,7 +82,11 @@
                                                     {{ comment.publication_time|naturaltime }}
                                                 </a>
                                             </span>
-                                            <span id="unv_{{ comment.id }}"></span>
+                                            <span id="unv_{{ comment.id }}">
+                                                {% if comment|is_contribution_liked:request.user.id %}
+                                                      | <a href={% url 'empo_news:likes_reply' comment.contribution.id comment.id %}>unvote</a>
+                                               {% endif %}
+                                            </span>
                                             <span class="par">
                                                  |
                                                 {% if comment.parent.id == None %}
