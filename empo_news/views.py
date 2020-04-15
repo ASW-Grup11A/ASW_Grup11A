@@ -181,7 +181,7 @@ def likes(request, view, pg, contribution_id):
     return HttpResponseRedirect(reverse('empo_news:' + view) + '?pg=' + str(pg))
 
 
-def likes_reply(request, contribution_id, comment_id):
+def likes_reply(request, contribution_id, comment_id, path):
     comment = get_object_or_404(Comment, id=comment_id)
     if UserFields.objects.filter(user=comment.user).count() == 0:
         userFields = UserFields(user=comment.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
@@ -197,7 +197,10 @@ def likes_reply(request, contribution_id, comment_id):
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', None) + 1)
     comment.points = comment.total_likes()
     comment.save()
-    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
+    if path == "item":
+        return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
+    return HttpResponseRedirect(reverse('empo_news:addreply') + '?id=' + str(comment_id))
+
 
 
 def likes_contribution(request, contribution_id):
