@@ -1,0 +1,85 @@
+{% extends "./bars_base.html" %}
+{% load functions %}
+{% block main_body %}
+{% load humanize %}
+<html op="news">
+   <head>
+       {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'empo_news/main_page.css' %}">
+        <title>Empo News</title>
+   </head>
+   <body>
+        <td>
+            <table border='0'>
+                {% for comment in userComments.all %}
+                    <tr>
+                        <td valign="top" class="votelinks" style="text-align: center;">
+                            {% if request.user == comment.user %}
+                                <span style="color: #ff0080; ">*</span>
+                            {% elif comment|is_contribution_liked:request.user.id %}
+                                <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                            {% else %}
+                                <a id='up_{{ comment.id }}' href={% url 'empo_news:likes_comment' comment.id userSelected.username %}>
+                                    <div class='votearrow' title='upvote'></div>
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td class="default">
+                            <div style="margin-top:2px; margin-bottom:-10px;">
+                                <span class="comhead">
+                                    <span class="score">
+                                        {{ comment.points }}
+                                        {% if comment.points == 1 %}
+                                            point
+                                        {% else %}
+                                            points
+                                        {% endif %}
+                                         by
+                                    </span>
+                                    <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
+                                    {{ comment.publication_time|naturaltime }}
+                                    <span id="unv_{{ comment.id }}">
+                                        {% if comment|is_contribution_liked:request.user.id %}
+                                             |
+                                            <a id="unv_{{ comment.id }}" href={% url 'empo_news:likes_comment' comment.id userSelected.username %}>
+                                                unvote
+                                            </a>
+                                        {% endif %}
+                                    </span>
+                                    | <span class="par">
+                                    {% if comment.parent == null %}
+                                        <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}">parent</a></span>
+                                    {% else %}
+                                        <a href="{% url 'empo_news:item'%}?id={{ comment.parent.id }}">parent</a></span>
+                                    {% endif %}
+                                    <span> | on:
+                                        <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}" >{{ comment.contribution.title }}</a>
+                                    </span>
+                                </span>
+                            </div>
+                            <br>
+                                <div class="comment">
+                                    <span class="commtext c00">{{ comment.text }}</span>
+                                    {% if not userSelected == request.user and request.user.is_authenticated %}
+                                        <div class='reply'>        <p>
+                                            <font size="1">
+                                                <u><a href="{% url 'empo_news:item' %}?id={{ comment.id }}">reply</a></u>
+                                            </font>
+                                        </div>
+                                    {% elif not request.user.is_authenticated%}
+                                        <div class='reply'>        <p>
+                                            <font size="1">
+                                                <u><a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">reply</a></u>
+                                            </font>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                        </td>
+                    </tr>
+                    <tr class="morespace" style="height:10px"></tr>
+                {% endfor %}
+            </table>
+        </td>
+   </body>
+</html>
+{% endblock %}

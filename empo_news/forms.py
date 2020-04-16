@@ -18,12 +18,14 @@ class SubmitForm(forms.Form):
             raise forms.ValidationError('Submissions can\'t have both urls and text, so you need to pick one. '
                                         'If you keep the url, you can always post your text as a comment in the '
                                         'thread.')
+        if not url and not text:
+            raise forms.ValidationError('Sorry, either url or text fields must be filled.')
+
         return cleaned_data
 
     @staticmethod
     def valid_url(url):
         return "." in url
-
 
 
 class CommentForm(forms.Form):
@@ -36,8 +38,10 @@ class CommentForm(forms.Form):
 
         if not comment:
             raise forms.ValidationError('Please try again.')
+
+        return cleaned_data
         
-        
+     
 class UserUpdateForm(forms.Form):
     about = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "cols": 56}), label='about', required=False)
     email = forms.CharField(widget=forms.TextInput(attrs={"size": 40}), max_length=80, min_length=1, label='email',
@@ -51,6 +55,14 @@ class UserUpdateForm(forms.Form):
                               required=True)
     delay = forms.CharField(widget=forms.TextInput(attrs={"size": 10}), max_length=80, min_length=0, label='delay',
                             required=True)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data
+
+
+class EditCommentForm(forms.Form):
+    text = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "cols": 56}), label='text', required=False)
 
     def clean(self):
         cleaned_data = super().clean()

@@ -42,17 +42,19 @@
                 <tr id="pagespace" title="Add comment" style="height: 10px"></tr>
                 <tr>
                     <td>
-                        Please try again.
-                        <br><br>
+                        {% if form.errors %}
+                            {{ form.non_field_errors }}
+                            <br><br>
+                        {% endif %}
                         <table class="fatitem" border="0">
-                            <tr class='athing' id='{{ contribution.id }}'>
+                            <tr class='athing' id='{{ comment.id }}'>
                                 <td valign="top" class="votelinks">
                                    <div>
                                         {% if request.user.is_authenticated %}
-                                            {% if contribution.user != request.user %}
+                                            {% if comment.user != request.user %}
                                                 {%  csrf_token %}
-                                               {% if contribution.is_liked %}
-                                                      <a id='up_22677970' href={% url 'empo_news:likes_contribution' contribution.id %}>
+                                               {% if not comment|is_contribution_liked:request.user.id %}
+                                                      <a href={% url 'empo_news:likes_reply' comment.contribution.id comment.id "reply" %}>
                                                          <div class='votearrow' title='upvote'></div>
                                                       </a>
                                                {% else %}
@@ -69,67 +71,63 @@
                                         {% endif %}
                                    </div>
                                 </td>
-                                <td class="title">
-                                    {% if contribution|get_class == "url" %}
-                                        <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
-                                    {% else %}
-                                        <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
-                                    {% endif %}
-
-                                    <span class="sitebit comhead">
-                                        {% if contribution|get_class == "url" %}
-                                            (<span class="sitestr">{{ contribution.url }}</span>)
-                                        {% endif %}
-                                    </span>
+                                <td class="default">
+                                    <div style="margin-top: 2px; margin-bottom: -10px">
+                                        <span class="comhead">
+                                            <a href="{% url 'empo_news:user_page' comment.user.username %}">
+                                                {{ comment.user.username }}
+                                            </a>
+                                            <span class="age">
+                                                <a href="{% url 'empo_news:item' %}?id={{ comment.id }}">
+                                                    {{ comment.publication_time|naturaltime }}
+                                                </a>
+                                            </span>
+                                            <span id="unv_{{ comment.id }}">
+                                                {% if comment|is_contribution_liked:request.user.id and comment.user != request.user %}
+                                                      | <a href={% url 'empo_news:likes_reply' comment.contribution.id comment.id "reply" %}>unvote</a>
+                                               {% endif %}
+                                            </span>
+                                            <span class="par">
+                                                 |
+                                                {% if comment.parent.id == None %}
+                                                    <a href="{% url 'empo_news:item' %}?id={{ comment.contribution.id }}">
+                                                        parent
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{% url 'empo_news:item' %}?id={{ comment.parent.id }}">
+                                                        parent
+                                                    </a>
+                                                {% endif %}
+                                            </span>
+                                            <span class="storyon">
+                                                 | on:
+                                                <a href="{% url 'empo_news:item' %}?id={{ comment.contribution.id }}">
+                                                    {{ comment.contribution|short_title }}
+                                                </a>
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <br>
+                                    <div class="comment">
+                                        <span class="commtext c00">
+                                            {{ comment.text }}
+                                        </span>
+                                        <div class="reply"></div>
+                                    </div>
                                 </td>
                             </tr>
-                            <tr>
-                                <td colspan="1"></td>
-                                <td class="subtext">
-                                    <span class="score" id="score_{{ contribution.id }}">
-                                        {{contribution.points}}
-                                        {% if contribution.points == 1 %}
-                                            point
-                                        {% else %}
-                                            points
-                                        {% endif %}
-                                         by
-                                    </span>
-                                    <a href="{% url 'empo_news:user_page' contribution.user.username %}" class="hnuser">{{contribution.user.username}}</a>
-                                    <span class="age">
-                                        {{ contribution.publication_time|naturaltime }}
-                                    </span>
-                                        <span id="unv_{{ contribution.id }}"></span>
-                                        | <a href={% url 'empo_news:hide_no_page' 'add_coment' contribution.id %}>hide</a>
-                                        {% if contribution|get_class == "url" %}
-                                            | <a href={{"http://www.google.com/search?q="|add:contribution.title|google_url}}>web</a>
-                                        {% endif %}
-                                        | <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}
-                                            {% if contribution.comments == 1 %}
-                                                comment
-                                            {% else %}
-                                                comments
-                                            {% endif %}
-                                        </a>
-                                </td>
-                            </tr>
-                            <tr style="height:2px"></tr>
-                            <tr>
-                                <td colspan="1"></td>
-                                <td>{{ contribution.text }}</td>
-                            </tr>
-                            <tr style="height:10px"></tr>
+                            <tr style="height: 10px"></tr>
                             <tr>
                                 <td colspan="1"></td>
                                 <td>
                                     {% block content %}
                                     <form method="post">
                                         {% csrf_token %}
-                                        <input type="hidden" name="parent" value="{{ contribution.id }}">
-                                        <input type="hidden" name="goto" value="item?id={{ contribution.id }}">
+                                        <input type="hidden" name="parent" value="{{ comment.id }}">
+                                        <input type="hidden" name="goto" value="item?id={{ comment.contribution.id }}#{{ comment.id }}">
                                         {{ comment_form.comment }}
                                     <br><br>
-                                        <input type="submit" value="add comment">
+                                        <input type="submit" value="reply">
                                     </form>
                                     {% endblock %}
                                 </td>
