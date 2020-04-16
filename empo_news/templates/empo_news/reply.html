@@ -10,19 +10,24 @@
                         <img src="{% static 'empo_news/images/s.gif' %}" height="1" width="{{ indent }}">
                     </td>
                     <td valign="top" class="votelinks" style="text-align: center;">
-                        {% if request.user == comment.user %}
-                            <span style="color: #ff0080; ">*</span>
-                        {% elif comment|is_contribution_liked:request.user.id %}
-                            <div class='votearrow' title='upvote' style="opacity: 0" ></div>
-                        {% else %}
-                            <a id='up_{{ comment.id }}' href={% url 'empo_news:likes_reply' comment.contribution.id comment.id "item" %}>
-                                <div class='votearrow' title='upvote'></div>
-                            </a>
+                        {% if not comment|is_hidden:request.user.id %}
+                            {% if request.user == comment.user %}
+                                <span style="color: #ff0080; ">*</span>
+                            {% elif comment|is_contribution_liked:request.user.id %}
+                                <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                            {% else %}
+                                <a id='up_{{ comment.id }}' href={% url 'empo_news:likes_reply' comment.contribution.id comment.id "item" %}>
+                                    <div class='votearrow' title='upvote'></div>
+                                </a>
+                            {% endif %}
                         {% endif %}
                     </td>
                     <td class="default">
                         <div>
                             <span class="comhead">
+                                {% if request.user == comment.user %}
+                                    {{ comment.points }} points
+                                {% endif %}
                                 <a href="{% url 'empo_news:user_page' comment.user.username %}" class="hnuser">{{comment.user.username}}</a>
                                 <span class="age">
                                     <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_time|naturaltime}}</a>
@@ -36,27 +41,39 @@
                                     {% endif %}
                                 </span>
                                 <span class="par"></span>
+                                <a class="togg" href="{% url 'empo_news:collapse' comment.contribution.id comment.id %}">
+                                    {% if not comment|is_hidden:request.user.id %}
+                                        [-]
+                                    {% else %}
+                                        [+{{ comment.comments|add:+1 }}]
+                                    {% endif %}
+                                </a>
                                 <span class='storyon'></span>
                             </span>
                         </div>
-                        <div class="comment">
-                            <span class="commtext c00">
-                                {{ comment.text }}
-                                <div class='reply'>
-                                    <p>
-                                        <span style="font-size: 7pt; ">
-                                            <u><a href="{% url 'empo_news:addreply' %}?id={{ comment.id }}">reply</a></u>
-                                        </span>
-                                    </p>
-                                </div>
-                            </span>
-                        </div>
+                        {% if not comment|is_hidden:request.user.id %}
+                            <div class="comment">
+                                <span class="commtext c00">
+                                    {{ comment.text }}
+                                    {% if request.user != comment.user %}
+                                        <div class='reply'>
+                                            <p>
+                                                <span style="font-size: 7pt; ">
+                                                    <u><a href="{% url 'empo_news:addreply' %}?id={{ comment.id }}">reply</a></u>
+                                                </span>
+                                            </p>
+                                        </div>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
                     </td>
                 </tr>
             </table>
         </td>
     </tr>
-    {% if comment|all_replies|length %}
+    {% if not comment|is_hidden:request.user.id and comment|all_replies|length %}
         {% include "empo_news/reply.html" with comments=comment|all_replies indent=indent|add:40 %}
     {% endif %}
 {% endfor %}
+

@@ -127,30 +127,32 @@
                         </td>
                     </tr>
                 {% endif %}
-                <tr style="height:10px"></tr>
-                <tr>
-                    <td colspan="2"></td>
-                    <td>
-                        {% block content %}
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="parent" value="{{ contribution.id }}">
-                            {% if contribution|get_type == "Contribution" %}
-                                <input type="hidden" name="goto" value="item?id={{ contribution.id }}">
-                            {% else %}
-                                <input type="hidden" name="goto" value="item?id={{ contribution.contribution.id }}#{{ contribution.id }}">
-                            {% endif %}
-                            {{ comment_form.comment }}
-                            <br><br>
-                            {% if contribution|get_type == "Contribution" %}
-                                <input type="submit" value="add comment">
-                            {% else %}
-                                <input type="submit" value="reply">
-                            {% endif %}
-                        </form>
-                        {% endblock %}
-                    </td>
-                </tr>
+                {% if request.user != contribution.user %}
+                    <tr style="height:10px"></tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td>
+                            {% block content %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="parent" value="{{ contribution.id }}">
+                                {% if contribution|get_type == "Contribution" %}
+                                    <input type="hidden" name="goto" value="item?id={{ contribution.id }}">
+                                {% else %}
+                                    <input type="hidden" name="goto" value="item?id={{ contribution.contribution.id }}#{{ contribution.id }}">
+                                {% endif %}
+                                {{ comment_form.comment }}
+                                <br><br>
+                                {% if contribution|get_type == "Contribution" %}
+                                    <input type="submit" value="add comment">
+                                {% else %}
+                                    <input type="submit" value="reply">
+                                {% endif %}
+                            </form>
+                            {% endblock %}
+                        </td>
+                    </tr>
+                {% endif %}
             </table>
             <br><br>
             <table border="0" class='comment-tree'>

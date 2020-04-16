@@ -33,4 +33,5 @@ urlpatterns = [
     path('hidden/<int:userid>', views.hidden, name='hidden'),
     path('voted_submissions', views.voted_submissions, name='voted_submissions'),
     path('voted_comments', views.voted_comments, name='voted_comments'),
+    path('collapse/<int:contribution_id>/<int:comment_id>', views.collapse, name='collapse'),
 ]

@@ -241,25 +241,30 @@ def likes_comment(request, comment_id, username):
 
 
 def hide(request, view, pg, contribution_id):
-    contribution = get_object_or_404(Contribution, id=contribution_id)
-    if contribution.hidden.filter(id=request.user.id).exists():
-        contribution.hidden.remove(request.user)
-    else:
-        contribution.hidden.add(request.user)
-    contribution.save()
+    hide_for_user(request, contribution_id)
     if pg == 1:
         return HttpResponseRedirect(reverse('empo_news:' + view))
     return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,)))
 
 
 def hide_no_page(request, view, contribution_id):
+    hide_for_user(request, contribution_id)
+    return HttpResponseRedirect(reverse('empo_news:' + view) + "?id=" + str(contribution_id))
+
+
+def hide_for_user(request, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
     if contribution.hidden.filter(id=request.user.id).exists():
         contribution.hidden.remove(request.user)
     else:
         contribution.hidden.add(request.user)
     contribution.save()
-    return HttpResponseRedirect(reverse('empo_news:' + view) + "?id=" + str(contribution_id))
+
+
+def collapse(request, contribution_id, comment_id):
+    hide_for_user(request, comment_id)
+    print(str(contribution_id) + ' ' + str(comment_id))
+    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
 
 
 def not_implemented(request):
