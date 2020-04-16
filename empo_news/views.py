@@ -38,7 +38,7 @@ def submit(request):
 def main_page(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -70,7 +70,7 @@ def main_page(request):
 def new_page(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -103,7 +103,7 @@ def new_page(request):
 def submitted(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     user_id = request.GET.get('username', "")
     if not User.objects.filter(username=user_id).exists():
         return HttpResponse('No such user')
@@ -148,11 +148,11 @@ def likes_submit(request, view, id, pg, contribution_id):
     if contribution.likes.filter(id=request.user.id).exists():
         contribution.likes.remove(request.user)
         UserFields.objects.filter(user=contribution.user).update(
-            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) - 1)
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.likes.add(request.user)
         UserFields.objects.filter(user=contribution.user).update(
-            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) + 1)
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
     contribution.save()
     if pg == 1:
@@ -169,11 +169,11 @@ def likes(request, view, pg, contribution_id):
     if contribution.likes.filter(id=request.user.id).exists():
         contribution.likes.remove(request.user)
         UserFields.objects.filter(user=contribution.user).update(
-            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) - 1)
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.likes.add(request.user)
         UserFields.objects.filter(user=contribution.user).update(
-            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) + 1)
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
     contribution.save()
     if pg == 1:
@@ -190,11 +190,11 @@ def likes_reply(request, contribution_id, comment_id, path):
     if comment.likes.filter(id=request.user.id).exists():
         comment.likes.remove(request.user)
         UserFields.objects.filter(user=comment.user).update(
-            karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', None) - 1)
+            karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) - 1)
     else:
         comment.likes.add(request.user)
         UserFields.objects.filter(user=comment.user).update(
-            karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', None) + 1)
+            karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) + 1)
     comment.points = comment.total_likes()
     comment.save()
     if path == "item":
@@ -211,11 +211,11 @@ def likes_contribution(request, contribution_id):
     if contribution.likes.filter(id=request.user.id).exists():
         contribution.likes.remove(request.user)
         UserFields.objects.filter(user=contribution.user).update(
-            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) - 1)
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.likes.add(request.user)
         UserFields.objects.filter(user=contribution.user).update(
-            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) + 1)
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
     contribution.save()
     return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id))
@@ -230,11 +230,11 @@ def likes_comment(request, comment_id, username):
     if contribution.likes.filter(id=request.user.id).exists():
         contribution.likes.remove(request.user)
         UserFields.objects.filter(user=contribution.user).update(
-            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) - 1)
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.likes.add(request.user)
         UserFields.objects.filter(user=contribution.user).update(
-            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', None) + 1)
+            karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
     contribution.save()
     return HttpResponseRedirect(reverse('empo_news:threads', kwargs={'username': username}))
@@ -274,7 +274,7 @@ def logout(request):
 def profile(request, username):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     userSelected = User.objects.get(username=username)
     if UserFields.objects.filter(user=userSelected).count() == 0:
         userFields = UserFields(user=userSelected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
@@ -330,7 +330,7 @@ def increment_comments_number(contrib):
 def item(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     contrib_id = int(request.GET.get('id', -1))
     if Comment.objects.filter(id=contrib_id).count() > 0:
         contrib = Comment.objects.get(id=contrib_id)
@@ -382,7 +382,7 @@ def item(request):
 def add_comment(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     contrib_id = int(request.GET.get('id', -1))
     contrib = Contribution.objects.get(id=contrib_id)
     context = {
@@ -432,7 +432,7 @@ def update_show(all_contributions, userid, border):
 def add_reply(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     comment_id = int(request.GET.get('id', -1))
     comment = Comment.objects.get(id=comment_id)
     context = {
@@ -467,7 +467,7 @@ def add_reply(request):
 def threads(request, username):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     userFields = UserFields.objects.filter(user=request.user)
     userSelected = User.objects.get(username=username)
     commentsUser = Comment.objects.filter(user=userSelected)
@@ -484,7 +484,7 @@ def threads(request, username):
 def comments(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -515,7 +515,7 @@ def comments(request):
 def ask_list(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -548,7 +548,7 @@ def ask_list(request):
 def show_list(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -596,7 +596,7 @@ def update_show_hidden(all_contributions, userid, border):
 def hidden(request, userid):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -643,7 +643,7 @@ def unhide(request, view, pg, contribution_id, userid):
 def voted_submissions(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
@@ -678,7 +678,7 @@ def voted_submissions(request):
 def voted_comments(request):
     karma = 0
     if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
+        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     pg = int(request.GET.get('pg', 1))
     base_path = request.get_full_path().split('?')[0]
     list_base = ((pg - 1) * 30) + 1
