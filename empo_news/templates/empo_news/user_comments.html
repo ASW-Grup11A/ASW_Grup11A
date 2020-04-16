@@ -27,8 +27,16 @@
                         <td class="default">
                             <div style="margin-top:2px; margin-bottom:-10px;">
                                 <span class="comhead">
-                                    <span class="score">{{ comment.points }} points </span>
-                                    by <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
+                                    <span class="score">
+                                        {{ comment.points }}
+                                        {% if comment.points == 1 %}
+                                            point
+                                        {% else %}
+                                            points
+                                        {% endif %}
+                                         by
+                                    </span>
+                                    <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
                                     {{ comment.publication_time|naturaltime }}
                                     <span id="unv_{{ comment.id }}">
                                         {% if comment|is_contribution_liked:request.user.id %}

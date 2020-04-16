@@ -38,7 +38,15 @@
                             <div style="margin-top:2px; margin-bottom:-10px;">
                                 <span class="comhead">
                                     {% if request.user == comment.user %}
-                                        <span class="score">{{ comment.points }} points by </span>
+                                        <span class="score">
+                                            {{ comment.points }}
+                                            {% if comment.points == 1 %}
+                                                point
+                                            {% else %}
+                                                points
+                                            {% endif %}
+                                             by
+                                        </span>
                                     {% endif %}
                                     <a href={% url 'empo_news:user_page' comment.user.username %}>{{ comment.user.username }}</a>
                                     {{ comment.publication_time|naturaltime }} |

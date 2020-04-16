@@ -26,7 +26,13 @@
                         <div>
                             <span class="comhead">
                                 {% if request.user == comment.user %}
-                                    {{ comment.points }} points
+                                    {{ comment.points }}
+                                    {% if comment.points == 1 %}
+                                        point
+                                    {% else %}
+                                        points
+                                    {% endif %}
+                                     by
                                 {% endif %}
                                 <a href="{% url 'empo_news:user_page' comment.user.username %}" class="hnuser">{{comment.user.username}}</a>
                                 <span class="age">

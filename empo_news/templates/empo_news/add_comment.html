@@ -84,10 +84,18 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2"></td>
+                                <td colspan="1"></td>
                                 <td class="subtext">
-                                    <span class="score" id="score_{{ contribution.id }}">{{contribution.points}} points</span>
-                                        by <a href="{% url 'empo_news:user_page' contribution.user.username %}" class="hnuser">{{contribution.user.username}}</a>
+                                    <span class="score" id="score_{{ contribution.id }}">
+                                        {{contribution.points}}
+                                        {% if contribution.points == 1 %}
+                                            point
+                                        {% else %}
+                                            points
+                                        {% endif %}
+                                         by
+                                    </span>
+                                    <a href="{% url 'empo_news:user_page' contribution.user.username %}" class="hnuser">{{contribution.user.username}}</a>
                                     <span class="age">
                                         {{ contribution.publication_time|naturaltime }}
                                     </span>
@@ -103,12 +111,12 @@
                             </tr>
                             <tr style="height:2px"></tr>
                             <tr>
-                                <td colspan="2"></td>
+                                <td colspan="1"></td>
                                 <td>{{ contribution.text }}</td>
                             </tr>
                             <tr style="height:10px"></tr>
                             <tr>
-                                <td colspan="2"></td>
+                                <td colspan="1"></td>
                                 <td>
                                     {% block content %}
                                     <form method="post">
