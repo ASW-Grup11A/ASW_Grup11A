@@ -352,6 +352,11 @@ def item(request):
         except Contribution.DoesNotExist:
             return HttpResponse('No such item.')
     elif request.method == 'POST':
+        if not request.user.is_authenticated:
+            href = "{% url 'social:begin' 'google-oauth2' %}?next={% url 'empo_news:addreply' %}?id={{ comment.id }}"
+            return HttpResponseRedirect(
+                reverse('social:begin', args={'google-oauth2', }) + '?next=' + reverse('empo_news:item')
+                + '?id=' + str(contrib_id))
         comment_form = CommentForm(request.POST)
 
         if comment_form.is_valid():
