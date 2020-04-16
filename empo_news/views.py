@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm, EditCommentForm
+from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 
 
@@ -484,38 +484,6 @@ def threads(request, username):
         "highlight": "user_comments",
     }
     return render(request, 'empo_news/user_comments.html', context)
-
-
-def delete_comment(request, commentid):
-    Comment.objects.filter(id=commentid).delete()
-    comments = Comment.objects.filter(user=request.user)
-    context = {
-        "userSelected": request.user,
-        "userComments": comments,
-        "highlight": "user_comments",
-    }
-    return render(request, 'empo_news/user_comments.html', context)
-
-
-def update_comment(request, commentid):
-    karma = 0
-    if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
-    if request.method == 'POST':
-        form = EditCommentForm(request.POST)
-        if form.is_valid():
-            Comment.objects.filter(id=commentid).update(text=form.cleaned_data['text'])
-
-    comment = Comment.objects.get(id=commentid)
-    form = EditCommentForm(
-        initial={'text': comment.text})
-
-    context = {
-        "comment": comment,
-        "form": form,
-        "karma": karma,
-    }
-    return render(request, 'empo_news/edit_comment.html', context)
 
 
 def comments(request):

@@ -52,10 +52,6 @@
                                     {% else %}
                                         <a href="{% url 'empo_news:item'%}?id={{ comment.parent.id }}">parent</a></span>
                                     {% endif %}
-                                    {% if userSelected == request.user %}
-                                        | <a href={% url 'empo_news:update_comment' comment.id %}>edit</a>
-                                        | <a href={% url 'empo_news:delete_comment' comment.id %}>delete</a>
-                                    {% endif %}
                                     <span> | on:
                                         <a href="{% url 'empo_news:item'%}?id={{ comment.contribution.id }}" >{{ comment.contribution.title }}</a>
                                     </span>
