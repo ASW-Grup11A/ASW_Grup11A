@@ -10,7 +10,7 @@
                     <tr class="morespace" style="height:10px"></tr>
                 {% endif %}
                 {% for contribution in list.all %}
-                    <tr class='athing' id='22677970'>
+                    <tr class='athing' id='{{ contribution.id }}'>
                         <td align="right" valign="top" class="title"><span class="rank">{{ forloop.counter|add:base_loop_count }}.</span></td>
                         <td valign="top" class="votelinks">
                            <div align="center">
@@ -18,7 +18,7 @@
                                     {% if contribution.user != request.user %}
                                         {%  csrf_token %}
                                        {% if contribution|is_liked %}
-                                              <a id='up_22677970' href={% url 'empo_news:likes' path page_value contribution.id %}>
+                                              <a id='up_{{ contribution.id }}' href={% url 'empo_news:likes' path page_value contribution.id %}>
                                                  <div class='votearrow' title='upvote'></div>
                                               </a>
                                        {% else %}
@@ -28,7 +28,7 @@
                                         <span style="color: #ff0080; ">*</span>
                                     {% endif %}
                                 {% else %}
-                                    <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
+                                    <a id='up_{{ contribution.id }}' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
                                         <div class='votearrow' title='upvote'></div>
                                     </a>
 
@@ -63,7 +63,7 @@
                            </span>
                             <a href={% url 'empo_news:user_page' contribution.user.username %} class="hnuser">{{ contribution.user.username }}</a>
                             <span class="age"><a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.publication_time|naturaltime }}</a></span>
-                            <span id="unv_22677970"></span> |
+                            <span id="unv_{{ contribution.id }}"></span> |
                                {% if not contribution|is_liked and request.user != contribution.user %}
                                    {%  csrf_token %}
                                    <a href={% url 'empo_news:likes' path page_value contribution.id %}>unvote</a> |
