@@ -18,6 +18,9 @@ class SubmitForm(forms.Form):
             raise forms.ValidationError('Submissions can\'t have both urls and text, so you need to pick one. '
                                         'If you keep the url, you can always post your text as a comment in the '
                                         'thread.')
+        if not url and not text:
+            raise forms.ValidationError('Sorry, either url or text fields must be filled.')
+
         return cleaned_data
 
     @staticmethod

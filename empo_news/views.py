@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm, EditCommentForm
+from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 
 
@@ -181,7 +181,7 @@ def likes(request, view, pg, contribution_id):
     return HttpResponseRedirect(reverse('empo_news:' + view) + '?pg=' + str(pg))
 
 
-def likes_reply(request, contribution_id, comment_id):
+def likes_reply(request, contribution_id, comment_id, path):
     comment = get_object_or_404(Comment, id=comment_id)
     if UserFields.objects.filter(user=comment.user).count() == 0:
         userFields = UserFields(user=comment.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
@@ -197,7 +197,9 @@ def likes_reply(request, contribution_id, comment_id):
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', None) + 1)
     comment.points = comment.total_likes()
     comment.save()
-    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
+    if path == "item":
+        return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
+    return HttpResponseRedirect(reverse('empo_news:addreply') + '?id=' + str(comment_id))
 
 
 def likes_contribution(request, contribution_id):
@@ -239,19 +241,29 @@ def likes_comment(request, comment_id, username):
 
 
 def hide(request, view, pg, contribution_id):
+    hide_for_user(request, contribution_id)
+    if pg == 1:
+        return HttpResponseRedirect(reverse('empo_news:' + view))
+    return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,)))
+
+
+def hide_no_page(request, view, contribution_id):
+    hide_for_user(request, contribution_id)
+    return HttpResponseRedirect(reverse('empo_news:' + view) + "?id=" + str(contribution_id))
+
+
+def hide_for_user(request, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
     if contribution.hidden.filter(id=request.user.id).exists():
         contribution.hidden.remove(request.user)
     else:
         contribution.hidden.add(request.user)
     contribution.save()
-    if pg == 1:
-        return HttpResponseRedirect(reverse('empo_news:' + view))
-    return HttpResponseRedirect(reverse('empo_news:' + view, args=(pg,)))
 
 
-def not_implemented(request):
-    return HttpResponse('View not yet implemented')
+def collapse(request, contribution_id, comment_id):
+    hide_for_user(request, comment_id)
+    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
 
 
 def logout(request):
@@ -303,6 +315,7 @@ def profile(request, username):
         "userSelected": userSelected,
         "userFields": userFields,
         "karma": karma,
+        "notBottom": True,
     }
     return render(request, 'empo_news/profile.html', context)
 
@@ -463,39 +476,9 @@ def threads(request, username):
         "userComments": commentsUser,
         "userFields": userFields,
         "karma": karma,
+        "highlight": "threads",
     }
     return render(request, 'empo_news/user_comments.html', context)
-
-
-def delete_comment(request, commentid):
-    Comment.objects.filter(id=commentid).delete()
-    comments = Comment.objects.filter(user=request.user)
-    context = {
-        "userSelected": request.user,
-        "userComments": comments,
-    }
-    return render(request, 'empo_news/user_comments.html', context)
-
-
-def update_comment(request, commentid):
-    karma = 0
-    if request.user.is_authenticated:
-        karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', None)
-    if request.method == 'POST':
-        form = EditCommentForm(request.POST)
-        if form.is_valid():
-            Comment.objects.filter(id=commentid).update(text=form.cleaned_data['text'])
-
-    comment = Comment.objects.get(id=commentid)
-    form = EditCommentForm(
-        initial={'text': comment.text})
-
-    context = {
-        "comment": comment,
-        "form": form,
-        "karma": karma,
-    }
-    return render(request, 'empo_news/edit_comment.html', context)
 
 
 def comments(request):
@@ -671,7 +654,7 @@ def voted_submissions(request):
 
     contributions = Contribution.objects.filter(comment__isnull=True,
                                                 likes__username__contains=request.user.username).exclude(
-                                                                                                    user=request.user)
+        user=request.user)
     update_show(contributions.order_by('-points'), request.user.id, pg * 30)
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)

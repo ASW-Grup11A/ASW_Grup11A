@@ -25,7 +25,7 @@
                                            <div class='votearrow' title='upvote' style="opacity: 0" ></div>
                                        {% endif %}
                                     {% else %}
-                                        <span style="color: #00ccff; ">*</span>
+                                        <span style="color: #ff0080; ">*</span>
                                     {% endif %}
                                 {% else %}
                                     <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
@@ -44,7 +44,7 @@
 
                             <span class="sitebit comhead">
                                 {% if contribution|get_class == "url" %}
-                                    (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                    (<span class="sitestr">{{ contribution.url }}</span>)
                                 {% endif %}
                             </span>
                         </td>
@@ -52,9 +52,17 @@
                     <tr>
                         <td colspan="2"></td>
                         <td class="subtext">
-                           <span class="score" id={{ contribution.id }}>{{ contribution.points }} points</span>
-                            by <a href={% url 'empo_news:user_page' contribution.user.username %} class="hnuser">{{ contribution.user.username }}</a>
-                            <span class="age"><a href={% url 'empo_news:not_implemented' %}>{{ contribution.publication_time|naturaltime }}</a></span>
+                           <span class="score" id={{ contribution.id }}>
+                               {{ contribution.points }}
+                               {% if contribution.points == 1 %}
+                                        point
+                                    {% else %}
+                                        points
+                                    {% endif %}
+                                     by
+                           </span>
+                            <a href={% url 'empo_news:user_page' contribution.user.username %} class="hnuser">{{ contribution.user.username }}</a>
+                            <span class="age"><a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.publication_time|naturaltime }}</a></span>
                             <span id="unv_22677970"></span> |
                                {% if not contribution|is_liked and request.user != contribution.user %}
                                    {%  csrf_token %}
@@ -71,7 +79,16 @@
                             {% else %}
                                 <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">hide</a> |
                             {% endif %}
-                            <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}&nbsp;comments</a>
+                            {% if highlight == "new" %}
+                                <a href= {{"http://www.google.com/search?q="|add:contribution.title|google_url}} > web </a> |
+                            {% endif %}
+                            <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}
+                                {% if contribution.comments == 1 %}
+                                    comment
+                                {% else %}
+                                    comments
+                                {% endif %}
+                            </a>
                         </td>
                     </tr>
                     <tr class="spacer" style="height:5px"></tr>
