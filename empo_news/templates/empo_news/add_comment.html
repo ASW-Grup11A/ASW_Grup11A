@@ -73,12 +73,12 @@
                                     {% if contribution|get_class == "url" %}
                                         <a href={{ contribution.url }} class="storylink">{{ contribution.title }}</a>
                                     {% else %}
-                                        <a href={% url 'empo_news:not_implemented' %} class="storylink">{{ contribution.title }}</a>
+                                        <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}" class="storylink">{{ contribution.title }}</a>
                                     {% endif %}
 
                                     <span class="sitebit comhead">
                                         {% if contribution|get_class == "url" %}
-                                            (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                            (<span class="sitestr">{{ contribution.url }}</span>)
                                         {% endif %}
                                     </span>
                                 </td>
@@ -100,13 +100,11 @@
                                         {{ contribution.publication_time|naturaltime }}
                                     </span>
                                         <span id="unv_{{ contribution.id }}"></span>
-                                        | <a href={% url 'empo_news:not_implemented' %}>hide</a>
-                                        | <a href="{% url 'empo_news:not_implemented' %}" class="hnpast">past</a>
+                                        | <a href={% url 'empo_news:hide_no_page' 'add_coment' contribution.id %}>hide</a>
                                         {% if contribution|get_class == "url" %}
-                                            | <a href={% url 'empo_news:not_implemented' %}>web</a>
+                                            | <a href={{"http://www.google.com/search?q="|add:contribution.title|google_url}}>web</a>
                                         {% endif %}
-                                        | <a href={% url 'empo_news:not_implemented' %}>favorite</a>
-                                        | <a href={% url 'empo_news:not_implemented' %}>{{ contribution.comments }} comment</a>
+                                        | <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }} comment</a>
                                 </td>
                             </tr>
                             <tr style="height:2px"></tr>

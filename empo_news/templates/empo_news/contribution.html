@@ -40,7 +40,7 @@
 
                             <span class="sitebit comhead">
                                 {% if contribution|get_class == "url" %}
-                                    (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                    (<span class="sitestr">{{ contribution.url }}</span>)
                                 {% endif %}
                             </span>
                         </td>
@@ -89,9 +89,15 @@
                             <span class="rank"></span>
                         </td>
                         <td valign="top" class="votelinks" style="text-align: center;">
-                            <a id='up_{{ contribution.id }}' href={% url 'empo_news:not_implemented' %}>
-                                <div class='votearrow' title='upvote'></div>
-                            </a>
+                            {% if request.user == contribution.user %}
+                                <span style="color: #ff0080; ">*</span>
+                            {% elif contribution|is_contribution_liked:request.user.id %}
+                                <div class='votearrow' title='upvote' style="opacity: 0" ></div>
+                            {% else %}
+                                <a id='up_{{ contribution.id }}' href={% url 'empo_news:likes_contribution' contribution.id %}>
+                                    <div class='votearrow' title='upvote'></div>
+                                </a>
+                            {% endif %}
                         </td>
                         <td class="default">
                             <div>

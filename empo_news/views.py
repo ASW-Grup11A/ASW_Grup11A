@@ -263,12 +263,7 @@ def hide_for_user(request, contribution_id):
 
 def collapse(request, contribution_id, comment_id):
     hide_for_user(request, comment_id)
-    print(str(contribution_id) + ' ' + str(comment_id))
     return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_id) + '#' + str(comment_id))
-
-
-def not_implemented(request):
-    return HttpResponse('View not yet implemented')
 
 
 def logout(request):

@@ -22,7 +22,7 @@
 
                                 <span class="sitebit comhead">
                                     {% if contribution|get_class == "url" %}
-                                        (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                        (<span class="sitestr">{{ contribution.url }}</span>)
                                     {% endif %}
                                 </span>
                             </td>
@@ -81,7 +81,7 @@
 
                             <span class="sitebit comhead">
                                 {% if contribution|get_class == "url" %}
-                                    (<a href={% url 'empo_news:not_implemented' %}><span class="sitestr">{{ contribution.url }}</span></a>)
+                                    (<span class="sitestr">{{ contribution.url }}</span>)
                                 {% endif %}
                             </span>
                         </td>

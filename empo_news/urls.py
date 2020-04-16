@@ -17,7 +17,6 @@ urlpatterns = [
     path('hide/<str:view>/<int:pg>/<int:contribution_id>', views.hide, name='hide'),
     path('hide/<str:view>/<int:contribution_id>', views.hide_no_page, name='hide_no_page'),
     path('unhide/<str:view>/<int:pg>/<int:contribution_id>/<int:userid>', views.unhide, name='unhide'),
-    path('notimplemented', views.not_implemented, name='not_implemented'),
     path('like_comment/<int:comment_id>/<str:username>', views.likes_comment, name='likes_comment'),
     path('like_reply/<int:contribution_id>/<int:comment_id>/<str:path>', views.likes_reply, name='likes_reply'),
     path('like_contribution/<int:contribution_id>', views.likes_contribution, name='likes_contribution'),

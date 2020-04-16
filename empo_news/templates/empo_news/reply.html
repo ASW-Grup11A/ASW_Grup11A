@@ -36,7 +36,7 @@
                                 {% endif %}
                                 <a href="{% url 'empo_news:user_page' comment.user.username %}" class="hnuser">{{comment.user.username}}</a>
                                 <span class="age">
-                                    <a href="{% url 'empo_news:not_implemented' %}">{{comment.publication_time|naturaltime}}</a>
+                                    <a href="{% url 'empo_news:item'%}?id={{ comment.id }}">{{comment.publication_time|naturaltime}}</a>
                                 </span>
                                 <span id="unv_{{ comment.id }}">
                                     {% if comment|is_contribution_liked:request.user.id %}
