@@ -15,8 +15,12 @@
                                 <span style="color: #ff0080; ">*</span>
                             {% elif comment|is_contribution_liked:request.user.id %}
                                 <div class='votearrow' title='upvote' style="opacity: 0" ></div>
-                            {% else %}
+                            {% elif request.user.is_authenticated %}
                                 <a id='up_{{ comment.id }}' href={% url 'empo_news:likes_reply' comment.contribution.id comment.id "item" %}>
+                                    <div class='votearrow' title='upvote'></div>
+                                </a>
+                            {% else %}
+                                <a id='up_{{ comment.id }}' href="{% url 'social:begin' 'google-oauth2' %}?next={% url 'empo_news:item' %}?id={{ comment.id }}">
                                     <div class='votearrow' title='upvote'></div>
                                 </a>
                             {% endif %}
@@ -47,7 +51,11 @@
                                     {% endif %}
                                 </span>
                                 <span class="par"></span>
-                                <a class="togg" href="{% url 'empo_news:collapse' comment.contribution.id comment.id %}">
+                                    {% if request.user.is_authenticated %}
+                                        <a class="togg" href="{% url 'empo_news:collapse' comment.contribution.id comment.id %}">
+                                    {% else %}
+                                        <a class="togg" href="{% url 'social:begin' 'google-oauth2' %}?next={% url 'empo_news:item' %}?id={{ comment.contribution.id }}">
+                                    {% endif %}
                                     {% if not comment|is_hidden:request.user.id %}
                                         [-]
                                     {% else %}
@@ -65,7 +73,11 @@
                                         <div class='reply'>
                                             <p>
                                                 <span style="font-size: 7pt; ">
-                                                    <u><a href="{% url 'empo_news:addreply' %}?id={{ comment.id }}">reply</a></u>
+                                                    {% if request.user.is_authenticated %}
+                                                        <u><a href="{% url 'empo_news:addreply' %}?id={{ comment.id }}">reply</a></u>
+                                                    {% else %}
+                                                        <u><a href="{% url 'social:begin' 'google-oauth2' %}?next={% url 'empo_news:item' %}?id={{ comment.contribution.id }}">reply</a></u>
+                                                    {% endif %}
                                                 </span>
                                             </p>
                                         </div>

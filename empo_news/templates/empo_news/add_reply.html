@@ -64,7 +64,7 @@
                                                 <span style="color: #ff0080; ">*</span>
                                             {% endif %}
                                         {% else %}
-                                            <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
+                                            <a id='up_{{ contribution.id }}' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
                                                 <div class='votearrow' title='upvote'></div>
                                             </a>
 

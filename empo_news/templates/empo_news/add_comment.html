@@ -52,7 +52,7 @@
                                             {% if contribution.user != request.user %}
                                                 {%  csrf_token %}
                                                {% if contribution.is_liked %}
-                                                      <a id='up_22677970' href={% url 'empo_news:likes_contribution' contribution.id %}>
+                                                      <a id='up_{{ contribution.id }}' href={% url 'empo_news:likes_contribution' contribution.id %}>
                                                          <div class='votearrow' title='upvote'></div>
                                                       </a>
                                                {% else %}
@@ -62,7 +62,7 @@
                                                 <span style="color: #ff0080; ">*</span>
                                             {% endif %}
                                         {% else %}
-                                            <a id='up_22677970' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
+                                            <a id='up_{{ contribution.id }}' href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">
                                                 <div class='votearrow' title='upvote'></div>
                                             </a>
 
