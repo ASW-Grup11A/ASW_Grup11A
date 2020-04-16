@@ -476,7 +476,7 @@ def threads(request, username):
         "userComments": commentsUser,
         "userFields": userFields,
         "karma": karma,
-        "highlight": "user_comments",
+        "highlight": "threads",
     }
     return render(request, 'empo_news/user_comments.html', context)
 

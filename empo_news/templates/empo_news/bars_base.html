@@ -33,7 +33,13 @@
                                         {% endif %}
                                          |
                                         {% if request.user.is_authenticated %}
-                                            <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
+                                            {% if highlight == "threads" and request.user == userSelected %}
+                                            <span class="topsel">
+                                                <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
+                                            </span>
+                                            {% else %}
+                                                <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
+                                            {% endif %}
                                         {% endif %}
                                         {% if highlight == 'comments' %}
                                             <span class="topsel">
@@ -73,13 +79,13 @@
                                             {{ submitted_id }}'s submissions
                                             </span>
                                         {% endif %}
-                                        {% if highlight == "voted_submissions" %}
+                                        {% if highlight == "voted_submissions" or highlight == "voted_comments"%}
                                             |
                                             <span class="topsel" style="color: white">
                                             upvoted
                                             </span>
                                         {% endif %}
-                                        {% if highlight == "user_comments" and not userSelected == request.user %}
+                                        {% if highlight == "threads" and not userSelected == request.user %}
                                             | <span class="topsel">
                                                 <a href="">{{ userSelected.username }}'s comments</a>
                                             </span>

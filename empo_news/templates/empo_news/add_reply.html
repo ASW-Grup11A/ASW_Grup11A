@@ -83,7 +83,7 @@
                                                 </a>
                                             </span>
                                             <span id="unv_{{ comment.id }}">
-                                                {% if comment|is_contribution_liked:request.user.id %}
+                                                {% if comment|is_contribution_liked:request.user.id and comment.user != request.user %}
                                                       | <a href={% url 'empo_news:likes_reply' comment.contribution.id comment.id "reply" %}>unvote</a>
                                                {% endif %}
                                             </span>
