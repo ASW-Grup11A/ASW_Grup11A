@@ -99,13 +99,17 @@
                                    <a href={% url 'empo_news:likes_submit' path submitted_id page_value contribution.id %}>unvote</a> |
                                {% endif %}
                             <a href={{"http://www.google.com/search?q="|add:contribution.title|google_url}} > web </a> |
-                            <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}
-                                {% if contribution.comments == 1 %}
-                                    comment
-                                {% else %}
-                                    comments
-                                {% endif %}
-                            </a>
+                            {% if contribution.comments == 0 %}
+                                <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">discuss</a>
+                            {% else %}
+                                <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}
+                                    {% if contribution.comments == 1 %}
+                                        comment
+                                    {% else %}
+                                        comments
+                                    {% endif %}
+                                </a>
+                            {% endif %}
                         </td>
                     </tr>
                     <tr class="spacer" style="height:5px"></tr>

@@ -81,12 +81,18 @@
                                     | <a href="{% url 'social:begin' 'google-oauth2' %}?next={% url 'empo_news:hide_no_page' "item" contribution.id %}">hide</a>
                                 {% endif %}
                                 | <a href={{"http://www.google.com/search?q="|add:contribution.title|google_url}}>web</a>
-                                | <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}
-                                    {% if contribution.comments == 1 %}
-                                        comment
-                                    {% else %}
-                                        comments
-                                    {% endif %}
+                                |
+                                {% if contribution.comments == 0 %}
+                                    <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">discuss</a>
+                                {% else %}
+                                    <a href="{% url 'empo_news:item'%}?id={{ contribution.id }}">{{ contribution.comments }}
+                                        {% if contribution.comments == 1 %}
+                                            comment
+                                        {% else %}
+                                            comments
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
                             </a>
                         </td>
                     </tr>

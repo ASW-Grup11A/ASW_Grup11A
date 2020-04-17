@@ -473,13 +473,11 @@ def threads(request, username):
     karma = 0
     if request.user.is_authenticated:
         karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
-    userFields = UserFields.objects.filter(user=request.user)
     userSelected = User.objects.get(username=username)
     commentsUser = Comment.objects.filter(user=userSelected)
     context = {
         "userSelected": userSelected,
         "userComments": commentsUser,
-        "userFields": userFields,
         "karma": karma,
         "highlight": "threads",
     }
@@ -562,7 +560,7 @@ def show_list(request):
     elif pg == 1:
         list_base = 0
 
-    contributions = Contribution.objects.filter(comment__isnull=True, url__isnull=True, title__startswith='Show EN: ')
+    contributions = Contribution.objects.filter(comment__isnull=True, title__startswith='Show EN: ')
     update_show(contributions.order_by('-points'), request.user.id, pg * 30)
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
