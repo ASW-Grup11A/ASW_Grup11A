@@ -562,7 +562,7 @@ def show_list(request):
     elif pg == 1:
         list_base = 0
 
-    contributions = Contribution.objects.filter(comment__isnull=True, url__isnull=True, title__startswith='Show EN: ')
+    contributions = Contribution.objects.filter(comment__isnull=True, title__startswith='Show EN: ')
     update_show(contributions.order_by('-points'), request.user.id, pg * 30)
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
