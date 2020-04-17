@@ -473,13 +473,11 @@ def threads(request, username):
     karma = 0
     if request.user.is_authenticated:
         karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
-    userFields = UserFields.objects.filter(user=request.user)
     userSelected = User.objects.get(username=username)
     commentsUser = Comment.objects.filter(user=userSelected)
     context = {
         "userSelected": userSelected,
         "userComments": commentsUser,
-        "userFields": userFields,
         "karma": karma,
         "highlight": "threads",
     }
