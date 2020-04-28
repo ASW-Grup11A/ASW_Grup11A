@@ -7,6 +7,55 @@ servers:
     - url: 'https://empo-news.herokuapp.com/api/v1'
 paths:
     /contributions:
+        post:
+            summary: Adds a new Contribution
+            operationId: createContribution
+            tags:
+                - contributions
+            requestBody:
+                description: Provide the author & content of the new Tweet
+                content:
+                    application/json:
+                        schema:
+                            required:
+                            - title
+                            - url
+                            - text
+                            type: object
+                            properties:
+                                title:
+                                    type: string
+                                    minLenght: 4
+                                    maxLenght: 2000
+                                    example: 'This is my first contribution'
+                                url:
+                                    type: string
+                                    nullable: true
+                                    format: url
+                                    maxLength: 500
+                                    example: 'https://google.com'
+                                text:
+                                    type: string
+                                    nullable: true
+                                    maxLength: 500
+                                    example: "Hello Wordl!"
+                required: true
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Contribution'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
         get:
             summary: Retrieves all the contributions
             operationId: listContribution
