@@ -148,10 +148,10 @@ components:
             properties:
                 status:
                     type: integer
-                    enum: [400, 401, 403, 404, 409]
+                    enum: [400, 401, 403, 404, 409, 500]
                 error: 
                     type: string
-                    enum: ["Bad Request", "Unauthorized", "Forbidden", "Not Found", "Conflict"]
+                    enum: ["Bad Request", "Unauthorized", "Forbidden", "Not Found", "Conflict", "Internal Server Error"]
                 message: 
                     type: string
     examples:
@@ -175,7 +175,7 @@ components:
                 status: 404
                 error: "Not Found"
                 message: "No Tweet with that ID"
-        error404:
+        error500:
             value:
                 status: 500
                 error: "Internal Server Error"
