@@ -17,8 +17,9 @@ paths:
           description: List of all contributions
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/ContributionsList'
+             type: array
+                items:
+                    $ref: '#/components/schemas/Contribution'
         default:
           description: 'Error: Unexpected error'
           content:
