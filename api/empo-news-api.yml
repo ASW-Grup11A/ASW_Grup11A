@@ -4,11 +4,11 @@ info:
   title: Empo News
   description: 'This is the Open API documentation for the REST API of **Empo News** deployed at <https://empo-news.herokuapp.com/>. <br>All operations are executable. Only one operation requires authentication: `deleteTweet`. In this case, you must **Authorize** your request by providing the api_key vaule you got when you created the tweet.'
 servers:
-  - url: 'https://empo-news.herokuapp.com'
+  - url: 'https://empo-news.herokuapp.com/api/v1'
 paths:
   /contributions:
     get:
-      summary: 'Retrieves all the contributions'
+      summary: Retrieves all the contributions
       operationId: listContribution
       tags:
         - contributions
@@ -17,9 +17,10 @@ paths:
           description: List of all contributions
           content:
             application/json:
-             type: array
-                items:
-                    $ref: '#/components/schemas/Contribution'
+                schema:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Contribution'
         default:
           description: 'Error: Unexpected error'
           content:
@@ -105,7 +106,7 @@ components:
                     example: 2
         Error:
             type: object
-              properties:
+            properties:
                 status:
                   type: integer
                   enum: [400, 401, 403, 404, 409]
@@ -135,3 +136,8 @@ components:
                         status: 404
                         error: "Not Found"
                         message: "No Tweet with that ID"
+    securitySchemes:
+        ApiKeyAuth:
+            type: apiKey
+            name: X-API-KEY #Custom headers in rails apps must have the X- prefix
+            in: header
