@@ -47,15 +47,15 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/AddContributionResult'
-                400:
-                    description: 'Error: Bad Request'
+                404:
+                    description: 'Error: Not Found'
                     content:
                         aplication/json:
                             schema:
                                 $ref: '#/components/schemas/Error'
                             examples:
                                 errorExample:
-                                    $ref: '#/components/examples/error40'
+                                    $ref: '#/components/examples/error404'
         get:
             summary: Retrieves all the contributions
             operationId: listContribution
@@ -155,8 +155,6 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error403'
-            security:
-            - ApiKeyAuth: []
 components:
     schemas:
         User:
@@ -242,10 +240,10 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/User'
-        AddContributionResult:
+        AddTweetResult:
             type: object
                 properties:
-                    new_contribution:
+                    new_tweet:
                         $ref: '#/components/schemas/Contribution'
                     api_key:
                         type: string
