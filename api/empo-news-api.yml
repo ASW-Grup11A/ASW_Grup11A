@@ -176,6 +176,10 @@ paths:
             responses:
                 200:
                     description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Contribution'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -204,6 +208,10 @@ paths:
             responses:
                 200:
                     description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Contribution'
                 404:
                     description: 'Error: Not Found'
                     content:
