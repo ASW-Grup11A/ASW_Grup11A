@@ -13,7 +13,7 @@ paths:
       tags:
         - contributions
       responses:
-        '200':
+        200:
           description: List of all contributions
           content:
             application/json:
@@ -21,8 +21,8 @@ paths:
                     type: array
                     items:
                         $ref: '#/components/schemas/Contribution'
-        default:
-          description: 'Error: Unexpected error'
+        400:
+          description: 'Error: Bad Request'
           content:
             application/json:
               schema:
