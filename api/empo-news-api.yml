@@ -30,7 +30,7 @@ paths:
                         examples:
                             errorExample:
                                 $ref: '#/components/examples/error500'
-    /contribution/{cotributionId}:
+    /contribution/{contributionId}:
         get:
             summary: Finds a contribution by its ID
             operationId: getContributionById
