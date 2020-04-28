@@ -3,10 +3,10 @@ info:
   version: 1.0
   title: Empo News
   description: 'This is the Open API documentation for the REST API of **Empo News** deployed at '
-  + '<https://empo-news.herokuapp.com/>. <br>All operations require authentication:' 
-  + ' In this case, you must **Authorize** your request by providing the api_key vaule you got when you created the account.'
+  + '<https://empo-news.herokuapp.com/>. <br>All operations are executable. Only one operation requires authentication: `deleteTweet`.'' 
+  + ' In this case, you must **Authorize** your request by providing the api_key vaule you got when you created the tweet.'
 servers:
-  - url: 'https://empo-news.herokuapp.com/api/v1'
+  - url: 'https://empo-news.herokuapp.com'
 paths:
   /contributions:
     get:
@@ -29,10 +29,17 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
     schemas:
+        Contribution:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                    
         ContributionsList:
             type: array
             items:
                 type: object
                 properties:
-                    id:
-                        type: 
+                    contribution:
+                        $ref: '#/components/schemas/Contribution'
