@@ -159,6 +159,83 @@ paths:
                                     $ref: '#/components/examples/error403'
             security:
             - ApiKeyAuth: []
+    /contribution/{contributionId}/vote:
+        put:
+            summary: Votes a Contribution
+            operationId: voteContribution
+            tags:
+                - contributions
+            parameters:
+              - name: contributionId
+                in: path
+                required: true
+                description: ID of the contribution to return
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Contribution'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+        delete:
+            summary: Deletes a Contribution
+            operationId: deleteContribution
+            tags:
+                - contributions
+            parameters:
+              - name: contributionId
+                in: path
+                required: true
+                description: ID of the contribution to return
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                204:
+                    description: Contribution deleted
+                    content:
+                        application/json: {}
+                404:
+                    description: 'Error: Not found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
+                403:
+                    description: 'Error: Forbidden'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error403'
+            security:
+            - ApiKeyAuth: []
 components:
     schemas:
         User:
@@ -236,14 +313,16 @@ components:
                     type: integer
                     format: int64
                     example: 2
-                liked:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/User'
+                likes:
+                    type: integer
+                    format: int32
+                    example: 38
                 hidden:
                     type: array
                     items:
-                        $ref: '#/components/schemas/User'
+                        type: integer
+                        format: int64
+                    example: [2, 4, 43]
         AddContributionResult:
             type: object
             properties:
