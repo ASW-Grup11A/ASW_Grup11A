@@ -53,6 +53,7 @@ components:
                     example: 'asndqw23qDS'
                 email:
                     type: string
+                    format: email
                     minLenght: 1
                     maxLenght: 254
                     example: 'john.doe@mail.com'
@@ -80,6 +81,11 @@ components:
                     type: string
                     format: date-time
                     example: '2020-04-16 22:18:21.208736'
+                url:
+                    type: string
+                    nullable: true
+                    format: url
+                    example: ''
                 user:
                     $ref: '#/components/schemas/User'
         ContributionsList:
