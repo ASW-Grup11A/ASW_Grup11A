@@ -82,10 +82,13 @@ components:
                     type: string
                     nullable: true
                     format: url
+                    maxLength: 500
                     example: 'https://google.com'
                 text:
                     type: string
                     nullable: true
+                    maxLength: 500
+                    example: "Hello Wordl!"
                 user:
                     $ref: '#/components/schemas/User'
         ContributionsList:
