@@ -89,16 +89,15 @@ components:
                     nullable: true
                     maxLength: 500
                     example: "Hello Wordl!"
-                likes:
-                    type: array
-                        items:
-                            $ref: '#/components/schemas/User'
                 comments:
                     type: integer
                     format: int32
                     default: 0
-                user:
-                    $ref: '#/components/schemas/User'
+                    example: 3
+                user_id:
+                    type: integer
+                    format: int32
+                    example: 2
         ContributionsList:
             type: array
             items:
