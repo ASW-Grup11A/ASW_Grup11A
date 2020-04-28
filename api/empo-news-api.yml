@@ -103,10 +103,40 @@ components:
                     type: integer
                     format: int64
                     example: 2
-        ContributionsList:
-            type: array
-            items:
-                type: object
-                properties:
-                    contribution:
-                        $ref: '#/components/schemas/Contribution'
+        Error:
+            type: object
+              properties:
+                status:
+                  type: integer
+                  enum: [400, 401, 403, 404, 409]
+                error: 
+                  type: string
+                  enum: ["Bad Request", "Unauthorized", "Forbidden", "Not Found", "Conflict"]
+                message: 
+                  type: string
+                examples:
+                    error400:
+                      value:
+                        status: 400
+                        error: "Bad Request"
+                        message: "Content is too long (maximum is 280 characters)"
+                    error401:
+                      value:
+                        status: 401
+                        error: "Unauthorized"
+                        message: "You provided no api key (X-API-KEY Header)"
+                    error403:
+                      value:
+                        status: 403
+                        error: "Forbidden"
+                        message: "Your api key (X-API-KEY Header) is not valid"
+                    error404:
+                      value:
+                        status: 404
+                        error: "Not Found"
+                        message: "No Tweet with that ID"
+    securitySchemes:
+        ApiKeyAuth:
+            type: apiKey
+            name: X-API-KEY #Custom headers in rails apps must have the X- prefix
+            in: header
