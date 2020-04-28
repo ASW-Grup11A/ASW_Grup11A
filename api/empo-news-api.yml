@@ -32,17 +32,14 @@ components:
             properties:
                 username:
                     type: string
-                    minLenght: 1
                     maxLenght: 150
                     example: 'John'
                 first_name:
                     type: string
-                    minLenght: 1
                     maxLenght: 30
                     example: 'Doe'
                 last_name:
                     type: string
-                    minLenght: 1
                     maxLenght: 150
                     example: 'García'
                 password:
@@ -54,7 +51,6 @@ components:
                 email:
                     type: string
                     format: email
-                    minLenght: 1
                     maxLenght: 254
                     example: 'john.doe@mail.com'
                 date_joined:
@@ -76,6 +72,7 @@ components:
                 points:
                     type: integer
                     format: int32
+                    default: 1
                     example: 3
                 publication_time:
                     type: string
@@ -85,7 +82,10 @@ components:
                     type: string
                     nullable: true
                     format: url
-                    example: ''
+                    example: 'https://google.com'
+                text:
+                    type: string
+                    nullable: true
                 user:
                     $ref: '#/components/schemas/User'
         ContributionsList:
