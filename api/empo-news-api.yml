@@ -105,7 +105,7 @@ components:
                     example: 2
         Error:
             type: object
-              properties:
+            properties:
                 status:
                   type: integer
                   enum: [400, 401, 403, 404, 409]
