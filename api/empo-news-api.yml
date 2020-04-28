@@ -21,15 +21,15 @@ paths:
                             type: array
                             items:
                                 $ref: '#/components/schemas/Contribution'
-                400:
-                  description: 'Error: Bad Request'
+                500:
+                  description: 'Error: Internal server error'
                   content:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/Error'
                         examples:
                             errorExample:
-                                $ref: '#/components/examples/error404'
+                                $ref: '#/components/examples/error500'
     /contribution/{cotributionId}:
         get:
             summary: Finds a contribution by its ID
@@ -143,34 +143,39 @@ components:
             type: object
             properties:
                 status:
-                  type: integer
-                  enum: [400, 401, 403, 404, 409]
+                    type: integer
+                    enum: [400, 401, 403, 404, 409]
                 error: 
-                  type: string
-                  enum: ["Bad Request", "Unauthorized", "Forbidden", "Not Found", "Conflict"]
+                    type: string
+                    enum: ["Bad Request", "Unauthorized", "Forbidden", "Not Found", "Conflict"]
                 message: 
-                  type: string
+                    type: string
     examples:
         error400:
-          value:
-            status: 400
-            error: "Bad Request"
-            message: "Content is too long (maximum is 280 characters)"
+            value:
+                status: 400
+                error: "Bad Request"
+                message: "Content is too long (maximum is 280 characters)"
         error401:
-          value:
-            status: 401
-            error: "Unauthorized"
-            message: "You provided no api key (X-API-KEY Header)"
+            value:
+                status: 401
+                error: "Unauthorized"
+                message: "You provided no api key (X-API-KEY Header)"
         error403:
-          value:
-            status: 403
-            error: "Forbidden"
-            message: "Your api key (X-API-KEY Header) is not valid"
+            value:
+                status: 403
+                error: "Forbidden"
+                message: "Your api key (X-API-KEY Header) is not valid"
         error404:
-          value:
-            status: 404
-            error: "Not Found"
-            message: "No Tweet with that ID"
+            value:
+                status: 404
+                error: "Not Found"
+                message: "No Tweet with that ID"
+        error404:
+            value:
+                status: 500
+                error: "Internal Server Error"
+                message: "No Tweet with that ID"
     securitySchemes:
         ApiKeyAuth:
             type: apiKey
