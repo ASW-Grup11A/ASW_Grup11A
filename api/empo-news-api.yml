@@ -4,29 +4,64 @@ info:
   title: Empo News
   description: 'This is the Open API documentation for the REST API of **Empo News** deployed at <https://empo-news.herokuapp.com/>. <br>All operations are executable. All operations requere authentication. In this case, you must **Authorize** your request by providing the api_key vaule you got when you created the account.'
 servers:
-  - url: 'https://empo-news.herokuapp.com/api/v1'
+    - url: 'https://empo-news.herokuapp.com/api/v1'
 paths:
-  /contributions:
-    get:
-      summary: Retrieves all the contributions
-      operationId: listContribution
-      tags:
-        - contributions
-      responses:
-        200:
-          description: List of all contributions
-          content:
-            application/json:
+    /contributions:
+        get:
+            summary: Retrieves all the contributions
+            operationId: listContribution
+            tags:
+                - contributions
+            responses:
+                200:
+                  description: List of all contributions
+                  content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Contribution'
+                400:
+                  description: 'Error: Bad Request'
+                  content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Error'
+                        examples:
+                            errorExample:
+                                $ref: '#/components/examples/error404'
+    /contribution/{cotributionId}:
+        get:
+            summary: Finds a contribution by its ID
+            operationId: getContributionById
+            tags:
+                - contributions
+            description: Returns a single Contribution
+            parameters:
+              - name: contributionId
+                in: path
+                required: true
+                description: ID of the contribution to return
                 schema:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/Contribution'
-        400:
-          description: 'Error: Bad Request'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                    type: integer
+                    format: int64
+                responses:
+                    200:
+                        description: Successful operation
+                        content:
+                            application/json:
+                                schema:
+                                    $ref: '#/components/schemas/Contribution'
+                    404:
+                        description: 'Error: Not Found'
+                        content:
+                            aplication/json:
+                                schema:
+                                    $ref: '#/components/schemas/Error'
+                                examples:
+                                    errorExample:
+                                        $ref: '#/components/examples/error404'
+        
 components:
     schemas:
         User:
@@ -115,27 +150,27 @@ components:
                   enum: ["Bad Request", "Unauthorized", "Forbidden", "Not Found", "Conflict"]
                 message: 
                   type: string
-                examples:
-                    error400:
-                      value:
-                        status: 400
-                        error: "Bad Request"
-                        message: "Content is too long (maximum is 280 characters)"
-                    error401:
-                      value:
-                        status: 401
-                        error: "Unauthorized"
-                        message: "You provided no api key (X-API-KEY Header)"
-                    error403:
-                      value:
-                        status: 403
-                        error: "Forbidden"
-                        message: "Your api key (X-API-KEY Header) is not valid"
-                    error404:
-                      value:
-                        status: 404
-                        error: "Not Found"
-                        message: "No Tweet with that ID"
+    examples:
+        error400:
+          value:
+            status: 400
+            error: "Bad Request"
+            message: "Content is too long (maximum is 280 characters)"
+        error401:
+          value:
+            status: 401
+            error: "Unauthorized"
+            message: "You provided no api key (X-API-KEY Header)"
+        error403:
+          value:
+            status: 403
+            error: "Forbidden"
+            message: "Your api key (X-API-KEY Header) is not valid"
+        error404:
+          value:
+            status: 404
+            error: "Not Found"
+            message: "No Tweet with that ID"
     securitySchemes:
         ApiKeyAuth:
             type: apiKey
