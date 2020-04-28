@@ -176,10 +176,6 @@ paths:
             responses:
                 200:
                     description: Successful operation
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Contribution'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -189,9 +185,12 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
-        delete:
-            summary: Deletes a Contribution
-            operationId: deleteContribution
+            security:
+            - ApiKeyAuth: []
+    /contribution/{contributionId}/unvote:
+        put:
+            summary: Unvotes a Contribution
+            operationId: unvoteContribution
             tags:
                 - contributions
             parameters:
@@ -203,12 +202,10 @@ paths:
                     type: integer
                     format: int64
             responses:
-                204:
-                    description: Contribution deleted
-                    content:
-                        application/json: {}
+                200:
+                    description: Successful operation
                 404:
-                    description: 'Error: Not found'
+                    description: 'Error: Not Found'
                     content:
                         aplication/json:
                             schema:
@@ -216,24 +213,6 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
-                401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
-                403:
-                    description: 'Error: Forbidden'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error403'
             security:
             - ApiKeyAuth: []
 components:
