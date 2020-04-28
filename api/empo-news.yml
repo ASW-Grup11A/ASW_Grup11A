@@ -16,7 +16,7 @@ paths:
         - contributions
       responses:
         '200':
-          description: 'List of contributions all'
+          description: 'List of all contributions'
           headers:
             x-next:
               description: A link to the next page of responses
