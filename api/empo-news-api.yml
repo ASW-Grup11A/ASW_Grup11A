@@ -175,7 +175,7 @@ components:
                 status: 404
                 error: "Not Found"
                 message: "No Tweet with that ID"
-        error500:
+        error404:
             value:
                 status: 500
                 error: "Internal Server Error"
