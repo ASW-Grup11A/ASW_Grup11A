@@ -139,6 +139,10 @@ components:
                     type: integer
                     format: int64
                     example: 2
+                liked:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/User'
         Error:
             type: object
             properties:
@@ -155,7 +159,7 @@ components:
             value:
                 status: 400
                 error: "Bad Request"
-                message: "Content is too long (maximum is 280 characters)"
+                message: "Content is too long (maximum is 500 characters)"
         error401:
             value:
                 status: 401
@@ -175,7 +179,7 @@ components:
             value:
                 status: 500
                 error: "Internal Server Error"
-                message: "No Tweet with that ID"
+                message: "There was an error when retrieving the data"
     securitySchemes:
         ApiKeyAuth:
             type: apiKey
