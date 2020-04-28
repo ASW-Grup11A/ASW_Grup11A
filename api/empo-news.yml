@@ -35,7 +35,8 @@ components:
                 id:
                     type: integer
                     format: int64
-                    
+                    example: 1
+                
         ContributionsList:
             type: array
             items:
