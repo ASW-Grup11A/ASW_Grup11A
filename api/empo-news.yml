@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: Empo News
 servers:
-  - url: 'http://localhost:3000'
+  - url: 'https://empo-news.herokuapp.com'
 paths:
   /user:
     get:
