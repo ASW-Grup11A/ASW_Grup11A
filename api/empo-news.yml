@@ -17,11 +17,6 @@ paths:
       responses:
         '200':
           description: 'List of all contributions'
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
           content:
             application/json:
               schema:
