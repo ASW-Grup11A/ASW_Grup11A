@@ -30,6 +30,10 @@ components:
         User:
             type: object
             properties:
+                id:
+                    type: integer
+                    format: int64
+                    example: 1
                 username:
                     type: string
                     maxLenght: 150
@@ -96,7 +100,7 @@ components:
                     example: 3
                 user_id:
                     type: integer
-                    format: int32
+                    format: int64
                     example: 2
         ContributionsList:
             type: array
