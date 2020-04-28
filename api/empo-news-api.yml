@@ -67,6 +67,19 @@ components:
                     type: integer
                     format: int64
                     example: 1
+                title:
+                    type: string
+                    minLenght: 4
+                    maxLenght: 2000
+                    example: 'This is my first contribution'
+                points:
+                    type: integer
+                    format: int32
+                    example: 3
+                publication_time:
+                    type: string
+                    format: date-time
+                    example: '2020-04-16 22:18:21.208736'
                 user:
                     $ref: '#/components/schemas/User'
         ContributionsList:
