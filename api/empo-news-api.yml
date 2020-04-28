@@ -8,7 +8,7 @@ servers:
 paths:
   /contributions:
     get:
-      summary: 'Retrieves all the contributions'
+      summary: Retrieves all the contributions
       operationId: listContribution
       tags:
         - contributions
