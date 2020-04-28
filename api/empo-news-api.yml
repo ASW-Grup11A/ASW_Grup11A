@@ -47,6 +47,7 @@ components:
                     example: 'García'
                 password:
                     type: string
+                    format: password
                     minLenght: 8
                     maxLenght: 128
                     example: 'asndqw23qDS'
@@ -56,9 +57,9 @@ components:
                     maxLenght: 254
                     example: 'john.doe@mail.com'
                 date_joined:
-                    type: date-time
+                    type: string
+                    format: date-time
                     example: '2020-04-16 22:41:09.025719'
-                
         Contribution:
             type: object
             properties:
