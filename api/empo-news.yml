@@ -20,10 +20,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListContributions'
+                $ref: '#/components/schemas/ContributionsList'
         default:
           description: 'Error: Unexpected error'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+components:
+    schemas:
+        ContributionsList:
+            type:
