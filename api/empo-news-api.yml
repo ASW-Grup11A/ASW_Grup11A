@@ -45,22 +45,22 @@ paths:
                 schema:
                     type: integer
                     format: int64
-                responses:
-                    200:
-                        description: Successful operation
-                        content:
-                            application/json:
-                                schema:
-                                    $ref: '#/components/schemas/Contribution'
-                    404:
-                        description: 'Error: Not Found'
-                        content:
-                            aplication/json:
-                                schema:
-                                    $ref: '#/components/schemas/Error'
-                                examples:
-                                    errorExample:
-                                        $ref: '#/components/examples/error404'
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Contribution'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
         
 components:
     schemas:
