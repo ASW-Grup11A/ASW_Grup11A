@@ -27,6 +27,8 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
     schemas:
+        User:
+        
         Contribution:
             type: object
             properties:
@@ -36,7 +38,6 @@ components:
                     example: 1
                 user:
                     $ref: '#/components/schemas/User'
-                    example:
         ContributionsList:
             type: array
             items:
