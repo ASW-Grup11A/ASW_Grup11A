@@ -17,7 +17,7 @@ paths:
           description: List of all contributions
           content:
             application/json:
-                type: array
+             type: array
                 items:
                     $ref: '#/components/schemas/Contribution'
         default:
@@ -105,7 +105,7 @@ components:
                     example: 2
         Error:
             type: object
-            properties:
+              properties:
                 status:
                   type: integer
                   enum: [400, 401, 403, 404, 409]
@@ -135,8 +135,3 @@ components:
                         status: 404
                         error: "Not Found"
                         message: "No Tweet with that ID"
-    securitySchemes:
-        ApiKeyAuth:
-            type: apiKey
-            name: X-API-KEY #Custom headers in rails apps must have the X- prefix
-            in: header
