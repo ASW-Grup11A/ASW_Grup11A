@@ -155,8 +155,8 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error403'
-        security:
-        - ApiKeyAuth: []
+            security:
+            - ApiKeyAuth: []
 components:
     schemas:
         User:
