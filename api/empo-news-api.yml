@@ -143,6 +143,10 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/User'
+                hidden:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/User'
         Error:
             type: object
             properties:
