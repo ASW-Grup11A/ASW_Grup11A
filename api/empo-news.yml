@@ -30,4 +30,6 @@ paths:
 components:
     schemas:
         ContributionsList:
-            type:
+            type: array
+            items:
+                type: object
