@@ -121,7 +121,7 @@ paths:
               - name: contributionId
                 in: path
                 required: true
-                description: ID of the contribution to return
+                description: ID of the contribution to delete
                 schema:
                     type: integer
                     format: int64
@@ -169,17 +169,13 @@ paths:
               - name: contributionId
                 in: path
                 required: true
-                description: ID of the contribution to return
+                description: ID of the contribution to vote
                 schema:
                     type: integer
                     format: int64
             responses:
                 200:
                     description: Successful operation
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Contribution'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -201,17 +197,13 @@ paths:
               - name: contributionId
                 in: path
                 required: true
-                description: ID of the contribution to return
+                description: ID of the contribution to unvote
                 schema:
                     type: integer
                     format: int64
             responses:
                 200:
                     description: Successful operation
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Contribution'
                 404:
                     description: 'Error: Not Found'
                     content:
