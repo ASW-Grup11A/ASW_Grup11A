@@ -13,7 +13,7 @@ paths:
       tags:
         - contributions
       responses:
-        200:
+        '200':
           description: List of all contributions
           content:
             application/json:
