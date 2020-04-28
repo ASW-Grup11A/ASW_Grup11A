@@ -25,8 +25,8 @@ paths:
                             properties:
                                 title:
                                     type: string
-                                    minLenght: 4
-                                    maxLenght: 2000
+                                    minLength: 4
+                                    maxLength: 2000
                                     example: 'This is my first contribution'
                                 url:
                                     type: string
@@ -55,7 +55,7 @@ paths:
                                 $ref: '#/components/schemas/Error'
                             examples:
                                 errorExample:
-                                    $ref: '#/components/examples/error40'
+                                    $ref: '#/components/examples/error400'
             security:
             - ApiKeyAuth: []
         get:
@@ -170,26 +170,26 @@ components:
                     example: 1
                 username:
                     type: string
-                    maxLenght: 150
+                    maxLength: 150
                     example: 'John'
                 first_name:
                     type: string
-                    maxLenght: 30
+                    maxLength: 30
                     example: 'Doe'
                 last_name:
                     type: string
-                    maxLenght: 150
+                    maxLength: 150
                     example: 'García'
                 password:
                     type: string
                     format: password
-                    minLenght: 8
-                    maxLenght: 128
+                    minLength: 8
+                    maxLength: 128
                     example: 'asndqw23qDS'
                 email:
                     type: string
                     format: email
-                    maxLenght: 254
+                    maxLength: 254
                     example: 'john.doe@mail.com'
                 date_joined:
                     type: string
@@ -204,8 +204,8 @@ components:
                     example: 1
                 title:
                     type: string
-                    minLenght: 4
-                    maxLenght: 2000
+                    minLength: 4
+                    maxLength: 2000
                     example: 'This is my first contribution'
                 points:
                     type: integer
