@@ -41,12 +41,12 @@ paths:
                                     example: "Hello Wordl!"
                 required: true
             responses:
-                200:
-                    description: Successful operation
+                201:
+                    description: Contribution created
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Contribution'
+                                $ref: '#/components/schemas/AddContributionResult'
                 404:
                     description: 'Error: Not Found'
                     content:
