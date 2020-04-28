@@ -6,7 +6,7 @@ info:
   + '<https://empo-news.herokuapp.com/>. <br>All operations require authentication:' 
   + ' In this case, you must **Authorize** your request by providing the api_key vaule you got when you created the account.'
 servers:
-  - url: 'https://empo-news.herokuapp.com/api/v1'
+  - url: 'https://empo-news.herokuapp.com/api'
 paths:
   /contributions:
     get:
