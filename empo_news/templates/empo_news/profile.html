@@ -39,6 +39,10 @@
                                 </tr>
                                 {% if userSelected == request.user %}
                                     <tr>
+                                        <td valign="top">api key: </td>
+                                        <td>{{ userFields.api_key }}</td>
+                                    </tr>
+                                    <tr>
                                         <td valign="top">{{ form.about.label_tag }}</td>
                                         <td>{{ form.about }}</td>
                                     </tr>
