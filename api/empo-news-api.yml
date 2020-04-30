@@ -6,6 +6,82 @@ info:
 servers:
     - url: 'https://empo-news.herokuapp.com/api/v1'
 paths:
+    /profiles:
+        get:
+            summary: Return a User profile
+            operationId: getUserProfile
+            tags:
+                - user
+            parameters:
+                - name: id
+                  in: query
+                  required: true
+                  description: ID of the profile to return
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Finds a User by its ID
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OtherProfile'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+    /profile/{id}:
+        get:
+            summary: Return my User profile
+            operationId: getMyProfile
+            tags:
+                - user
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: ID of the profile to return
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Returns a User profile
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MyProfile'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
+                403:
+                    description: 'Error: Forbidden'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error403'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
     /contributions:
         post:
             summary: Adds a new Contribution
@@ -42,6 +118,15 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error400'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
             security:
             - ApiKeyAuth: []
         get:
@@ -114,15 +199,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ContributionResult'
-                404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
                 400:
                     description: 'Error: Bad Request'
                     content:
@@ -132,6 +208,35 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error400'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
+                403:
+                    description: 'Error: Forbidden'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error403'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+            security:
+            - ApiKeyAuth: []
         get:
             summary: Finds a contribution by its ID
             operationId: getContributionById
@@ -233,6 +338,15 @@ paths:
                             examples:
                                 successExample:
                                     $ref: '#/components/examples/success200'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -277,6 +391,15 @@ paths:
                             examples:
                                 successExample:
                                     $ref: '#/components/examples/success200'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -321,6 +444,15 @@ paths:
                             examples:
                                 successExample:
                                     $ref: '#/components/examples/success200'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -365,6 +497,15 @@ paths:
                             examples:
                                 successExample:
                                     $ref: '#/components/examples/success200'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -387,40 +528,72 @@ paths:
             - ApiKeyAuth: []
 components:
     schemas:
-        User:
+        MyProfile:
             type: object
             properties:
                 id:
-                    type: integer
-                    format: int64
-                    example: 1
-                username:
                     type: string
                     maxLength: 150
-                    example: 'John'
-                first_name:
-                    type: string
-                    maxLength: 30
-                    example: 'Doe'
-                last_name:
-                    type: string
-                    maxLength: 150
-                    example: 'García'
-                password:
-                    type: string
-                    format: password
-                    minLength: 8
-                    maxLength: 128
-                    example: 'asndqw23qDS'
-                email:
-                    type: string
-                    format: email
-                    maxLength: 254
-                    example: 'john.doe@mail.com'
+                    example: John
                 date_joined:
                     type: string
                     format: date-time
                     example: '2020-04-16 22:41:09.025719'
+                karma:
+                    type: integer
+                    format: int32
+                    default: 1
+                    example: 4
+                about:
+                    type: string
+                    maxLength: 2000
+                    nullable: true
+                    default: null
+                    example: Hello my name is John and I love Empo News
+                email:
+                    type: string
+                    format: email
+                    maxLength: 254
+                    example: john.doe@mail.com
+                showdead:
+                    type: boolean
+                    default: false
+                    example: true
+                noprocast:
+                    type: boolean
+                    default: false
+                    example: false
+                maxvisit:
+                    type: integer
+                    format: int32
+                    default: 1
+                    example: 20
+                minaway:
+                    type: integer
+                    format: int32
+                    default: 100
+                    example: 180
+                delay:
+                    type: integer
+                    format: int32
+                    default: 0
+                    example: 0
+        OtherProfile:
+            type: object
+            properties:
+                id:
+                    type: string
+                    maxLength: 150
+                    example: 'Thomas'
+                date_joined:
+                    type: string
+                    format: date-time
+                    example: '2020-04-16 22:41:09.025719'
+                karma:
+                    type: integer
+                    format: int32
+                    default: 1
+                    example: 4
         Contribution:
             type: object
             properties:
@@ -471,7 +644,7 @@ components:
                     items:
                         type: integer
                         format: int64
-                    example: [2, 4, 43]
+                    example: [John, Thomas, Rosie]
         ContributionResult:
             type: object
             properties:
@@ -557,7 +730,7 @@ components:
             value:
                 status: 404
                 error: "Not Found"
-                message: "No Contribution with that ID"
+                message: "No item with that ID"
         error409:
             value:
                 status: 409
@@ -576,6 +749,23 @@ components:
             value:
                 title: This is my first contribution
                 text: Hello World!
+        myProfile:
+            value:
+                id: John
+                date_joined: '2020-04-16 22:41:09.025719'
+                karma: 3
+                about: null
+                email: john@mail.com
+                showdead: false
+                noprocast: false
+                maxvisit: 1
+                minaway: 100
+                delay: 0
+        otherProfile:
+            value:
+                id: Thomas
+                date_joined: '2020-04-6 12:21:09.025719'
+                karma: 7
     securitySchemes:
         ApiKeyAuth:
             type: apiKey
