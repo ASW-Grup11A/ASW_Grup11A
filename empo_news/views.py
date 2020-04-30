@@ -714,6 +714,11 @@ def voted_comments(request):
     return render(request, 'empo_news/comments.html', context)
 
 
-class ContributionsViewSet(viewsets.ReadOnlyModelViewSet):
+class ContributionsViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user, points=1, publication_time=datetime.today(),
+                        comments=0, liked=True, show=True)
+

@@ -12,7 +12,12 @@ class UserFieldsSerializer(serializers.ModelSerializer):
 
 
 class ContributionSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
+    user = serializers.ReadOnlyField(source='user.id')
+    points = serializers.ReadOnlyField()
+    publication_time = serializers.ReadOnlyField()
+    comments = serializers.ReadOnlyField()
+    liked = serializers.ReadOnlyField()
+    show = serializers.ReadOnlyField()
 
     class Meta:
         model = Contribution

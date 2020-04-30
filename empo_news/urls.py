@@ -7,7 +7,8 @@ from .views import ContributionsViewSet
 app_name = 'empo_news'
 
 contributions_view = ContributionsViewSet.as_view({
-    'get': 'list'
+    'get': 'list',
+    'post': 'create'
 })
 
 urlpatterns = [
@@ -38,5 +39,5 @@ urlpatterns = [
     path('voted_comments', views.voted_comments, name='voted_comments'),
     path('collapse/<int:contribution_id>/<int:comment_id>', views.collapse, name='collapse'),
 
-    path('api/contributions', contributions_view, name='api_contributions')
+    path('api/v1/contributions', contributions_view, name='api_contributions')
 ]
