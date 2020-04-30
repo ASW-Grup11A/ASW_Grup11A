@@ -162,6 +162,13 @@ paths:
             responses:
                 200:
                     description: Successful operation
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/BasicResponse'
+                            examples:
+                                successExample:
+                                    $ref: '#/components/examples/success200'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -190,6 +197,13 @@ paths:
             responses:
                 200:
                     description: Successful operation
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/BasicResponse'
+                            examples:
+                                successExample:
+                                    $ref: '#/components/examples/success200'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -329,6 +343,15 @@ components:
                     nullable: true
                     maxLength: 500
                     example: Hello Wordl!
+        BasicResponse:
+            type: object
+            properties:
+                status:
+                    type: integer
+                    enum: [200, 201]
+                message: 
+                    type: string
+                
         Error:
             type: object
             properties:
@@ -341,6 +364,10 @@ components:
                 message: 
                     type: string
     examples:
+        success200:
+            value:
+                status: 200
+                message: OK
         error400:
             value:
                 status: 400
