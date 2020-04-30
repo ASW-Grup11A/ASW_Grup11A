@@ -47,15 +47,15 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/AddContributionResult'
-                400:
+                500:
                     description: 'Error: Bad Request'
                     content:
                         aplication/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error400'
+                            $ref: '#/components/schemas/Error'
+                        examples:
+                            errorExample:
+                                $ref: '#/components/examples/error500'
             security:
             - ApiKeyAuth: []
         get:
