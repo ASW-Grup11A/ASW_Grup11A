@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from rest_framework import viewsets
 
+from empo_news.errors import UrlAndTextFieldException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
@@ -714,11 +715,20 @@ def voted_comments(request):
     return render(request, 'empo_news/comments.html', context)
 
 
+def is_url_valid(url):
+    return '.' in url
+
+
 class ContributionsViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
-    #serializer_class = ContributionSerializer
 
     def perform_create(self, serializer):
+        url = self.request.data.get('url', '')
+        text = self.request.data.get('text', '')
+
+        if url and text and is_url_valid(url):
+            raise UrlAndTextFieldException
+
         if serializer == UrlContributionSerializer:
             serializer.save(user=self.request.user, points=1, publication_time=datetime.today(),
                             comments=0, liked=True, show=True, text=None)
@@ -728,11 +738,12 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
-            url = self.request.POST.get('url', "")
+            url = self.request.data.get('url', '')
+            text = self.request.data.get('text', '')
 
-            if url:
+            if url and is_url_valid(url):
                 return UrlContributionSerializer
-            else:
+            elif text:
                 return AskContributionSerializer
 
         return ContributionSerializer
