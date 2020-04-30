@@ -1,3 +1,5 @@
+import random
+import string
 from datetime import datetime
 
 from django.contrib.auth import logout as do_logout
@@ -7,7 +9,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from rest_framework import viewsets
 
-from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException
+from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
+    UnauthenticatedException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
@@ -27,7 +30,7 @@ def submit(request):
             else:
                 contribution.text = form.cleaned_data['text']
             contribution.save()
-            contribution.likes.add(request.user)
+            contribution.user_likes.add(request.user)
             contribution.save()
 
             return HttpResponseRedirect(reverse('empo_news:main_page'))
@@ -55,7 +58,7 @@ def main_page(request):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -87,7 +90,7 @@ def new_page(request):
     most_recent_list = contributions.filter(show=True).order_by('-publication_time')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_recent_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_recent_list,
@@ -123,7 +126,7 @@ def submitted(request):
     submitted_list = base_list.order_by('publication_time')[list_start:(pg * 30)]
     more = len(base_list.all()) > (pg * 30)
     for contribution in submitted_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
 
     context = {
@@ -148,12 +151,12 @@ def likes_submit(request, view, id, pg, contribution_id):
         userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user)
+    if contribution.user_likes.filter(id=request.user.id).exists():
+        contribution.user_likes.remove(request.user)
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
-        contribution.likes.add(request.user)
+        contribution.user_likes.add(request.user)
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -169,12 +172,14 @@ def likes(request, view, pg, contribution_id):
         userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user)
+    if contribution.user_likes.filter(id=request.user.id).exists():
+        contribution.user_likes.remove(request.user)
+        contribution.likes = contribution.likes - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
-        contribution.likes.add(request.user)
+        contribution.user_likes.add(request.user)
+        contribution.likes = contribution.likes + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -190,12 +195,14 @@ def likes_reply(request, contribution_id, comment_id, path):
         userFields = UserFields(user=comment.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if comment.likes.filter(id=request.user.id).exists():
-        comment.likes.remove(request.user)
+    if comment.user_likes.filter(id=request.user.id).exists():
+        comment.user_likes.remove(request.user)
+        comment.likes = comment.likes - 1
         UserFields.objects.filter(user=comment.user).update(
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) - 1)
     else:
-        comment.likes.add(request.user)
+        comment.user_likes.add(request.user)
+        comment.likes = comment.likes + 1
         UserFields.objects.filter(user=comment.user).update(
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) + 1)
     comment.points = comment.total_likes()
@@ -211,12 +218,14 @@ def likes_contribution(request, contribution_id):
         userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user)
+    if contribution.user_likes.filter(id=request.user.id).exists():
+        contribution.user_likes.remove(request.user)
+        contribution.likes = contribution.likes - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
-        contribution.likes.add(request.user)
+        contribution.user_likes.add(request.user)
+        contribution.likes = contribution.likes + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -230,12 +239,14 @@ def likes_comment(request, comment_id, username):
         userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user)
+    if contribution.user_likes.filter(id=request.user.id).exists():
+        contribution.user_likes.remove(request.user)
+        contribution.likes = contribution.likes - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
-        contribution.likes.add(request.user)
+        contribution.user_likes.add(request.user)
+        contribution.likes = contribution.likes + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -257,10 +268,12 @@ def hide_no_page(request, view, contribution_id):
 
 def hide_for_user(request, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
-    if contribution.hidden.filter(id=request.user.id).exists():
-        contribution.hidden.remove(request.user)
+    if contribution.user_id_hidden.filter(id=request.user.id).exists():
+        contribution.user_id_hidden.remove(request.user)
+        contribution.hidden = contribution.hidden - 1
     else:
-        contribution.hidden.add(request.user)
+        contribution.user_id_hidden.add(request.user)
+        contribution.hidden = contribution.hidden + 1
     contribution.save()
 
 
@@ -274,6 +287,10 @@ def logout(request):
     return redirect('/')
 
 
+def generate_key():
+    return ''.join(random.choice(string.ascii_letters + string.digits) for value in range(20))
+
+
 def profile(request, username):
     karma = 0
     if request.user.is_authenticated:
@@ -285,6 +302,10 @@ def profile(request, username):
         userFields.save()
     else:
         userFields = UserFields.objects.get(user=userSelected)
+
+    if not userFields.api_key:
+        userFields.api_key = generate_key()
+        userFields.save()
 
     if userFields.showdead == 0:
         posS = '0'
@@ -428,7 +449,7 @@ def update_show(all_contributions, userid, border):
     length = len(all_contributions)
     while count_shown < border and i < length:
         contribution = all_contributions[i]
-        if contribution.hidden.filter(id=userid).exists():
+        if contribution.user_id_hidden.filter(id=userid).exists():
             contribution.show = False
         else:
             contribution.show = True
@@ -504,7 +525,7 @@ def comments(request):
     most_recent_list = Comment.objects.all().order_by('-publication_time')[list_base:(pg * 30)]
     more = len(Comment.objects.all()) > (pg * 30)
     for contribution in most_recent_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_recent_list,
@@ -537,7 +558,7 @@ def ask_list(request):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -570,7 +591,7 @@ def show_list(request):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -592,7 +613,7 @@ def update_show_hidden(all_contributions, userid, border):
     length = len(all_contributions)
     while count_shown < border and i < length:
         contribution = all_contributions[i]
-        if contribution.hidden.filter(id=userid).exists():
+        if contribution.user_id_hidden.filter(id=userid).exists():
             contribution.show = True
             count_shown += 1
         else:
@@ -619,7 +640,7 @@ def hidden(request, userid):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -638,10 +659,12 @@ def hidden(request, userid):
 
 def unhide(request, view, pg, contribution_id, userid):
     contribution = get_object_or_404(Contribution, id=contribution_id)
-    if contribution.hidden.filter(id=request.user.id).exists():
-        contribution.hidden.remove(request.user)
+    if contribution.user_id_hidden.filter(id=request.user.id).exists():
+        contribution.user_id_hidden.remove(request.user)
+        contribution.hidden = contribution.hidden - 1
     else:
-        contribution.hidden.add(request.user)
+        contribution.user_id_hidden.add(request.user)
+        contribution.hidden = contribution.hidden + 1
     contribution.save()
     if pg == 1:
         return HttpResponseRedirect(reverse('empo_news:' + view, kwargs={'userid': userid}))
@@ -667,7 +690,7 @@ def voted_submissions(request):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -699,7 +722,7 @@ def voted_comments(request):
     most_recent_list = comments.order_by('-publication_time')[list_base:(pg * 30)]
     more = len(comments) > (pg * 30)
     for contribution in most_recent_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_recent_list,
@@ -726,6 +749,10 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         title = self.request.data.get('title', '')
         url = self.request.data.get('url', '')
         text = self.request.data.get('text', '')
+        api_key = self.request.META.get('API-KEY', '')
+
+        if not UserFields.objects.filter(api_key__exact=api_key).exists():
+            raise UnauthenticatedException
 
         if len(title) > 80:
             raise TitleIsTooLongException

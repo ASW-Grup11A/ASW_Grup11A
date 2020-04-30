@@ -22,7 +22,7 @@ class ContributionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contribution
         fields = ['id', 'title', 'points', 'publication_time', 'url', 'text', 'comments',
-                  'liked', 'show', 'user']
+                  'liked', 'show', 'user', 'likes', 'hidden']
 
 
 class CommentSerializer(serializers.ModelSerializer):

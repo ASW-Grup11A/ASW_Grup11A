@@ -18,3 +18,9 @@ class UrlIsTooLongException(APIException):
     status_code = 400
     default_detail = 'Url is too long (maximum is 500 characters)'
     default_code = 'url too long'
+
+
+class UnauthenticatedException(APIException):
+    status_code = 401
+    default_detail = 'The user is not authenticated'
+    default_code = 'not authenticated'
