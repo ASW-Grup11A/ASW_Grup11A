@@ -13,7 +13,7 @@ paths:
             tags:
                 - contributions
             requestBody:
-                description: Provide the author & content of the new Tweet
+                description: Provide the author & content of the new Contribution
                 content:
                     application/json:
                         schema:
@@ -68,6 +68,70 @@ paths:
                             errorExample:
                                 $ref: '#/components/examples/error500'
     /contribution/{contributionId}:
+        put:
+            summary: Edits a contribution by its ID
+            operationId: editContributionById
+            tags:
+                - contributions
+            description: Edits a single Contribution
+            parameters:
+              - name: contributionId
+                in: path
+                required: true
+                description: ID of the contribution to return
+                schema:
+                    type: integer
+                    format: int64
+            requestBody:
+              required: true
+              description: Provides the new content for the contribution
+              content:
+                  application/json:
+                      schema:
+                          oneOf:
+                              - type: object
+                                properties:
+                                    title:
+                                        type: string
+                                        minLength: 4
+                                        maxLength: 2000
+                                        example: 'This is my new title'
+                              - $ref: '#/components/schemas/CreateContributionWithText'
+                      examples:
+                          urlContribution:
+                              summary: Example of a contribution with url
+                              value:
+                                  title: This is my new title
+                          textContribution:
+                              summary: Example of a contribution with text
+                              value:
+                                  title: This is my new title
+                                  text: Hey there!
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AddContributionResult'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+                400:
+                    description: 'Error: Bad Request'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error400'
         get:
             summary: Finds a contribution by its ID
             operationId: getContributionById
@@ -178,6 +242,15 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error409'
             security:
             - ApiKeyAuth: []
     /contribution/{contributionId}/unvote:
@@ -213,6 +286,15 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error409'
             security:
             - ApiKeyAuth: []
     /contribution/{contributionId}/hide:
@@ -248,6 +330,15 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error409'
             security:
             - ApiKeyAuth: []
     /contribution/{contributionId}/unhide:
@@ -283,6 +374,15 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error409'
             security:
             - ApiKeyAuth: []
 components:
@@ -427,7 +527,7 @@ components:
             properties:
                 status:
                     type: integer
-                    enum: [400, 401, 403, 404, 500]
+                    enum: [400, 401, 403, 404, 409, 500]
                 error: 
                     type: string
                     enum: ["Bad Request", "Unauthorized", "Forbidden", "Not Found", "Conflict", "Internal Server Error"]
@@ -457,7 +557,12 @@ components:
             value:
                 status: 404
                 error: "Not Found"
-                message: "No Tweet with that ID"
+                message: "No Contribution with that ID"
+        error409:
+            value:
+                status: 409
+                error: "Conflict"
+                message: "The Contribution already is in this state"
         error500:
             value:
                 status: 500
