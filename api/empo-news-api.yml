@@ -17,28 +17,14 @@ paths:
                 content:
                     application/json:
                         schema:
-                            required:
-                            - title
-                            - url
-                            - text
-                            type: object
-                            properties:
-                                title:
-                                    type: string
-                                    minLength: 4
-                                    maxLength: 2000
-                                    example: 'This is my first contribution'
-                                url:
-                                    type: string
-                                    nullable: true
-                                    format: url
-                                    maxLength: 500
-                                    example: 'https://google.com'
-                                text:
-                                    type: string
-                                    nullable: true
-                                    maxLength: 500
-                                    example: "Hello Wordl!"
+                            oneOf:
+                                - $ref: '#/components/schemas/CreateContributionWithUrl'
+                                - $ref: '#/components/schemas/CreateContributionWithText'
+                        examples:
+                            urlExample:
+                                $ref: '#/components/examples/postUrl'
+                            textExample:
+                                $ref: '#/components/examples/postText'
                 required: true
             responses:
                 201:
@@ -309,7 +295,40 @@ components:
                     $ref: '#/components/schemas/Contribution'
                 api_key:
                     type: string
-                    example: "MjAyMC0wNC0xOCAxMjoyODo0MSBVVEM=\n"
+                    example: MjAyMC0wNC0xOCAxMjoyODo0MSBVVEM=\n
+        CreateContributionWithUrl:
+            required:
+            - title
+            - url
+            type: object
+            properties:
+                title:
+                    type: string
+                    minLength: 4
+                    maxLength: 2000
+                    example: This is my first contribution
+                url:
+                    type: string
+                    nullable: true
+                    format: url
+                    maxLength: 500
+                    example: https://www.google.com
+        CreateContributionWithText:
+            required:
+            - title
+            - text
+            type: object
+            properties:
+                title:
+                    type: string
+                    minLength: 4
+                    maxLength: 2000
+                    example: This is my first contribution
+                text:
+                    type: string
+                    nullable: true
+                    maxLength: 500
+                    example: Hello Wordl!
         Error:
             type: object
             properties:
@@ -347,6 +366,14 @@ components:
                 status: 500
                 error: "Internal Server Error"
                 message: "There was an error when retrieving the data"
+        postUrl:
+            value: 
+                title: This is my first contribution
+                url: https://www.google.com
+        postText:
+            value:
+                title: This is my first contribution
+                text: Hello World!
     securitySchemes:
         ApiKeyAuth:
             type: apiKey
