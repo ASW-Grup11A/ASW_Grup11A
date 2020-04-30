@@ -91,7 +91,7 @@ paths:
             tags:
                 - contributions
             requestBody:
-                description: Provide the author & content of the new Contribution
+                description: Provide the content of the new Contribution
                 content:
                     application/json:
                         schema:
@@ -110,7 +110,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ContributionResult'
+                                $ref: '#/components/schemas/Contribution'
                 400:
                     description: 'Error: Bad Request'
                     content:
@@ -200,7 +200,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ContributionResult'
+                                $ref: '#/components/schemas/Contribution'
                 400:
                     description: 'Error: Bad Request'
                     content:
@@ -533,6 +533,89 @@ paths:
                                     $ref: '#/components/examples/error409'
             security:
             - ApiKeyAuth: []
+    /contribution/{contributionId}/comments:
+        post:
+            summary: Creates a comment for the given contribution
+            operationId: createComment
+            tags:
+              - comments
+            parameters:
+                - name: contributionId
+                  in: path
+                  required: true
+                  description: ID of the contribution
+                  schema:
+                      type: integer
+                      format: int64
+            requestBody:
+                description: Provide the content of the new Comment
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                text: 
+                                    type: string
+                                    example: What's up?
+                required: true
+            responses:
+                201:
+                    description: Comment created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Comment'
+                400:
+                    description: 'Error: Bad Request'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error400'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
+            security:
+                - ApiKeyAuth: []
+        get:
+            summary: Retrieves all comments for the given contribution
+            operationId: listContributionComments
+            tags:
+              - comments
+            parameters:
+                - name: contributionId
+                  in: path
+                  required: true
+                  description: ID of the contribution
+                  schema:
+                      type: integer
+                      format: int64
+            responses:
+                200:
+                  description: List of all contribution comments
+                  content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Comment'
+                500:
+                  description: 'Error: Internal server error'
+                  content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Error'
+                        examples:
+                            errorExample:
+                                $ref: '#/components/examples/error500'
 components:
     schemas:
         MyProfile:
@@ -639,27 +722,61 @@ components:
                     default: 0
                     example: 3
                 user_id:
-                    type: integer
-                    format: int64
-                    example: 2
+                    type: string
+                    maxLength: 150
+                    example: John
                 likes:
                     type: integer
                     format: int32
                     example: 38
                 hidden:
-                    type: array
-                    items:
-                        type: string
-                        maxLength: 150
-                    example: [John, Thomas, Rosie]
-        ContributionResult:
+                    type: integer
+                    format: int32
+                    example: 5
+        Comment:
             type: object
             properties:
-                new_contribution:
-                    $ref: '#/components/schemas/Contribution'
-                api_key:
+                id:
+                    type: integer
+                    format: int64
+                    example: 1
+                points:
+                    type: integer
+                    format: int32
+                    default: 1
+                    example: 1
+                publication_time:
                     type: string
-                    example: MjAyMC0wNC0xOCAxMjoyODo0MSBVVEM=\n
+                    format: date-time
+                    example: '2020-04-16 22:18:21.208736'
+                text:
+                    type: string
+                    nullable: true
+                    maxLength: 500
+                    example: What's up?
+                replies:
+                    type: integer
+                    format: int32
+                    default: 0
+                    example: 0
+                user_id:
+                    type: string
+                    maxLength: 150
+                    example: John
+                likes:
+                    type: integer
+                    format: int32
+                    default: 1
+                    example: 1
+                hidden:
+                    type: integer
+                    format: int32
+                    default: 0
+                    example: 0
+                parent_id:
+                    type: integer
+                    format: int64
+                    example: 381
         CreateContributionWithUrl:
             required:
             - title
@@ -726,7 +843,7 @@ components:
             value:
                 status: 400
                 error: "Bad Request"
-                message: "Content is too long (maximum is 500 characters)"
+                message: "Content is too long (maximum is 2000 characters)"
         error401:
             value:
                 status: 401
