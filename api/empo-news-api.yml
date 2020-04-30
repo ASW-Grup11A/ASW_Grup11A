@@ -37,7 +37,7 @@ paths:
                                     $ref: '#/components/examples/error404'
     /profile/{id}:
         get:
-            summary: Return my User profile
+            summary: Return signed in profile
             operationId: getMyProfile
             tags:
                 - user
@@ -50,7 +50,7 @@ paths:
                       type: string
             responses:
                 200:
-                    description: Returns a User profile
+                    description: Returns the authenticated profile
                     content:
                         application/json:
                             schema:
@@ -82,6 +82,8 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
+            security:
+            - ApiKeyAuth: []
     /contributions:
         post:
             summary: Adds a new Contribution
@@ -284,7 +286,12 @@ paths:
                 204:
                     description: Contribution deleted
                     content:
-                        application/json: {}
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/BasicResponse'
+                            examples:
+                                successExample:
+                                    $ref: '#/components/examples/success204'
                 404:
                     description: 'Error: Not found'
                     content:
@@ -642,8 +649,8 @@ components:
                 hidden:
                     type: array
                     items:
-                        type: integer
-                        format: int64
+                        type: string
+                        maxLength: 150
                     example: [John, Thomas, Rosie]
         ContributionResult:
             type: object
@@ -691,7 +698,7 @@ components:
             properties:
                 status:
                     type: integer
-                    enum: [200, 201]
+                    enum: [200, 204]
                 message: 
                     type: string
                 
@@ -711,6 +718,10 @@ components:
             value:
                 status: 200
                 message: OK
+        success204:
+            value:
+                status: 204
+                message: Deleted
         error400:
             value:
                 status: 400
