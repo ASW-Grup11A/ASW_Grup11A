@@ -9,7 +9,7 @@ from rest_framework import viewsets
 
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
-from empo_news.serializers import ContributionSerializer
+from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
 
 
 def submit(request):
@@ -716,9 +716,24 @@ def voted_comments(request):
 
 class ContributionsViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
-    serializer_class = ContributionSerializer
+    #serializer_class = ContributionSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user, points=1, publication_time=datetime.today(),
-                        comments=0, liked=True, show=True)
+        if serializer == UrlContributionSerializer:
+            serializer.save(user=self.request.user, points=1, publication_time=datetime.today(),
+                            comments=0, liked=True, show=True, text=None)
+        else:
+            serializer.save(user=self.request.user, points=1, publication_time=datetime.today(),
+                            comments=0, liked=True, show=True, url=None)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            url = self.request.POST.get('url', "")
+
+            if url:
+                return UrlContributionSerializer
+            else:
+                return AskContributionSerializer
+
+        return ContributionSerializer
 
