@@ -5,9 +5,11 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from rest_framework import viewsets
 
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
+from empo_news.serializers import ContributionSerializer
 
 
 def submit(request):
@@ -710,3 +712,8 @@ def voted_comments(request):
         "karma": karma,
     }
     return render(request, 'empo_news/comments.html', context)
+
+
+class ContributionsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
