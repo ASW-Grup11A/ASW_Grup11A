@@ -11,7 +11,7 @@ paths:
             summary: Return a User profile
             operationId: getUserProfile
             tags:
-                - user
+                - users
             parameters:
                 - name: id
                   in: query
@@ -40,7 +40,7 @@ paths:
             summary: Return signed in profile
             operationId: getMyProfile
             tags:
-                - user
+                - users
             parameters:
                 - name: id
                   in: path
