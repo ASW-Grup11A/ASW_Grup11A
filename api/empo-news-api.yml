@@ -8,7 +8,7 @@ servers:
 paths:
     /profiles:
         get:
-            summary: Return a User profile
+            summary: Return a user profile
             operationId: getUserProfile
             tags:
                 - users
@@ -21,7 +21,7 @@ paths:
                       type: string
             responses:
                 200:
-                    description: Finds a User by its ID
+                    description: Finds a user by its ID
                     content:
                         application/json:
                             schema:
@@ -37,7 +37,7 @@ paths:
                                     $ref: '#/components/examples/error404'
     /profile/{id}:
         get:
-            summary: Return signed in User profile
+            summary: Returns the current signed in user profile
             operationId: getMyProfile
             tags:
                 - users
@@ -82,16 +82,14 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
-            security:
-            - ApiKeyAuth: []
     /contributions:
         post:
-            summary: Adds a new Contribution
+            summary: Adds a new contribution
             operationId: createContribution
             tags:
                 - contributions
             requestBody:
-                description: Provide the content of the new Contribution
+                description: Provide the content of the new contribution
                 content:
                     application/json:
                         schema:
@@ -129,8 +127,6 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error401'
-            security:
-            - ApiKeyAuth: []
         get:
             summary: Retrieves all the contributions
             operationId: listContribution
@@ -160,7 +156,7 @@ paths:
             operationId: editContributionById
             tags:
                 - contributions
-            description: Edits a single Contribution
+            description: Edits a single contribution
             parameters:
               - name: contributionId
                 in: path
@@ -237,14 +233,12 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
-            security:
-            - ApiKeyAuth: []
         get:
             summary: Finds a contribution by its ID
             operationId: getContributionById
             tags:
                 - contributions
-            description: Returns a single Contribution
+            description: Returns a single contribution
             parameters:
               - name: contributionId
                 in: path
@@ -270,7 +264,7 @@ paths:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
         delete:
-            summary: Deletes a Contribution
+            summary: Deletes a contribution
             operationId: deleteContribution
             tags:
                 - contributions
@@ -319,8 +313,6 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error403'
-            security:
-            - ApiKeyAuth: []
     /contribution/{id}/comments:
         post:
             summary: Creates a comment
@@ -337,7 +329,7 @@ paths:
                       type: integer
                       format: int64
             requestBody:
-                description: Provide the content of the new Comment
+                description: Provide the content of the new comment
                 content:
                     application/json:
                         schema:
@@ -381,8 +373,6 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
-            security:
-                - ApiKeyAuth: []
         get:
             summary: Retrieves all comments
             description: Retrieves all comments for the given contribution or comment
@@ -506,8 +496,6 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error409'
-            security:
-            - ApiKeyAuth: []
     /contribution/{id}/unvote:
         put:
             summary: Unvotes a contribution or comment
@@ -560,8 +548,6 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error409'
-            security:
-            - ApiKeyAuth: []
     /contribution/{id}/hide:
         put:
             summary: Hides a contribution or a comment
@@ -614,8 +600,6 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error409'
-            security:
-            - ApiKeyAuth: []
     /contribution/{id}/unhide:
         put:
             summary: Unhides a contribution or a comment
@@ -668,8 +652,8 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error409'
-            security:
-            - ApiKeyAuth: []
+security:
+- ApiKeyAuth: []
 components:
     schemas:
         MyProfile:
