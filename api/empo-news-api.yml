@@ -27,23 +27,9 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/OtherProfile'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                     $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                     $ref: '#/components/responses/404'
     /profile/{id}:
         get:
             summary: Returns the current signed in user profile
@@ -60,32 +46,11 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/MyProfile'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                     $ref: '#/components/responses/401'
                 403:
-                    description: 'Error: Forbidden'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error403'
+                     $ref: '#/components/responses/403'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                     $ref: '#/components/responses/404'
     /contributions:
         post:
             summary: Adds a new contribution
@@ -114,23 +79,9 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Contribution'
                 400:
-                    description: 'Error: Bad Request'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error400'
+                     $ref: '#/components/responses/400'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                     $ref: '#/components/responses/401'
         get:
             summary: Retrieves all the contributions
             operationId: listContribution
@@ -159,23 +110,9 @@ paths:
                             items:
                                 $ref: '#/components/schemas/Contribution'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                     $ref: '#/components/responses/401'
                 500:
-                  description: 'Error: Internal server error'
-                  content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/Error'
-                        examples:
-                            errorExample:
-                                $ref: '#/components/examples/error500'
+                   $ref: '#/components/responses/500'
     /contribution/{id}:
         parameters:
                 - $ref: '#/components/parameters/contributionId'
@@ -219,41 +156,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Contribution'
                 400:
-                    description: 'Error: Bad Request'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error400'
+                     $ref: '#/components/responses/400'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                     $ref: '#/components/responses/401'
                 403:
-                    description: 'Error: Forbidden'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error403'
+                     $ref: '#/components/responses/403'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                     $ref: '#/components/responses/404'
         get:
             summary: Finds a contribution by its ID
             operationId: getContributionById
@@ -276,23 +185,9 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Contribution'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                     $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                     $ref: '#/components/responses/404'
         delete:
             summary: Deletes a contribution or comment by its ID
             operationId: deleteContribution
@@ -310,32 +205,11 @@ paths:
                                 successExample:
                                     $ref: '#/components/examples/success204'
                 404:
-                    description: 'Error: Not found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                     $ref: '#/components/responses/404'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                     $ref: '#/components/responses/401'
                 403:
-                    description: 'Error: Forbidden'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error403'
+                     $ref: '#/components/responses/403'
     /contribution/{id}/comments:
         parameters:
                 - $ref: '#/components/parameters/contributionId'
@@ -364,32 +238,11 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Comment'
                 400:
-                    description: 'Error: Bad Request'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error400'
+                    $ref: '#/components/responses/400'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                    $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                    $ref: '#/components/responses/404'
         get:
             summary: Retrieves all comments
             description: Retrieves all comments for the given contribution or comment
@@ -408,32 +261,11 @@ paths:
                             items:
                                 $ref: '#/components/schemas/Comment'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                    $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                    $ref: '#/components/responses/404'
                 500:
-                  description: 'Error: Internal server error'
-                  content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/Error'
-                        examples:
-                            errorExample:
-                                $ref: '#/components/examples/error500'
+                  $ref: '#/components/responses/500'
     /comment/{commentId}:
         get:
             summary: Gets a comment by its ID
@@ -456,23 +288,9 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Comment'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                    $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                    $ref: '#/components/responses/404'
     /contribution/{id}/vote:
         put:
             summary: Votes a contribution or comment
@@ -484,41 +302,13 @@ paths:
               - $ref: '#/components/parameters/contributionId'
             responses:
                 200:
-                    description: Successful operation
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success200'
+                    $ref: '#/components/responses/200'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                    $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                    $ref: '#/components/responses/404'
                 409:
-                    description: 'Error: Conflict'
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error409'
+                    $ref: '#/components/responses/409'
     /contribution/{id}/unvote:
         put:
             summary: Unvotes a contribution or comment
@@ -530,41 +320,13 @@ paths:
               - $ref: '#/components/parameters/contributionId'
             responses:
                 200:
-                    description: Successful operation
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success200'
+                    $ref: '#/components/responses/200'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                    $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                    $ref: '#/components/responses/404'
                 409:
-                    description: 'Error: Conflict'
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error409'
+                    $ref: '#/components/responses/409'
     /contribution/{id}/hide:
         put:
             summary: Hides a contribution or a comment
@@ -576,41 +338,13 @@ paths:
               - $ref: '#/components/parameters/contributionId'
             responses:
                 200:
-                    description: Successful operation
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success200'
+                    $ref: '#/components/responses/200'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                    $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                    $ref: '#/components/responses/404'
                 409:
-                    description: 'Error: Conflict'
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error409'
+                    $ref: '#/components/responses/409'
     /contribution/{id}/unhide:
         put:
             summary: Unhides a contribution or a comment
@@ -622,41 +356,13 @@ paths:
               - $ref: '#/components/parameters/contributionId'
             responses:
                 200:
-                    description: Successful operation
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success200'
+                    $ref: '#/components/responses/200'
                 401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
+                    $ref: '#/components/responses/401'
                 404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
+                    $ref: '#/components/responses/404'
                 409:
-                    description: 'Error: Conflict'
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error409'
+                    $ref: '#/components/responses/409'
 security:
 - ApiKeyAuth: []
 components:
@@ -686,6 +392,79 @@ components:
                     - publication_date
                     - title
                     - votes
+    responses:
+        200:
+            description: Successful operation
+            content:
+                aplication/json:
+                    schema:
+                        $ref: '#/components/schemas/BasicResponse'
+                    examples:
+                        successExample:
+                            $ref: '#/components/examples/success200'
+        400:
+            description: 'Error: Bad Request'
+            content:
+                aplication/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'
+                    examples:
+                        errorExample:
+                            $ref: '#/components/examples/error400'
+        401:
+            description: 'Error: Unauthorized'
+            content:
+                aplication/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'
+                    examples:
+                        errorExample:
+                            $ref: '#/components/examples/error401'
+        403:
+            description: 'Error: Forbidden'
+            content:
+                aplication/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'
+                    examples:
+                        errorExample:
+                            $ref: '#/components/examples/error403'
+        404:
+            description: 'Error: Not Found'
+            content:
+                aplication/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'
+                    examples:
+                        errorExample:
+                            $ref: '#/components/examples/error404'
+        405:
+            description: Method Not Allowed
+            content:
+                aplication/json:
+                    schema:
+                        $ref: '#/components/schemas/BasicResponse'
+                    examples:
+                        errorExample:
+                            $ref: '#/components/examples/error405'
+        409:
+            description: 'Error: Conflict'
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'
+                    examples:
+                        errorExample:
+                            $ref: '#/components/examples/error409'
+        500:
+            description: 'Error: Internal server error'
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'
+                    examples:
+                        errorExample:
+                            $ref: '#/components/examples/error500'
     schemas:
         MyProfile:
             type: object
@@ -898,7 +677,7 @@ components:
             properties:
                 status:
                     type: integer
-                    enum: [400, 401, 403, 404, 409, 500]
+                    enum: [400, 401, 403, 404, 405, 409, 500]
                 error: 
                     type: string
                     enum: ["Bad Request", "Unauthorized", "Forbidden", "Not Found", "Conflict", "Internal Server Error"]
@@ -933,11 +712,16 @@ components:
                 status: 404
                 error: "Not Found"
                 message: "No item with that ID"
+        error405:
+            value:
+                status: 405
+                error: "Method not allowed"
+                message: "The requested method is not allowed"
         error409:
             value:
                 status: 409
                 error: "Conflict"
-                message: "The Contribution already is in this state"
+                message: "The contribution already is in this state"
         error500:
             value:
                 status: 500
