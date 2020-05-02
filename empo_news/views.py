@@ -5,11 +5,13 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from rest_framework import viewsets
+from rest_framework import viewsets, renderers
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework_api_key.models import APIKey
 from rest_framework_api_key.permissions import HasAPIKey
 
-from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException
+from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, NotFoundException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
@@ -780,3 +782,16 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
         return ContributionSerializer
 
+
+class ContributionsIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [HasAPIKey]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+        return Response(ContributionSerializer(contribution).data)

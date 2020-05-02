@@ -2,13 +2,17 @@ from django.conf.urls import url
 from django.urls import path, include
 
 from . import views
-from .views import ContributionsViewSet
+from .views import ContributionsViewSet, ContributionsIdViewSet
 
 app_name = 'empo_news'
 
 contributions_view = ContributionsViewSet.as_view({
     'get': 'list',
     'post': 'create'
+})
+
+contributions_id_view = ContributionsIdViewSet.as_view({
+    'get': 'get_actual',
 })
 
 urlpatterns = [
@@ -39,5 +43,6 @@ urlpatterns = [
     path('voted_comments', views.voted_comments, name='voted_comments'),
     path('collapse/<int:contribution_id>/<int:comment_id>', views.collapse, name='collapse'),
 
-    path('api/v1/contributions', contributions_view, name='api_contributions')
+    path('api/v1/contributions', contributions_view, name='api_contributions'),
+    path('api/v1/contributions/<int:id>', contributions_id_view, name='api_contributions_id')
 ]

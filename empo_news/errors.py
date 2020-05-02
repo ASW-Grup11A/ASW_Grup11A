@@ -24,3 +24,9 @@ class UnauthenticatedException(APIException):
     status_code = 401
     default_detail = 'The user is not authenticated'
     default_code = 'not authenticated'
+
+
+class NotFoundException(APIException):
+    status_code = 404
+    default_detail = 'Not found'
+    default_code = 'not found'
