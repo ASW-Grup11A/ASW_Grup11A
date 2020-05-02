@@ -26,6 +26,15 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/OtherProfile'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -141,6 +150,15 @@ paths:
                             type: array
                             items:
                                 $ref: '#/components/schemas/Contribution'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 500:
                   description: 'Error: Internal server error'
                   content:
@@ -254,6 +272,15 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Contribution'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -396,6 +423,15 @@ paths:
                             type: array
                             items:
                                 $ref: '#/components/schemas/Comment'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 404:
                     description: 'Error: Not Found'
                     content:
@@ -435,6 +471,15 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Comment'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
                 404:
                     description: 'Error: Not Found'
                     content:
