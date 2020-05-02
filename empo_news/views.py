@@ -12,7 +12,7 @@ from rest_framework_api_key.models import APIKey
 from rest_framework_api_key.permissions import HasAPIKey
 
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
-    NotFoundException, ForbiddenException, UnauthenticatedException
+    NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
@@ -778,6 +778,12 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
                             comments=0, liked=True, show=True, url=None)
 
+        user_contributions = Contribution.objects.filter(user=user_field.user).order_by('-publication_time')
+        contribution = user_contributions[0]
+
+        contribution.user_likes.add(user_field.user)
+        contribution.save()
+
     def get_serializer_class(self):
         if self.action == 'create':
             url = self.request.data.get('url', '')
@@ -853,3 +859,35 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         contribution.save()
 
         return Response(ContributionSerializer(contribution).data)
+
+
+class VoteIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [HasAPIKey]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def vote(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        for user_like in contribution.user_likes.all():
+            if str(user_field.user.username) == str(user_like):
+                raise ConflictException
+
+        contribution.user_likes.add(user_field.user.id)
+        contribution.likes += 1
+        contribution.save()
+
+        response = {'status': 200, 'message': 'OK'}
+        return Response(response)

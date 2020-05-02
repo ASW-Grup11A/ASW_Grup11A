@@ -36,3 +36,9 @@ class NotFoundException(APIException):
     status_code = 404
     default_detail = 'Not found'
     default_code = 'not found'
+
+
+class ConflictException(APIException):
+    status_code = 409
+    default_detail = 'The contribution already is in this state'
+    default_code = 'conflict'

@@ -2,7 +2,7 @@ from django.conf.urls import url
 from django.urls import path, include
 
 from . import views
-from .views import ContributionsViewSet, ContributionsIdViewSet
+from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet
 
 app_name = 'empo_news'
 
@@ -15,6 +15,10 @@ contributions_id_view = ContributionsIdViewSet.as_view({
     'get': 'get_actual',
     'delete': 'delete_actual',
     'put': 'update_actual'
+})
+
+vote_id_view = VoteIdViewSet.as_view({
+    'put': 'vote'
 })
 
 urlpatterns = [
@@ -46,5 +50,6 @@ urlpatterns = [
     path('collapse/<int:contribution_id>/<int:comment_id>', views.collapse, name='collapse'),
 
     path('api/v1/contributions', contributions_view, name='api_contributions'),
-    path('api/v1/contributions/<int:id>', contributions_id_view, name='api_contributions_id')
+    path('api/v1/contributions/<int:id>', contributions_id_view, name='api_contributions_id'),
+    path('api/v1/contributions/<int:id>/vote', vote_id_view, name='api_vote_id')
 ]
