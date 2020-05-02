@@ -266,6 +266,20 @@ paths:
                 schema:
                     type: integer
                     format: int64
+              - in: query
+                name: showEn
+                description: Filter Show EN contributions
+                schema:
+                    type: boolean
+              - in: query
+                name: orderBy
+                description: Orders by one of the available values
+                schema:
+                    type: string
+                    enum:
+                        - publication_date
+                        - title
+                        - votes
             responses:
                 200:
                     description: Successful operation
