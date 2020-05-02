@@ -168,24 +168,25 @@ paths:
                         examples:
                             errorExample:
                                 $ref: '#/components/examples/error500'
-    /contribution/{contributionId}:
+    /contribution/{id}:
         put:
-            summary: Edits a contribution by its ID
+            summary: Edits a contribution or comment by its ID
             operationId: editContributionById
             tags:
                 - contributions
-            description: Edits a single contribution
+                - comments
+            description: Edits a single contribution or comment
             parameters:
-              - name: contributionId
+              - name: id
                 in: path
                 required: true
-                description: ID of the contribution to return
+                description: ID of the contribution or comment to edit
                 schema:
                     type: integer
                     format: int64
             requestBody:
               required: true
-              description: Provides the new content for the contribution
+              description: Provides the new content for the contribution or comment
               content:
                   application/json:
                       schema:
@@ -258,7 +259,7 @@ paths:
                 - contributions
             description: Returns a single contribution
             parameters:
-              - name: contributionId
+              - name: id
                 in: path
                 required: true
                 description: ID of the contribution to return
@@ -291,15 +292,16 @@ paths:
                                 errorExample:
                                     $ref: '#/components/examples/error404'
         delete:
-            summary: Deletes a contribution
+            summary: Deletes a contribution or comment by its ID
             operationId: deleteContribution
             tags:
                 - contributions
+                - comments
             parameters:
-              - name: contributionId
+              - name: id
                 in: path
                 required: true
-                description: ID of the contribution to delete
+                description: ID of the contribution or comment to delete
                 schema:
                     type: integer
                     format: int64
