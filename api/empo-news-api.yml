@@ -971,5 +971,5 @@ components:
     securitySchemes:
         ApiKeyAuth:
             type: apiKey
-            name: API-KEY
+            name: Api-Key
             in: header
