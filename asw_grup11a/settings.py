@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     #'empo_news.apps.AswGrup11AConfig',
     'rest_framework',
+    'rest_framework_api_key',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

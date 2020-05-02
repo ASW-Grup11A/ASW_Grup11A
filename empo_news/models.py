@@ -11,7 +11,7 @@ class UserFields(models.Model):
     maxvisit = models.IntegerField(default=1)
     minaway = models.IntegerField(default=180)
     delay = models.IntegerField(default=0)
-    api_key = models.CharField(max_length=20, default='')
+    api_key = models.CharField(max_length=1000, null=True)
 
 
 class Contribution(models.Model):

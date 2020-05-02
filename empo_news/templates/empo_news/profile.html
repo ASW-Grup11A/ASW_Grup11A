@@ -40,7 +40,15 @@
                                 {% if userSelected == request.user %}
                                     <tr>
                                         <td valign="top">api key: </td>
-                                        <td>{{ userFields.api_key }}</td>
+                                        <td>
+                                            {% if key %}
+                                                {{ key }} (Warning: Copy your key, you won't be able to see it again)
+                                            {% else %}
+                                                <a href="{% url 'empo_news:user_page' userSelected.username %}?generate=true">
+                                                    <u>Click to generate</u>
+                                                </a>
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td valign="top">{{ form.about.label_tag }}</td>

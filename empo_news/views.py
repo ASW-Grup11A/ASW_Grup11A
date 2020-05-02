@@ -1,5 +1,3 @@
-import random
-import string
 from datetime import datetime
 
 from django.contrib.auth import logout as do_logout
@@ -8,6 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from rest_framework import viewsets
+from rest_framework_api_key.models import APIKey
 
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
     UnauthenticatedException
@@ -287,12 +286,9 @@ def logout(request):
     return redirect('/')
 
 
-def generate_key():
-    return ''.join(random.choice(string.ascii_letters + string.digits) for value in range(20))
-
-
 def profile(request, username):
     karma = 0
+    key = ''
     if request.user.is_authenticated:
         karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     userSelected = User.objects.get(username=username)
@@ -302,10 +298,6 @@ def profile(request, username):
         userFields.save()
     else:
         userFields = UserFields.objects.get(user=userSelected)
-
-    if not userFields.api_key:
-        userFields.api_key = generate_key()
-        userFields.save()
 
     if userFields.showdead == 0:
         posS = '0'
@@ -322,6 +314,13 @@ def profile(request, username):
                  'minaway': userFields.minaway, 'delay': userFields.delay})
 
     if userSelected == request.user:
+        generate = request.GET.get('generate', 'false')
+
+        if generate == 'true':
+            api_key, key = APIKey.objects.create_key(name="empo-news")
+            userFields.api_key = api_key.id
+            userFields.save()
+
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
             if form.is_valid():
@@ -340,6 +339,7 @@ def profile(request, username):
         "userFields": userFields,
         "karma": karma,
         "notBottom": True,
+        "key": key,
     }
     return render(request, 'empo_news/profile.html', context)
 
