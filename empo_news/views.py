@@ -771,11 +771,11 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         if url and text and is_url_valid(url):
             raise UrlAndTextFieldException
 
-        if serializer == UrlContributionSerializer:
-            serializer.save(user=user_field.user, points=1, publication_time=datetime.today(),
+        if isinstance(serializer, UrlContributionSerializer):
+            serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
                             comments=0, liked=True, show=True, text=None)
         else:
-            serializer.save(user=user_field.user, points=1, publication_time=datetime.today(),
+            serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
                             comments=0, liked=True, show=True, url=None)
 
     def get_serializer_class(self):
@@ -821,3 +821,35 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         contribution.delete()
         message = {'status': 204, 'message': 'Deleted'}
         return Response(message)
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def update_actual(self, request, *args, **kwargs):
+        title = self.request.data.get('title', '')
+        url = self.request.data.get('url', '')
+        text = self.request.data.get('text', '')
+        key = self.request.META.get('HTTP_API_KEY', '')
+
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        if len(title) > 80:
+            raise TitleIsTooLongException
+
+        if len(url) > 500:
+            raise UrlIsTooLongException
+
+        if url and text and is_url_valid(url):
+            raise UrlAndTextFieldException
+
+        contribution = Contribution.objects.get(id=kwargs.get('id'))
+        contribution.title = title
+        contribution.url = url
+        contribution.text = text
+
+        contribution.save()
+
+        return Response(ContributionSerializer(contribution).data)

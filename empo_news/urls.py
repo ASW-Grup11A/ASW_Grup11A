@@ -13,7 +13,8 @@ contributions_view = ContributionsViewSet.as_view({
 
 contributions_id_view = ContributionsIdViewSet.as_view({
     'get': 'get_actual',
-    'delete': 'delete_actual'
+    'delete': 'delete_actual',
+    'put': 'update_actual'
 })
 
 urlpatterns = [
