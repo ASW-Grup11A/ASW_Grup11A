@@ -51,12 +51,7 @@ paths:
             tags:
                 - users
             parameters:
-                - name: id
-                  in: path
-                  required: true
-                  description: ID of the profile to return
-                  schema:
-                      type: string
+                - $ref: '#/components/parameters/userId'
             responses:
                 200:
                     description: Returns the authenticated profile
@@ -141,6 +136,19 @@ paths:
             operationId: listContribution
             tags:
                 - contributions
+            parameters:
+              - in: query
+                name: showEn
+                description: Filter Show EN contributions
+                schema:
+                    type: boolean
+              - in: query
+                name: url
+                description: Filter contributions by their URL
+                schema:
+                    type: string
+                    format: url
+              - $ref: '#/components/parameters/orderBy'
             responses:
                 200:
                   description: List of all contributions
@@ -169,6 +177,8 @@ paths:
                             errorExample:
                                 $ref: '#/components/examples/error500'
     /contribution/{id}:
+        parameters:
+                - $ref: '#/components/parameters/contributionId'
         put:
             summary: Edits a contribution or comment by its ID
             operationId: editContributionById
@@ -176,14 +186,6 @@ paths:
                 - contributions
                 - comments
             description: Edits a single contribution or comment
-            parameters:
-              - name: id
-                in: path
-                required: true
-                description: ID of the contribution or comment to edit
-                schema:
-                    type: integer
-                    format: int64
             requestBody:
               required: true
               description: Provides the new content for the contribution or comment
@@ -259,27 +261,13 @@ paths:
                 - contributions
             description: Returns a single contribution
             parameters:
-              - name: id
-                in: path
-                required: true
-                description: ID of the contribution to return
-                schema:
-                    type: integer
-                    format: int64
-              - in: query
-                name: showEn
-                description: Filter Show EN contributions
-                schema:
-                    type: boolean
-              - in: query
-                name: orderBy
-                description: Orders by one of the available values
-                schema:
-                    type: string
-                    enum:
-                        - publication_date
-                        - title
-                        - votes
+                - in: path
+                  name: id
+                  description: ID of the contribution
+                  required: true
+                  schema:
+                      type: integer
+                      format: int64
             responses:
                 200:
                     description: Successful operation
@@ -311,14 +299,6 @@ paths:
             tags:
                 - contributions
                 - comments
-            parameters:
-              - name: id
-                in: path
-                required: true
-                description: ID of the contribution or comment to delete
-                schema:
-                    type: integer
-                    format: int64
             responses:
                 204:
                     description: Contribution deleted
@@ -357,20 +337,14 @@ paths:
                                 errorExample:
                                     $ref: '#/components/examples/error403'
     /contribution/{id}/comments:
+        parameters:
+                - $ref: '#/components/parameters/contributionId'
         post:
             summary: Creates a comment
             description: Creates a comment for the given contribution or comment.
             operationId: createComment
             tags:
               - comments
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  description: ID of the contribution or comment
-                  schema:
-                      type: integer
-                      format: int64
             requestBody:
                 description: Provide the content of the new comment
                 content:
@@ -423,13 +397,7 @@ paths:
             tags:
               - comments
             parameters:
-                - name: id
-                  in: path
-                  required: true
-                  description: ID of the contribution or comment
-                  schema:
-                      type: integer
-                      format: int64
+                - $ref: '#/components/parameters/orderBy'
             responses:
                 200:
                   description: List of all contribution comments
@@ -513,13 +481,7 @@ paths:
                 - contributions
                 - comments
             parameters:
-              - name: id
-                in: path
-                required: true
-                description: ID of the contribution or comment to vote
-                schema:
-                    type: integer
-                    format: int64
+              - $ref: '#/components/parameters/contributionId'
             responses:
                 200:
                     description: Successful operation
@@ -565,13 +527,7 @@ paths:
                 - contributions
                 - comments
             parameters:
-              - name: id
-                in: path
-                required: true
-                description: ID of the contribution or comment to unvote
-                schema:
-                    type: integer
-                    format: int64
+              - $ref: '#/components/parameters/contributionId'
             responses:
                 200:
                     description: Successful operation
@@ -617,13 +573,7 @@ paths:
                 - contributions
                 - comments
             parameters:
-              - name: id
-                in: path
-                required: true
-                description: ID of the contribution or comment to unvote
-                schema:
-                    type: integer
-                    format: int64
+              - $ref: '#/components/parameters/contributionId'
             responses:
                 200:
                     description: Successful operation
@@ -669,13 +619,7 @@ paths:
                 - contributions
                 - comments
             parameters:
-              - name: id
-                in: path
-                required: true
-                description: ID of the contribution or comment to unvote
-                schema:
-                    type: integer
-                    format: int64
+              - $ref: '#/components/parameters/contributionId'
             responses:
                 200:
                     description: Successful operation
@@ -716,6 +660,32 @@ paths:
 security:
 - ApiKeyAuth: []
 components:
+    parameters:
+        contributionId:
+            name: id
+            in: path
+            required: true
+            description: ID of the contribution or comment
+            schema:
+              type: integer
+              format: int64
+        userId:
+            name: id
+            in: path
+            required: true
+            description: ID of the profile to return
+            schema:
+                type: string
+        orderBy:
+            in: query
+            name: orderBy
+            description: Orders by one of the available values
+            schema:
+                type: string
+                enum:
+                    - publication_date
+                    - title
+                    - votes
     schemas:
         MyProfile:
             type: object
