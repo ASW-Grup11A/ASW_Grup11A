@@ -12,7 +12,7 @@ from rest_framework_api_key.models import APIKey
 from rest_framework_api_key.permissions import HasAPIKey
 
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
-    NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException
+    NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
@@ -887,6 +887,48 @@ class VoteIdViewSet(viewsets.ModelViewSet):
 
         contribution.user_likes.add(user_field.user.id)
         contribution.likes += 1
+        contribution.save()
+
+        response = {'status': 200, 'message': 'OK'}
+        return Response(response)
+
+
+class UnVoteIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [HasAPIKey]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def un_vote(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        if user_field.user == contribution.user:
+            raise ContributionUserException
+
+        found = False
+        user_likes = contribution.user_likes.all()
+        actual = 0
+
+        while (not found and actual < len(user_likes)):
+            found = str(user_likes[actual]) == str(user_field.user.username)
+            actual += 1
+
+        if not found:
+            raise ConflictException
+
+        contribution.user_likes.remove(user_field.user.id)
+        contribution.likes -= 1
         contribution.save()
 
         response = {'status': 200, 'message': 'OK'}

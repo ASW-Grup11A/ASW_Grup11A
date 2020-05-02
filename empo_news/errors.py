@@ -42,3 +42,9 @@ class ConflictException(APIException):
     status_code = 409
     default_detail = 'The contribution already is in this state'
     default_code = 'conflict'
+
+
+class ContributionUserException(APIException):
+    status_code = 409
+    default_detail = 'The contribution is yours'
+    default_code = 'conflict'
