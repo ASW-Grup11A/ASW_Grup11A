@@ -795,3 +795,14 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         except Contribution.DoesNotExist:
             raise NotFoundException
         return Response(ContributionSerializer(contribution).data)
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def delete_actual(self, request, *args, **kwargs):
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        contribution.delete()
+        message = {'status': 204, 'message': 'Deleted'}
+        return Response(message)
