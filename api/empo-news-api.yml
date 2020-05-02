@@ -84,10 +84,11 @@ paths:
                      $ref: '#/components/responses/401'
         get:
             summary: Retrieves all the contributions
-            operationId: listContribution
+            operationId: listContributions
             tags:
                 - contributions
             parameters:
+              - $ref: '#/components/parameters/userIdQuery'
               - in: query
                 name: showEn
                 description: Filter Show EN contributions
@@ -95,10 +96,19 @@ paths:
                     type: boolean
               - in: query
                 name: url
-                description: Filter contributions by their URL
+                description: > 
+                  Filter contributions by their URL. It cannot be used in conjunction with ask parameter.
                 schema:
                     type: string
                     format: url
+              - in: query
+                name: ask
+                description: >
+                    Filter all contributions with text. It cannot be used in conjunction with url parameter.
+                schema:
+                    type: boolean
+                    enum:
+                        - true
               - $ref: '#/components/parameters/orderBy'
             responses:
                 200:
@@ -109,6 +119,22 @@ paths:
                             type: array
                             items:
                                 $ref: '#/components/schemas/Contribution'
+                400:
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: integer
+                                        example: 400
+                                    error:
+                                        type: string
+                                        example: Bad Request
+                                    message:
+                                        type: string
+                                        example: Url and ask parameters cannot be used together
                 401:
                      $ref: '#/components/responses/401'
                 500:
@@ -266,6 +292,35 @@ paths:
                     $ref: '#/components/responses/404'
                 500:
                   $ref: '#/components/responses/500'
+    /comments:
+        get:
+            summary: Retrieves all the comments
+            operationId: listComments
+            tags:
+                - comments
+            parameters:
+              - $ref: '#/components/parameters/userIdQuery'
+              - in: query
+                name: orderBy
+                description: Orders by one of the available values
+                schema:
+                    type: string
+                    enum:
+                        - publication_date
+                        - votes
+            responses:
+                200:
+                  description: List of all comments
+                  content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Comment'
+                401:
+                     $ref: '#/components/responses/401'
+                500:
+                   $ref: '#/components/responses/500'
     /comment/{commentId}:
         get:
             summary: Gets a comment by its ID
@@ -381,7 +436,15 @@ components:
             required: true
             description: ID of the profile to return
             schema:
-                type: string
+                type: integer
+                format: int64
+        userIdQuery:
+            name: id
+            in: query
+            description: Filter by user ID
+            schema:
+                type: integer
+                format: int64
         orderBy:
             in: query
             name: orderBy
