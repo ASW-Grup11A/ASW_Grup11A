@@ -26,6 +26,12 @@ class UnauthenticatedException(APIException):
     default_code = 'not authenticated'
 
 
+class ForbiddenException(APIException):
+    status_code = 403
+    default_detail = 'Your api key (Api-Key Header) is not valid'
+    default_code = 'not valid'
+
+
 class NotFoundException(APIException):
     status_code = 404
     default_detail = 'Not found'

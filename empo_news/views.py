@@ -11,7 +11,8 @@ from rest_framework.response import Response
 from rest_framework_api_key.models import APIKey
 from rest_framework_api_key.permissions import HasAPIKey
 
-from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, NotFoundException
+from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
+    NotFoundException, ForbiddenException, UnauthenticatedException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
@@ -752,7 +753,14 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         title = self.request.data.get('title', '')
         url = self.request.data.get('url', '')
         text = self.request.data.get('text', '')
-        key = self.request.META.get('Api-Key', '')
+        key = self.request.META.get('HTTP_API_KEY', '')
+
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
 
         if len(title) > 80:
             raise TitleIsTooLongException
@@ -764,10 +772,10 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             raise UrlAndTextFieldException
 
         if serializer == UrlContributionSerializer:
-            serializer.save(user=self.request.user, points=1, publication_time=datetime.today(),
+            serializer.save(user=user_field.user, points=1, publication_time=datetime.today(),
                             comments=0, liked=True, show=True, text=None)
         else:
-            serializer.save(user=self.request.user, points=1, publication_time=datetime.today(),
+            serializer.save(user=user_field.user, points=1, publication_time=datetime.today(),
                             comments=0, liked=True, show=True, url=None)
 
     def get_serializer_class(self):
@@ -802,6 +810,13 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
             contribution = Contribution.objects.get(id=kwargs.get('id'))
         except Contribution.DoesNotExist:
             raise NotFoundException
+
+        user = UserFields.objects.get(id=contribution.user.id)
+        key = request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        if user.api_key != api_key.id:
+            raise ForbiddenException
 
         contribution.delete()
         message = {'status': 204, 'message': 'Deleted'}
