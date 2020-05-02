@@ -65,6 +65,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'asw_grup11a.urls'
+API_KEY_CUSTOM_HEADER = "HTTP_API_KEY"
 
 TEMPLATES = [
     {
