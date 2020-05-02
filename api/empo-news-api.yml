@@ -922,12 +922,12 @@ components:
             value:
                 status: 401
                 error: "Unauthorized"
-                message: "You provided no api key (API-KEY Header)"
+                message: "You provided no api key (Api-Key Header)"
         error403:
             value:
                 status: 403
                 error: "Forbidden"
-                message: "Your api key (API-KEY Header) is not valid"
+                message: "Your api key (Api-Key Header) is not valid"
         error404:
             value:
                 status: 404
