@@ -37,7 +37,7 @@ paths:
                                     $ref: '#/components/examples/error404'
     /profile/{id}:
         get:
-            summary: Return signed in profile
+            summary: Return signed in User profile
             operationId: getMyProfile
             tags:
                 - users
@@ -321,229 +321,18 @@ paths:
                                     $ref: '#/components/examples/error403'
             security:
             - ApiKeyAuth: []
-    /contribution/{contributionId}/vote:
-        put:
-            summary: Votes a Contribution
-            operationId: voteContribution
-            tags:
-                - contributions
-            parameters:
-              - name: contributionId
-                in: path
-                required: true
-                description: ID of the contribution to vote
-                schema:
-                    type: integer
-                    format: int64
-            responses:
-                200:
-                    description: Successful operation
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success200'
-                401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
-                404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
-                409:
-                    description: 'Error: Conflict'
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error409'
-            security:
-            - ApiKeyAuth: []
-    /contribution/{contributionId}/unvote:
-        put:
-            summary: Unvotes a Contribution
-            operationId: unvoteContribution
-            tags:
-                - contributions
-            parameters:
-              - name: contributionId
-                in: path
-                required: true
-                description: ID of the contribution to unvote
-                schema:
-                    type: integer
-                    format: int64
-            responses:
-                200:
-                    description: Successful operation
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success200'
-                401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
-                404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
-                409:
-                    description: 'Error: Conflict'
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error409'
-            security:
-            - ApiKeyAuth: []
-    /contribution/{contributionId}/hide:
-        put:
-            summary: Hides a Contribution
-            operationId: hideContribution
-            tags:
-                - contributions
-            parameters:
-              - name: contributionId
-                in: path
-                required: true
-                description: ID of the contribution to unvote
-                schema:
-                    type: integer
-                    format: int64
-            responses:
-                200:
-                    description: Successful operation
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success200'
-                401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
-                404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
-                409:
-                    description: 'Error: Conflict'
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error409'
-            security:
-            - ApiKeyAuth: []
-    /contribution/{contributionId}/unhide:
-        put:
-            summary: Unhides a Contribution
-            operationId: unhideContribution
-            tags:
-                - contributions
-            parameters:
-              - name: contributionId
-                in: path
-                required: true
-                description: ID of the contribution to unvote
-                schema:
-                    type: integer
-                    format: int64
-            responses:
-                200:
-                    description: Successful operation
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success200'
-                401:
-                    description: 'Error: Unauthorized'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error401'
-                404:
-                    description: 'Error: Not Found'
-                    content:
-                        aplication/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error404'
-                409:
-                    description: 'Error: Conflict'
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                            examples:
-                                errorExample:
-                                    $ref: '#/components/examples/error409'
-            security:
-            - ApiKeyAuth: []
-    /contribution/{contributionId}/comments:
+    /contribution/{id}/comments:
         post:
-            summary: Creates a comment for the given contribution
+            summary: Creates a comment
+            description: Creates a comment for the given contribution or comment.
             operationId: createComment
             tags:
               - comments
             parameters:
-                - name: contributionId
+                - name: id
                   in: path
                   required: true
-                  description: ID of the contribution
+                  description: ID of the contribution or comment
                   schema:
                       type: integer
                       format: int64
@@ -583,18 +372,28 @@ paths:
                             examples:
                                 errorExample:
                                     $ref: '#/components/examples/error401'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
             security:
                 - ApiKeyAuth: []
         get:
-            summary: Retrieves all comments for the given contribution
+            summary: Retrieves all comments
+            description: Retrieves all comments for the given contribution or comment
             operationId: listContributionComments
             tags:
               - comments
             parameters:
-                - name: contributionId
+                - name: id
                   in: path
                   required: true
-                  description: ID of the contribution
+                  description: ID of the contribution or comment
                   schema:
                       type: integer
                       format: int64
@@ -607,6 +406,15 @@ paths:
                             type: array
                             items:
                                 $ref: '#/components/schemas/Comment'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
                 500:
                   description: 'Error: Internal server error'
                   content:
@@ -616,6 +424,252 @@ paths:
                         examples:
                             errorExample:
                                 $ref: '#/components/examples/error500'
+    /comment/{commentId}:
+        get:
+            summary: Gets a comment by its ID
+            operationId: getCommentById
+            tags:
+              - comments
+            parameters:
+                - name: commentId
+                  in: path
+                  required: true
+                  description: ID of the comment
+                  schema:
+                      type: integer
+                      format: int64
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Comment'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+    /contribution/{id}/vote:
+        put:
+            summary: Votes a contribution or comment
+            operationId: voteContribution
+            tags:
+                - contributions
+                - comments
+            parameters:
+              - name: id
+                in: path
+                required: true
+                description: ID of the contribution or comment to vote
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/BasicResponse'
+                            examples:
+                                successExample:
+                                    $ref: '#/components/examples/success200'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error409'
+            security:
+            - ApiKeyAuth: []
+    /contribution/{id}/unvote:
+        put:
+            summary: Unvotes a contribution or comment
+            operationId: unvoteContribution
+            tags:
+                - contributions
+                - comments
+            parameters:
+              - name: id
+                in: path
+                required: true
+                description: ID of the contribution or comment to unvote
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/BasicResponse'
+                            examples:
+                                successExample:
+                                    $ref: '#/components/examples/success200'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error409'
+            security:
+            - ApiKeyAuth: []
+    /contribution/{id}/hide:
+        put:
+            summary: Hides a contribution or a comment
+            operationId: hideContribution
+            tags:
+                - contributions
+                - comments
+            parameters:
+              - name: id
+                in: path
+                required: true
+                description: ID of the contribution or comment to unvote
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/BasicResponse'
+                            examples:
+                                successExample:
+                                    $ref: '#/components/examples/success200'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error409'
+            security:
+            - ApiKeyAuth: []
+    /contribution/{id}/unhide:
+        put:
+            summary: Unhides a contribution or a comment
+            operationId: unhideContribution
+            tags:
+                - contributions
+                - comments
+            parameters:
+              - name: id
+                in: path
+                required: true
+                description: ID of the contribution or comment to unvote
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/BasicResponse'
+                            examples:
+                                successExample:
+                                    $ref: '#/components/examples/success200'
+                401:
+                    description: 'Error: Unauthorized'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error401'
+                404:
+                    description: 'Error: Not Found'
+                    content:
+                        aplication/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error404'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    $ref: '#/components/examples/error409'
+            security:
+            - ApiKeyAuth: []
 components:
     schemas:
         MyProfile:
@@ -773,9 +827,14 @@ components:
                     format: int32
                     default: 0
                     example: 0
+                contribution_id:
+                    type: integer
+                    format: int64
+                    example: 235
                 parent_id:
                     type: integer
                     format: int64
+                    nullable: true
                     example: 381
         CreateContributionWithUrl:
             required:
