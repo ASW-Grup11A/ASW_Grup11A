@@ -1022,3 +1022,20 @@ class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
         except Comment.DoesNotExist:
             raise NotFoundException
         return Response(CommentSerializer(comment).data)
+
+
+class ContributionCommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        try:
+            Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
+
+        return Response(CommentSerializer(contribution_comments, many=True).data)
