@@ -9,13 +9,12 @@ from rest_framework import viewsets, renderers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_api_key.models import APIKey
-from rest_framework_api_key.permissions import HasAPIKey
 
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
     NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
-from empo_news.permissions import GetKeyPermission
+from empo_news.permissions import KeyPermission
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
 
 
@@ -748,7 +747,7 @@ def is_url_valid(url):
 
 class ContributionsViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
-    permission_classes = [GetKeyPermission]
+    permission_classes = [KeyPermission]
 
     def perform_create(self, serializer):
         title = self.request.data.get('title', '')
@@ -801,7 +800,7 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 class ContributionsIdViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
-    permission_classes = [HasAPIKey]
+    permission_classes = [KeyPermission]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
@@ -865,7 +864,7 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 class VoteIdViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
-    permission_classes = [HasAPIKey]
+    permission_classes = [KeyPermission]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def vote(self, request, *args, **kwargs):
@@ -897,7 +896,7 @@ class VoteIdViewSet(viewsets.ModelViewSet):
 class UnVoteIdViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
-    permission_classes = [HasAPIKey]
+    permission_classes = [KeyPermission]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def unvote(self, request, *args, **kwargs):
@@ -939,7 +938,7 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
 class HideIdViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
-    permission_classes = [HasAPIKey]
+    permission_classes = [KeyPermission]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def hide(self, request, *args, **kwargs):
@@ -971,7 +970,7 @@ class HideIdViewSet(viewsets.ModelViewSet):
 class UnHideIdViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
-    permission_classes = [HasAPIKey]
+    permission_classes = [KeyPermission]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def unhide(self, request, *args, **kwargs):
