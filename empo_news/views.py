@@ -15,7 +15,8 @@ from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, Ti
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
-from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
+from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer, \
+    CommentSerializer
 
 
 def submit(request):
@@ -1002,3 +1003,8 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
 
         response = {'status': 200, 'message': 'OK'}
         return Response(response)
+
+class CommentViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
