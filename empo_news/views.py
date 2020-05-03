@@ -934,3 +934,35 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
 
         response = {'status': 200, 'message': 'OK'}
         return Response(response)
+
+
+class HideIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [HasAPIKey]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def hide(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        for user_hidden in contribution.user_id_hidden.all():
+            if str(user_field.user.username) == str(user_hidden):
+                raise ConflictException
+
+        contribution.user_id_hidden.add(user_field.user.id)
+        contribution.hidden += 1
+        contribution.save()
+
+        response = {'status': 200, 'message': 'OK'}
+        return Response(response)

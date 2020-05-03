@@ -2,7 +2,7 @@ from django.conf.urls import url
 from django.urls import path, include
 
 from . import views
-from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet, UnVoteIdViewSet
+from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet, UnVoteIdViewSet, HideIdViewSet
 
 app_name = 'empo_news'
 
@@ -23,6 +23,10 @@ vote_id_view = VoteIdViewSet.as_view({
 
 unvote_id_view = UnVoteIdViewSet.as_view({
     'put': 'un_vote'
+})
+
+hide_id_view = HideIdViewSet.as_view({
+    'put': 'hide'
 })
 
 urlpatterns = [
@@ -56,5 +60,6 @@ urlpatterns = [
     path('api/v1/contributions', contributions_view, name='api_contributions'),
     path('api/v1/contributions/<int:id>', contributions_id_view, name='api_contributions_id'),
     path('api/v1/contributions/<int:id>/vote', vote_id_view, name='api_vote_id'),
-    path('api/v1/contributions/<int:id>/unvote', unvote_id_view, name='api_unvote_id')
+    path('api/v1/contributions/<int:id>/unvote', unvote_id_view, name='api_unvote_id'),
+    path('api/v1/contributions/<int:id>/hide', hide_id_view, name='api_hide_id'),
 ]
