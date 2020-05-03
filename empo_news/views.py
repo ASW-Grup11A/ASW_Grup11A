@@ -1075,3 +1075,25 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         comment.save()
 
         return Response(CommentSerializer(comment).data)
+
+
+class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = UserFields.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        try:
+            user_fields = UserFields.objects.get(id=self.request.GET.get('id'))
+        except UserFields.DoesNotExist:
+            raise NotFoundException
+
+        user = {
+            "id": user_fields.user.id,
+            "username": user_fields.user.username,
+            "data_joined": user_fields.user.date_joined,
+            "karma": user_fields.karma
+        }
+
+        return Response(user)
