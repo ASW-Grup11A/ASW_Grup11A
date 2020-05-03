@@ -11,6 +11,7 @@ class UserFields(models.Model):
     maxvisit = models.IntegerField(default=1)
     minaway = models.IntegerField(default=180)
     delay = models.IntegerField(default=0)
+    api_key = models.CharField(max_length=1000, null=True)
 
 
 class Contribution(models.Model):
@@ -20,8 +21,10 @@ class Contribution(models.Model):
     publication_time = models.DateTimeField('publication date')
     url = models.CharField(max_length=500, blank=True, null=True)
     text = models.CharField(max_length=2000, blank=True, null=True)
-    likes = models.ManyToManyField(User, related_name="likes", blank=True)
-    hidden = models.ManyToManyField(User, related_name="hide", blank=True)
+    user_likes = models.ManyToManyField(User, related_name="likes", blank=True)
+    likes = models.IntegerField(default=1)
+    user_id_hidden = models.ManyToManyField(User, related_name="hide", blank=True)
+    hidden = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)
     liked = models.BooleanField(default=True)
     show = models.BooleanField(default=True)
@@ -38,10 +41,10 @@ class Contribution(models.Model):
 
 
     def total_likes(self):
-        return self.likes.count()
+        return self.user_likes.count()
 
     def total_hidden(self):
-        return self.hidden.count()
+        return self.user_id_hidden.count()
 
     def is_liked(self):
         return self.liked

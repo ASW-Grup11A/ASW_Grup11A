@@ -5,9 +5,17 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from rest_framework import viewsets, renderers
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework_api_key.models import APIKey
 
+from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
+    NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
+from empo_news.permissions import KeyPermission
+from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
 
 
 def submit(request):
@@ -24,7 +32,7 @@ def submit(request):
             else:
                 contribution.text = form.cleaned_data['text']
             contribution.save()
-            contribution.likes.add(request.user)
+            contribution.user_likes.add(request.user)
             contribution.save()
 
             return HttpResponseRedirect(reverse('empo_news:main_page'))
@@ -52,7 +60,7 @@ def main_page(request):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -84,7 +92,7 @@ def new_page(request):
     most_recent_list = contributions.filter(show=True).order_by('-publication_time')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_recent_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_recent_list,
@@ -120,7 +128,7 @@ def submitted(request):
     submitted_list = base_list.order_by('publication_time')[list_start:(pg * 30)]
     more = len(base_list.all()) > (pg * 30)
     for contribution in submitted_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
 
     context = {
@@ -145,12 +153,12 @@ def likes_submit(request, view, id, pg, contribution_id):
         userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user)
+    if contribution.user_likes.filter(id=request.user.id).exists():
+        contribution.user_likes.remove(request.user)
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
-        contribution.likes.add(request.user)
+        contribution.user_likes.add(request.user)
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -166,12 +174,14 @@ def likes(request, view, pg, contribution_id):
         userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user)
+    if contribution.user_likes.filter(id=request.user.id).exists():
+        contribution.user_likes.remove(request.user)
+        contribution.likes = contribution.likes - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
-        contribution.likes.add(request.user)
+        contribution.user_likes.add(request.user)
+        contribution.likes = contribution.likes + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -187,12 +197,14 @@ def likes_reply(request, contribution_id, comment_id, path):
         userFields = UserFields(user=comment.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if comment.likes.filter(id=request.user.id).exists():
-        comment.likes.remove(request.user)
+    if comment.user_likes.filter(id=request.user.id).exists():
+        comment.user_likes.remove(request.user)
+        comment.likes = comment.likes - 1
         UserFields.objects.filter(user=comment.user).update(
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) - 1)
     else:
-        comment.likes.add(request.user)
+        comment.user_likes.add(request.user)
+        comment.likes = comment.likes + 1
         UserFields.objects.filter(user=comment.user).update(
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) + 1)
     comment.points = comment.total_likes()
@@ -208,12 +220,14 @@ def likes_contribution(request, contribution_id):
         userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user)
+    if contribution.user_likes.filter(id=request.user.id).exists():
+        contribution.user_likes.remove(request.user)
+        contribution.likes = contribution.likes - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
-        contribution.likes.add(request.user)
+        contribution.user_likes.add(request.user)
+        contribution.likes = contribution.likes + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -227,12 +241,14 @@ def likes_comment(request, comment_id, username):
         userFields = UserFields(user=contribution.user, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
         userFields.save()
-    if contribution.likes.filter(id=request.user.id).exists():
-        contribution.likes.remove(request.user)
+    if contribution.user_likes.filter(id=request.user.id).exists():
+        contribution.user_likes.remove(request.user)
+        contribution.likes = contribution.likes - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
-        contribution.likes.add(request.user)
+        contribution.user_likes.add(request.user)
+        contribution.likes = contribution.likes + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -254,10 +270,12 @@ def hide_no_page(request, view, contribution_id):
 
 def hide_for_user(request, contribution_id):
     contribution = get_object_or_404(Contribution, id=contribution_id)
-    if contribution.hidden.filter(id=request.user.id).exists():
-        contribution.hidden.remove(request.user)
+    if contribution.user_id_hidden.filter(id=request.user.id).exists():
+        contribution.user_id_hidden.remove(request.user)
+        contribution.hidden = contribution.hidden - 1
     else:
-        contribution.hidden.add(request.user)
+        contribution.user_id_hidden.add(request.user)
+        contribution.hidden = contribution.hidden + 1
     contribution.save()
 
 
@@ -273,6 +291,7 @@ def logout(request):
 
 def profile(request, username):
     karma = 0
+    key = ''
     if request.user.is_authenticated:
         karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     userSelected = User.objects.get(username=username)
@@ -298,6 +317,13 @@ def profile(request, username):
                  'minaway': userFields.minaway, 'delay': userFields.delay})
 
     if userSelected == request.user:
+        generate = request.GET.get('generate', 'false')
+
+        if generate == 'true':
+            api_key, key = APIKey.objects.create_key(name="empo-news")
+            userFields.api_key = api_key.id
+            userFields.save()
+
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
             if form.is_valid():
@@ -316,6 +342,7 @@ def profile(request, username):
         "userFields": userFields,
         "karma": karma,
         "notBottom": True,
+        "key": key,
     }
     return render(request, 'empo_news/profile.html', context)
 
@@ -425,7 +452,7 @@ def update_show(all_contributions, userid, border):
     length = len(all_contributions)
     while count_shown < border and i < length:
         contribution = all_contributions[i]
-        if contribution.hidden.filter(id=userid).exists():
+        if contribution.user_id_hidden.filter(id=userid).exists():
             contribution.show = False
         else:
             contribution.show = True
@@ -499,7 +526,7 @@ def comments(request):
     most_recent_list = Comment.objects.all().order_by('-publication_time')[list_base:(pg * 30)]
     more = len(Comment.objects.all()) > (pg * 30)
     for contribution in most_recent_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_recent_list,
@@ -532,7 +559,7 @@ def ask_list(request):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -565,7 +592,7 @@ def show_list(request):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -587,7 +614,7 @@ def update_show_hidden(all_contributions, userid, border):
     length = len(all_contributions)
     while count_shown < border and i < length:
         contribution = all_contributions[i]
-        if contribution.hidden.filter(id=userid).exists():
+        if contribution.user_id_hidden.filter(id=userid).exists():
             contribution.show = True
             count_shown += 1
         else:
@@ -614,7 +641,7 @@ def hidden(request, userid):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -633,10 +660,12 @@ def hidden(request, userid):
 
 def unhide(request, view, pg, contribution_id, userid):
     contribution = get_object_or_404(Contribution, id=contribution_id)
-    if contribution.hidden.filter(id=request.user.id).exists():
-        contribution.hidden.remove(request.user)
+    if contribution.user_id_hidden.filter(id=request.user.id).exists():
+        contribution.user_id_hidden.remove(request.user)
+        contribution.hidden = contribution.hidden - 1
     else:
-        contribution.hidden.add(request.user)
+        contribution.user_id_hidden.add(request.user)
+        contribution.hidden = contribution.hidden + 1
     contribution.save()
     if pg == 1:
         return HttpResponseRedirect(reverse('empo_news:' + view, kwargs={'userid': userid}))
@@ -662,7 +691,7 @@ def voted_submissions(request):
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
     more = len(contributions.filter(show=True)) > (pg * 30)
     for contribution in most_points_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_points_list,
@@ -694,7 +723,7 @@ def voted_comments(request):
     most_recent_list = comments.order_by('-publication_time')[list_base:(pg * 30)]
     more = len(comments) > (pg * 30)
     for contribution in most_recent_list:
-        contribution.liked = not contribution.likes.filter(id=request.user.id).exists()
+        contribution.liked = not contribution.user_likes.filter(id=request.user.id).exists()
         contribution.save()
     context = {
         "list": most_recent_list,
@@ -708,3 +737,268 @@ def voted_comments(request):
         "karma": karma,
     }
     return render(request, 'empo_news/comments.html', context)
+
+
+def is_url_valid(url):
+    return '.' in url
+
+
+class ContributionsViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    permission_classes = [KeyPermission]
+
+    def perform_create(self, serializer):
+        title = self.request.data.get('title', '')
+        url = self.request.data.get('url', '')
+        text = self.request.data.get('text', '')
+        key = self.request.META.get('HTTP_API_KEY', '')
+
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        if len(title) > 80:
+            raise TitleIsTooLongException
+
+        if len(url) > 500:
+            raise UrlIsTooLongException
+
+        if url and text and is_url_valid(url):
+            raise UrlAndTextFieldException
+
+        if isinstance(serializer, UrlContributionSerializer):
+            serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
+                            comments=0, liked=True, show=True, text=None)
+        else:
+            serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
+                            comments=0, liked=True, show=True, url=None)
+
+        user_contributions = Contribution.objects.filter(user=user_field.user).order_by('-publication_time')
+        contribution = user_contributions[0]
+
+        contribution.user_likes.add(user_field.user)
+        contribution.save()
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            url = self.request.data.get('url', '')
+            text = self.request.data.get('text', '')
+
+            if url and is_url_valid(url):
+                return UrlContributionSerializer
+            elif text:
+                return AskContributionSerializer
+
+        return ContributionSerializer
+
+
+class ContributionsIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+        return Response(ContributionSerializer(contribution).data)
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def delete_actual(self, request, *args, **kwargs):
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        user = UserFields.objects.get(id=contribution.user.id)
+        key = request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        if user.api_key != api_key.id:
+            raise ForbiddenException
+
+        contribution.delete()
+        message = {'status': 204, 'message': 'Deleted'}
+        return Response(message)
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def update_actual(self, request, *args, **kwargs):
+        title = self.request.data.get('title', '')
+        url = self.request.data.get('url', '')
+        text = self.request.data.get('text', '')
+        key = self.request.META.get('HTTP_API_KEY', '')
+
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        if len(title) > 80:
+            raise TitleIsTooLongException
+
+        if len(url) > 500:
+            raise UrlIsTooLongException
+
+        if url and text and is_url_valid(url):
+            raise UrlAndTextFieldException
+
+        contribution = Contribution.objects.get(id=kwargs.get('id'))
+        contribution.title = title
+        contribution.url = url
+        contribution.text = text
+
+        contribution.save()
+
+        return Response(ContributionSerializer(contribution).data)
+
+
+class VoteIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def vote(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        for user_like in contribution.user_likes.all():
+            if str(user_field.user.username) == str(user_like):
+                raise ConflictException
+
+        contribution.user_likes.add(user_field.user.id)
+        contribution.likes += 1
+        contribution.save()
+
+        response = {'status': 200, 'message': 'OK'}
+        return Response(response)
+
+
+class UnVoteIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def unvote(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        if user_field.user == contribution.user:
+            raise ContributionUserException
+
+        found = False
+        user_likes = contribution.user_likes.all()
+        actual = 0
+
+        while (not found and actual < len(user_likes)):
+            found = str(user_likes[actual]) == str(user_field.user.username)
+            actual += 1
+
+        if not found:
+            raise ConflictException
+
+        contribution.user_likes.remove(user_field.user.id)
+        contribution.likes -= 1
+        contribution.save()
+
+        response = {'status': 200, 'message': 'OK'}
+        return Response(response)
+
+
+class HideIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def hide(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        for user_hidden in contribution.user_id_hidden.all():
+            if str(user_field.user.username) == str(user_hidden):
+                raise ConflictException
+
+        contribution.user_id_hidden.add(user_field.user.id)
+        contribution.hidden += 1
+        contribution.save()
+
+        response = {'status': 200, 'message': 'OK'}
+        return Response(response)
+
+
+class UnHideIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def unhide(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        found = False
+        user_hides = contribution.user_id_hidden.all()
+        actual = 0
+
+        while (not found and actual < len(user_hides)):
+            found = str(user_hides[actual]) == str(user_field.user.username)
+            actual += 1
+
+        if not found:
+            raise ConflictException
+
+        contribution.user_id_hidden.remove(user_field.user.id)
+        contribution.hidden -= 1
+        contribution.save()
+
+        response = {'status': 200, 'message': 'OK'}
+        return Response(response)

@@ -2,8 +2,38 @@ from django.conf.urls import url
 from django.urls import path, include
 
 from . import views
+from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet, UnVoteIdViewSet, HideIdViewSet, \
+    UnHideIdViewSet
 
 app_name = 'empo_news'
+
+contributions_view = ContributionsViewSet.as_view({
+    'get': 'list',
+    'post': 'create'
+})
+
+contributions_id_view = ContributionsIdViewSet.as_view({
+    'get': 'get_actual',
+    'delete': 'delete_actual',
+    'put': 'update_actual'
+})
+
+vote_id_view = VoteIdViewSet.as_view({
+    'put': 'vote'
+})
+
+unvote_id_view = UnVoteIdViewSet.as_view({
+    'put': 'unvote'
+})
+
+hide_id_view = HideIdViewSet.as_view({
+    'put': 'hide'
+})
+
+unhide_id_view = UnHideIdViewSet.as_view({
+    'put': 'unhide'
+})
+
 urlpatterns = [
     path('submit/', views.submit, name='submit'),
     path('', views.main_page, name='main_page'),
@@ -31,4 +61,11 @@ urlpatterns = [
     path('voted_submissions', views.voted_submissions, name='voted_submissions'),
     path('voted_comments', views.voted_comments, name='voted_comments'),
     path('collapse/<int:contribution_id>/<int:comment_id>', views.collapse, name='collapse'),
+
+    path('api/v1/contributions', contributions_view, name='api_contributions'),
+    path('api/v1/contributions/<int:id>', contributions_id_view, name='api_contributions_id'),
+    path('api/v1/contributions/<int:id>/vote', vote_id_view, name='api_vote_id'),
+    path('api/v1/contributions/<int:id>/unvote', unvote_id_view, name='api_unvote_id'),
+    path('api/v1/contributions/<int:id>/hide', hide_id_view, name='api_hide_id'),
+    path('api/v1/contributions/<int:id>/unhide', unhide_id_view, name='api_unhide_id'),
 ]

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+
 import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -38,6 +39,9 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     #'empo_news.apps.AswGrup11AConfig',
+    'rest_framework',
+    'rest_framework_api_key',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,6 +54,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -62,6 +68,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'asw_grup11a.urls'
+API_KEY_CUSTOM_HEADER = "HTTP_API_KEY"
 
 TEMPLATES = [
     {

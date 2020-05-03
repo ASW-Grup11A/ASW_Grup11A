@@ -37,7 +37,7 @@ def is_liked(contribution):
 
 @register.filter
 def is_contribution_liked(contribution, user_id):
-    return contribution.likes.filter(id=user_id).exists()
+    return contribution.user_likes.filter(id=user_id).exists()
   
 
 @register.filter
@@ -47,7 +47,7 @@ def all_replies(comment):
 
 @register.filter
 def is_hidden(contribution, user_id):
-    return contribution.hidden.filter(id=user_id).exists()
+    return contribution.user_id_hidden.filter(id=user_id).exists()
 
 @register.filter
 def google_url(originalString):
