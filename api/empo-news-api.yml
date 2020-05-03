@@ -35,13 +35,13 @@ paths:
                 500:
                     $ref: '#/components/responses/500'
     /profile/{id}:
+        parameters:
+                - $ref: '#/components/parameters/userId'
         get:
             summary: Returns the current signed in user profile
             operationId: getMyProfile
             tags:
                 - users
-            parameters:
-                - $ref: '#/components/parameters/userId'
             responses:
                 200:
                     description: Returns the authenticated profile
@@ -49,6 +49,72 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/MyProfile'
+                401:
+                    $ref: '#/components/responses/401'
+                403:
+                    $ref: '#/components/responses/403'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
+        put:
+            summary: Updates the current signed in user profile
+            operationId: updateMyProfile
+            tags:
+                - users
+            parameters:
+                - in: query
+                  name: about
+                  description: The new contents for the about field
+                  schema:
+                        type: string
+                        maxLength: 2000
+                - in: query
+                  name: email
+                  description: The new email
+                  schema:
+                        type: string
+                        format: email
+                        maxLength: 254
+                - in: query
+                  name: showdead
+                  description: The new value for the showdead
+                  schema:
+                        type: boolean
+                - in: query
+                  name: noprocast
+                  description: The new value for the noprocast
+                  schema:
+                        type: boolean
+                - in: query
+                  name: maxvisit
+                  description: The new value for the maxvisit
+                  schema:
+                        type: integer
+                        format: int32
+                - in: query
+                  name: minaway
+                  description: The new value for the minaway
+                  schema:
+                        type: integer
+                        format: int32
+                - in: query
+                  name: delay
+                  description: The new value for the delay
+                  schema:
+                        type: integer
+                        format: int32
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Contribution'
+                400:
+                    $ref: '#/components/responses/400'
                 401:
                     $ref: '#/components/responses/401'
                 403:
