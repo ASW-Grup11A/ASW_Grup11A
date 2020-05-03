@@ -32,6 +32,8 @@ paths:
                     $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
     /profile/{id}:
         get:
             summary: Returns the current signed in user profile
@@ -55,6 +57,8 @@ paths:
                     $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
     /contributions:
         post:
             summary: Adds a new contribution
@@ -88,6 +92,8 @@ paths:
                     $ref: '#/components/responses/401'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
         get:
             summary: Retrieves all the contributions
             operationId: listContributions
@@ -199,6 +205,8 @@ paths:
                     $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
         get:
             summary: Finds a contribution by its ID
             operationId: getContributionById
@@ -226,6 +234,8 @@ paths:
                     $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
         delete:
             summary: Deletes a contribution or comment by its ID
             operationId: deleteContribution
@@ -250,6 +260,8 @@ paths:
                     $ref: '#/components/responses/403'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
     /contribution/{id}/comments:
         parameters:
                 - $ref: '#/components/parameters/contributionId'
@@ -285,6 +297,8 @@ paths:
                     $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
         get:
             summary: Retrieves all comments
             description: Retrieves all comments for the given contribution or comment
@@ -368,6 +382,8 @@ paths:
                     $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
     /contribution/{id}/vote:
         put:
             summary: Votes a contribution or comment
@@ -388,6 +404,8 @@ paths:
                     $ref: '#/components/responses/405'
                 409:
                     $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
     /contribution/{id}/unvote:
         put:
             summary: Unvotes a contribution or comment
@@ -408,6 +426,8 @@ paths:
                     $ref: '#/components/responses/405'
                 409:
                     $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
     /contribution/{id}/hide:
         put:
             summary: Hides a contribution or a comment
@@ -428,6 +448,8 @@ paths:
                     $ref: '#/components/responses/405'
                 409:
                     $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
     /contribution/{id}/unhide:
         put:
             summary: Unhides a contribution or a comment
@@ -448,6 +470,9 @@ paths:
                     $ref: '#/components/responses/405'
                 409:
                     $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
+                
 security:
 - ApiKeyAuth: []
 components:
