@@ -4,11 +4,14 @@ from empo_news.models import UserFields, Contribution, Comment
 
 
 class UserFieldsSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
+    id = serializers.ReadOnlyField(source='user.id')
+    username = serializers.ReadOnlyField(source='user.username')
+    date_joined = serializers.ReadOnlyField(source='user.date_joined')
 
     class Meta:
         model = UserFields
-        fields = ['karma', 'about', 'showdead', 'noprocrast', 'maxvisit', 'minaway', 'delay', 'user']
+        fields = ['id', 'username', 'date_joined', 'karma', 'about', 'showdead', 'noprocrast', 'maxvisit',
+                  'minaway', 'delay']
 
 
 class ContributionSerializer(serializers.ModelSerializer):

@@ -16,7 +16,7 @@ from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer, \
-    CommentSerializer
+    CommentSerializer, UserFieldsSerializer
 
 
 def submit(request):
@@ -1097,3 +1097,24 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
         }
 
         return Response(user)
+
+
+class ProfilesIdViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = UserFields.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_fields = UserFields.objects.get(id=kwargs.get('id'))
+        except UserFields.DoesNotExist:
+            raise NotFoundException
+
+        if user_fields.api_key != api_key.id:
+            raise ForbiddenException
+
+        return Response(UserFieldsSerializer(user_fields).data)

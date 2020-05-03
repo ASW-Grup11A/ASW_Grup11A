@@ -3,7 +3,7 @@ from django.urls import path, include
 
 from . import views
 from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet, UnVoteIdViewSet, HideIdViewSet, \
-    UnHideIdViewSet, CommentViewSet, CommentIdViewSet, ContributionCommentViewSet, ProfilesViewSet
+    UnHideIdViewSet, CommentViewSet, CommentIdViewSet, ContributionCommentViewSet, ProfilesViewSet, ProfilesIdViewSet
 
 app_name = 'empo_news'
 
@@ -47,7 +47,11 @@ contribution_comments_view = ContributionCommentViewSet.as_view({
     'post': 'create_comment'
 })
 
-profiles_id = ProfilesViewSet.as_view({
+profiles_id_args = ProfilesViewSet.as_view({
+    'get': 'get_actual'
+})
+
+profiles_id_kwargs = ProfilesIdViewSet.as_view({
     'get': 'get_actual'
 })
 
@@ -88,5 +92,6 @@ urlpatterns = [
     path('api/v1/comments', comments_view, name='api_comments'),
     path('api/v1/comments/<int:commentId>', comments_id_view, name='api_id_comments'),
     path('api/v1/contributions/<int:id>/comments', contribution_comments_view, name='api_contribution_comments'),
-    path('api/v1/profile', profiles_id, name='api_profiles_id'),
+    path('api/v1/profile', profiles_id_args, name='api_profiles_id_args'),
+    path('api/v1/profile/<int:id>', profiles_id_kwargs, name='api_profiles_id_kwargs'),
 ]
