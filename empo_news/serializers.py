@@ -26,7 +26,7 @@ class ContributionSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
+    user = serializers.ReadOnlyField(source='user.id')
     contribution = serializers.ReadOnlyField(source='contribution.id')
     parent = serializers.ReadOnlyField(source='parent.id')
 

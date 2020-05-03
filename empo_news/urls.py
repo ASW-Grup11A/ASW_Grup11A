@@ -3,7 +3,7 @@ from django.urls import path, include
 
 from . import views
 from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet, UnVoteIdViewSet, HideIdViewSet, \
-    UnHideIdViewSet
+    UnHideIdViewSet, CommentViewSet, CommentIdViewSet, ContributionCommentViewSet
 
 app_name = 'empo_news'
 
@@ -32,6 +32,19 @@ hide_id_view = HideIdViewSet.as_view({
 
 unhide_id_view = UnHideIdViewSet.as_view({
     'put': 'unhide'
+})
+
+comments_view = CommentViewSet.as_view({
+    'get': 'list'
+})
+
+comments_id_view = CommentIdViewSet.as_view({
+    'get': 'get_actual'
+})
+
+contribution_comments_view = ContributionCommentViewSet.as_view({
+    'get': 'get_actual',
+    'post': 'create_comment'
 })
 
 urlpatterns = [
@@ -68,4 +81,7 @@ urlpatterns = [
     path('api/v1/contributions/<int:id>/unvote', unvote_id_view, name='api_unvote_id'),
     path('api/v1/contributions/<int:id>/hide', hide_id_view, name='api_hide_id'),
     path('api/v1/contributions/<int:id>/unhide', unhide_id_view, name='api_unhide_id'),
+    path('api/v1/comments', comments_view, name='api_comments'),
+    path('api/v1/comments/<int:commentId>', comments_id_view, name='api_id_comments'),
+    path('api/v1/contributions/<int:id>/comments', contribution_comments_view, name='api_contribution_comments'),
 ]

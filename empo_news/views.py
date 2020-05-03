@@ -15,7 +15,8 @@ from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, Ti
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
-from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
+from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer, \
+    CommentSerializer
 
 
 def submit(request):
@@ -1002,3 +1003,75 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
 
         response = {'status': 200, 'message': 'OK'}
         return Response(response)
+
+
+class CommentViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+
+class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        try:
+            comment = Comment.objects.get(id=kwargs.get('commentId'))
+        except Comment.DoesNotExist:
+            raise NotFoundException
+        return Response(CommentSerializer(comment).data)
+
+
+class ContributionCommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        try:
+            Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
+
+        return Response(CommentSerializer(contribution_comments, many=True).data)
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def create_comment(self, request, *args, **kwargs):
+        text = self.request.data.get('text', '')
+        parent_id = kwargs.get('id', '')
+        key = self.request.META.get('HTTP_API_KEY', '')
+
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            comment = Comment.objects.get(id=parent_id)
+            contribution = comment.contribution
+        except Comment.DoesNotExist:
+            try:
+                comment = None
+                contribution = Contribution.objects.get(id=parent_id)
+            except Contribution.DoesNotExist:
+                raise NotFoundException
+
+        if (comment is None and contribution.user.id == user_field.user.id) or comment.user.id == user_field.user.id:
+            raise ContributionUserException
+
+        comment = Comment(user=user_field.user, title='', points=1, publication_time=datetime.today(),
+                          comments=0, liked=True, show=True, url=None, text=text, contribution=contribution,
+                          parent=comment)
+        comment.save()
+        comment.user_likes.add(user_field.user)
+        comment.save()
+
+        return Response(CommentSerializer(comment).data)
