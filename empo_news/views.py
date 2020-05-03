@@ -900,7 +900,7 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
     permission_classes = [HasAPIKey]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
-    def un_vote(self, request, *args, **kwargs):
+    def unvote(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
         api_key = APIKey.objects.get_from_key(key)
 
@@ -962,6 +962,45 @@ class HideIdViewSet(viewsets.ModelViewSet):
 
         contribution.user_id_hidden.add(user_field.user.id)
         contribution.hidden += 1
+        contribution.save()
+
+        response = {'status': 200, 'message': 'OK'}
+        return Response(response)
+
+
+class UnHideIdViewSet(viewsets.ModelViewSet):
+    queryset = Contribution.objects.filter(comment__isnull=True)
+    serializer_class = ContributionSerializer
+    permission_classes = [HasAPIKey]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def unhide(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('id'))
+        except Contribution.DoesNotExist:
+            raise NotFoundException
+
+        found = False
+        user_hides = contribution.user_id_hidden.all()
+        actual = 0
+
+        while (not found and actual < len(user_hides)):
+            found = str(user_hides[actual]) == str(user_field.user.username)
+            actual += 1
+
+        if not found:
+            raise ConflictException
+
+        contribution.user_id_hidden.remove(user_field.user.id)
+        contribution.hidden -= 1
         contribution.save()
 
         response = {'status': 200, 'message': 'OK'}
