@@ -15,7 +15,7 @@ from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, Ti
     NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
-from empo_news.permissions import ContributionKeyPermission
+from empo_news.permissions import GetKeyPermission
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer
 
 
@@ -748,7 +748,7 @@ def is_url_valid(url):
 
 class ContributionsViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
-    permission_classes = [ContributionKeyPermission]
+    permission_classes = [GetKeyPermission]
 
     def perform_create(self, serializer):
         title = self.request.data.get('title', '')

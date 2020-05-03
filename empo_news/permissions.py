@@ -7,7 +7,7 @@ from rest_framework_api_key.permissions import HasAPIKey
 from empo_news.errors import UnauthenticatedException
 
 
-class ContributionKeyPermission(HasAPIKey):
+class GetKeyPermission(HasAPIKey):
     def has_permission(self, request: HttpRequest, view: typing.Any) -> bool:
         if request.method == 'GET':
             key = request.META.get('HTTP_API_KEY', '')
