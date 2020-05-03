@@ -43,7 +43,8 @@ comments_id_view = CommentIdViewSet.as_view({
 })
 
 contribution_comments_view = ContributionCommentViewSet.as_view({
-    'get': 'get_actual'
+    'get': 'get_actual',
+    'post': 'create_comment'
 })
 
 urlpatterns = [

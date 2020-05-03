@@ -1004,6 +1004,7 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
         response = {'status': 200, 'message': 'OK'}
         return Response(response)
 
+
 class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -1039,3 +1040,38 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
 
         return Response(CommentSerializer(contribution_comments, many=True).data)
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def create_comment(self, request, *args, **kwargs):
+        text = self.request.data.get('text', '')
+        parent_id = kwargs.get('id', '')
+        key = self.request.META.get('HTTP_API_KEY', '')
+
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        try:
+            comment = Comment.objects.get(id=parent_id)
+            contribution = comment.contribution
+        except Comment.DoesNotExist:
+            try:
+                comment = None
+                contribution = Contribution.objects.get(id=parent_id)
+            except Contribution.DoesNotExist:
+                raise NotFoundException
+
+        if (comment is None and contribution.user.id == user_field.user.id) or comment.user.id == user_field.user.id:
+            raise ContributionUserException
+
+        comment = Comment(user=user_field.user, title='', points=1, publication_time=datetime.today(),
+                          comments=0, liked=True, show=True, url=None, text=text, contribution=contribution,
+                          parent=comment)
+        comment.save()
+        comment.user_likes.add(user_field.user)
+        comment.save()
+
+        return Response(CommentSerializer(comment).data)
