@@ -27,9 +27,11 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/OtherProfile'
                 401:
-                     $ref: '#/components/responses/401'
+                    $ref: '#/components/responses/401'
                 404:
-                     $ref: '#/components/responses/404'
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
     /profile/{id}:
         get:
             summary: Returns the current signed in user profile
@@ -46,11 +48,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/MyProfile'
                 401:
-                     $ref: '#/components/responses/401'
+                    $ref: '#/components/responses/401'
                 403:
-                     $ref: '#/components/responses/403'
+                    $ref: '#/components/responses/403'
                 404:
-                     $ref: '#/components/responses/404'
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
     /contributions:
         post:
             summary: Adds a new contribution
@@ -79,9 +83,11 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Contribution'
                 400:
-                     $ref: '#/components/responses/400'
+                    $ref: '#/components/responses/400'
                 401:
-                     $ref: '#/components/responses/401'
+                    $ref: '#/components/responses/401'
+                405:
+                    $ref: '#/components/responses/405'
         get:
             summary: Retrieves all the contributions
             operationId: listContributions
@@ -137,6 +143,8 @@ paths:
                                         example: Url and ask parameters cannot be used together
                 401:
                      $ref: '#/components/responses/401'
+                405:
+                    $ref: '#/components/responses/405'
                 500:
                    $ref: '#/components/responses/500'
     /contribution/{id}:
@@ -182,13 +190,15 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Contribution'
                 400:
-                     $ref: '#/components/responses/400'
+                    $ref: '#/components/responses/400'
                 401:
-                     $ref: '#/components/responses/401'
+                    $ref: '#/components/responses/401'
                 403:
-                     $ref: '#/components/responses/403'
+                    $ref: '#/components/responses/403'
                 404:
-                     $ref: '#/components/responses/404'
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
         get:
             summary: Finds a contribution by its ID
             operationId: getContributionById
@@ -211,9 +221,11 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Contribution'
                 401:
-                     $ref: '#/components/responses/401'
+                    $ref: '#/components/responses/401'
                 404:
-                     $ref: '#/components/responses/404'
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
         delete:
             summary: Deletes a contribution or comment by its ID
             operationId: deleteContribution
@@ -231,11 +243,13 @@ paths:
                                 successExample:
                                     $ref: '#/components/examples/success204'
                 404:
-                     $ref: '#/components/responses/404'
+                    $ref: '#/components/responses/404'
                 401:
-                     $ref: '#/components/responses/401'
+                    $ref: '#/components/responses/401'
                 403:
-                     $ref: '#/components/responses/403'
+                    $ref: '#/components/responses/403'
+                405:
+                    $ref: '#/components/responses/405'
     /contribution/{id}/comments:
         parameters:
                 - $ref: '#/components/parameters/contributionId'
@@ -269,6 +283,8 @@ paths:
                     $ref: '#/components/responses/401'
                 404:
                     $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
         get:
             summary: Retrieves all comments
             description: Retrieves all comments for the given contribution or comment
@@ -290,6 +306,8 @@ paths:
                     $ref: '#/components/responses/401'
                 404:
                     $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
                 500:
                   $ref: '#/components/responses/500'
     /comments:
@@ -319,6 +337,8 @@ paths:
                                 $ref: '#/components/schemas/Comment'
                 401:
                      $ref: '#/components/responses/401'
+                405:
+                    $ref: '#/components/responses/405'
                 500:
                    $ref: '#/components/responses/500'
     /comment/{commentId}:
@@ -346,6 +366,8 @@ paths:
                     $ref: '#/components/responses/401'
                 404:
                     $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
     /contribution/{id}/vote:
         put:
             summary: Votes a contribution or comment
@@ -362,6 +384,8 @@ paths:
                     $ref: '#/components/responses/401'
                 404:
                     $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
                 409:
                     $ref: '#/components/responses/409'
     /contribution/{id}/unvote:
@@ -380,6 +404,8 @@ paths:
                     $ref: '#/components/responses/401'
                 404:
                     $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
                 409:
                     $ref: '#/components/responses/409'
     /contribution/{id}/hide:
@@ -398,6 +424,8 @@ paths:
                     $ref: '#/components/responses/401'
                 404:
                     $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
                 409:
                     $ref: '#/components/responses/409'
     /contribution/{id}/unhide:
@@ -416,6 +444,8 @@ paths:
                     $ref: '#/components/responses/401'
                 404:
                     $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
                 409:
                     $ref: '#/components/responses/409'
 security:
