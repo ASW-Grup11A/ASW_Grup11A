@@ -3,7 +3,7 @@ from django.urls import path, include
 
 from . import views
 from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet, UnVoteIdViewSet, HideIdViewSet, \
-    UnHideIdViewSet, CommentViewSet
+    UnHideIdViewSet, CommentViewSet, CommentIdViewSet
 
 app_name = 'empo_news'
 
@@ -36,6 +36,10 @@ unhide_id_view = UnHideIdViewSet.as_view({
 
 comments_view = CommentViewSet.as_view({
     'get': 'list'
+})
+
+comments_id_view = CommentIdViewSet.as_view({
+    'get': 'get_actual'
 })
 
 urlpatterns = [
@@ -73,4 +77,5 @@ urlpatterns = [
     path('api/v1/contributions/<int:id>/hide', hide_id_view, name='api_hide_id'),
     path('api/v1/contributions/<int:id>/unhide', unhide_id_view, name='api_unhide_id'),
     path('api/v1/comments', comments_view, name='api_comments'),
+    path('api/v1/comments/<int:commentId>', comments_id_view, name='api_id_comments'),
 ]

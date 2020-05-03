@@ -1008,3 +1008,17 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [KeyPermission]
+
+
+class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        try:
+            comment = Comment.objects.get(id=kwargs.get('commentId'))
+        except Comment.DoesNotExist:
+            raise NotFoundException
+        return Response(CommentSerializer(comment).data)
