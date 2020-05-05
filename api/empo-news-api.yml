@@ -573,7 +573,7 @@ components:
         200:
             description: Successful operation
             content:
-                aplication/json:
+                application/json:
                     schema:
                         $ref: '#/components/schemas/BasicResponse'
                     examples:
@@ -582,7 +582,7 @@ components:
         201:
             description: Successful operation
             content:
-                aplication/json:
+                application/json:
                     schema:
                         $ref: '#/components/schemas/BasicResponse'
                     examples:
@@ -593,7 +593,7 @@ components:
         400:
             description: 'Error: Bad Request'
             content:
-                aplication/json:
+                application/json:
                     schema:
                         $ref: '#/components/schemas/Error'
                     examples:
@@ -602,7 +602,7 @@ components:
         401:
             description: 'Error: Unauthorized'
             content:
-                aplication/json:
+                application/json:
                     schema:
                         $ref: '#/components/schemas/Error'
                     examples:
@@ -611,7 +611,7 @@ components:
         403:
             description: 'Error: Forbidden'
             content:
-                aplication/json:
+                application/json:
                     schema:
                         $ref: '#/components/schemas/Error'
                     examples:
@@ -620,7 +620,7 @@ components:
         404:
             description: 'Error: Not Found'
             content:
-                aplication/json:
+                application/json:
                     schema:
                         $ref: '#/components/schemas/Error'
                     examples:
@@ -629,7 +629,7 @@ components:
         405:
             description: Method Not Allowed
             content:
-                aplication/json:
+                application/json:
                     schema:
                         $ref: '#/components/schemas/BasicResponse'
                     examples:
