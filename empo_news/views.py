@@ -816,7 +816,7 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         except Contribution.DoesNotExist:
             raise NotFoundException
 
-        user = UserFields.objects.get(id=contribution.user.id)
+        user = UserFields.objects.get(user_id=contribution.user.id)
         key = request.META.get('HTTP_API_KEY', '')
         api_key = APIKey.objects.get_from_key(key)
 
@@ -1085,7 +1085,7 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
         try:
-            user_fields = UserFields.objects.get(id=self.request.query_params.get('id'))
+            user_fields = UserFields.objects.get(user_id=self.request.query_params.get('id'))
         except UserFields.DoesNotExist:
             raise NotFoundException
 
@@ -1110,7 +1110,7 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user_fields = UserFields.objects.get(id=kwargs.get('id'))
+            user_fields = UserFields.objects.get(user_id=kwargs.get('id'))
         except UserFields.DoesNotExist:
             raise NotFoundException
 
@@ -1133,7 +1133,7 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user_fields = UserFields.objects.get(id=kwargs.get('id'))
+            user_fields = UserFields.objects.get(user_id=kwargs.get('id'))
         except UserFields.DoesNotExist:
             raise NotFoundException
 
