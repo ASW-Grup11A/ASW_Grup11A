@@ -22,7 +22,6 @@ class Contribution(models.Model):
     url = models.CharField(max_length=500, blank=True, null=True)
     text = models.CharField(max_length=2000, blank=True, null=True)
     user_likes = models.ManyToManyField(User, related_name="likes", blank=True)
-    likes = models.IntegerField(default=1)
     user_id_hidden = models.ManyToManyField(User, related_name="hide", blank=True)
     hidden = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)

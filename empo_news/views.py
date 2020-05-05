@@ -177,12 +177,12 @@ def likes(request, view, pg, contribution_id):
         userFields.save()
     if contribution.user_likes.filter(id=request.user.id).exists():
         contribution.user_likes.remove(request.user)
-        contribution.likes = contribution.likes - 1
+        contribution.points = contribution.points - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.user_likes.add(request.user)
-        contribution.likes = contribution.likes + 1
+        contribution.points = contribution.points + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -200,12 +200,12 @@ def likes_reply(request, contribution_id, comment_id, path):
         userFields.save()
     if comment.user_likes.filter(id=request.user.id).exists():
         comment.user_likes.remove(request.user)
-        comment.likes = comment.likes - 1
+        comment.points = comment.points - 1
         UserFields.objects.filter(user=comment.user).update(
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) - 1)
     else:
         comment.user_likes.add(request.user)
-        comment.likes = comment.likes + 1
+        comment.points = comment.points + 1
         UserFields.objects.filter(user=comment.user).update(
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) + 1)
     comment.points = comment.total_likes()
@@ -223,12 +223,12 @@ def likes_contribution(request, contribution_id):
         userFields.save()
     if contribution.user_likes.filter(id=request.user.id).exists():
         contribution.user_likes.remove(request.user)
-        contribution.likes = contribution.likes - 1
+        contribution.points = contribution.points - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.user_likes.add(request.user)
-        contribution.likes = contribution.likes + 1
+        contribution.points = contribution.points + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -244,12 +244,12 @@ def likes_comment(request, comment_id, username):
         userFields.save()
     if contribution.user_likes.filter(id=request.user.id).exists():
         contribution.user_likes.remove(request.user)
-        contribution.likes = contribution.likes - 1
+        contribution.points = contribution.points - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.user_likes.add(request.user)
-        contribution.likes = contribution.likes + 1
+        contribution.points = contribution.points + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -885,7 +885,7 @@ class VoteIdViewSet(viewsets.ModelViewSet):
                 raise ConflictException
 
         contribution.user_likes.add(user_field.user.id)
-        contribution.likes += 1
+        contribution.points += 1
         contribution.save()
 
         response = {'status': 204, 'message': 'OK'}
@@ -927,7 +927,7 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
             raise ConflictException
 
         contribution.user_likes.remove(user_field.user.id)
-        contribution.likes -= 1
+        contribution.points -= 1
         contribution.save()
 
         response = {'status': 204, 'message': 'OK'}
