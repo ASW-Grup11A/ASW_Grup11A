@@ -84,6 +84,10 @@ CORS_ALLOW_HEADERS = [
     'Api-Key',
 ]
 
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'empo_news.errors.empo_news_exception_handler'
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
