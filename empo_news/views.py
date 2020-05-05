@@ -857,7 +857,7 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
         contribution.save()
 
-        return Response(ContributionSerializer(contribution).data, status=status.HTTP_204_NO_CONTENT)
+        return Response(ContributionSerializer(contribution).data)
 
 
 class VoteIdViewSet(viewsets.ModelViewSet):
@@ -1163,4 +1163,4 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
 
         user_fields.save()
 
-        return Response(UserFieldsSerializer(user_fields).data, status=status.HTTP_204_NO_CONTENT)
+        return Response(UserFieldsSerializer(user_fields).data)
