@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from rest_framework import viewsets, renderers
+from rest_framework import viewsets, renderers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_api_key.models import APIKey
@@ -825,7 +825,7 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
         contribution.delete()
         message = {'status': 204, 'message': 'Deleted'}
-        return Response(message)
+        return Response(message, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def update_actual(self, request, *args, **kwargs):
