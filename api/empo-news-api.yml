@@ -590,13 +590,6 @@ components:
                             $ref: '#/components/examples/success201'
         204:
             description: Successful operation
-            content:
-                aplication/json:
-                    schema:
-                        $ref: '#/components/schemas/BasicResponse'
-                    examples:
-                        successExample:
-                            $ref: '#/components/examples/success204'
         400:
             description: 'Error: Bad Request'
             content:
