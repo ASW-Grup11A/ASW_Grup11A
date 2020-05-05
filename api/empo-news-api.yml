@@ -243,13 +243,12 @@ paths:
                             description: The new title
                             type: string
                             minLength: 4
-                            maxLength: 2000
+                            maxLength: 80
                             example: 'This is my new title'
                         text:
                             description: The new text. It must not be used in those contributions that have a url instead of text.
                             type: string
                             nullable: true
-                            maxLength: 500
                             example: Hey there!
                     minProperties: 1
                     additionalProperties: false
@@ -727,7 +726,7 @@ components:
                 title:
                     type: string
                     minLength: 4
-                    maxLength: 2000
+                    maxLength: 80
                     example: 'This is my first contribution'
                 points:
                     type: integer
@@ -747,7 +746,6 @@ components:
                 text:
                     type: string
                     nullable: true
-                    maxLength: 500
                     example: "Hello Wordl!"
                 comments:
                     type: integer
@@ -785,7 +783,6 @@ components:
                 text:
                     type: string
                     nullable: true
-                    maxLength: 500
                     example: What's up?
                 replies:
                     type: integer
@@ -824,7 +821,7 @@ components:
                 title:
                     type: string
                     minLength: 4
-                    maxLength: 2000
+                    maxLength: 80
                     example: This is my first contribution
                 url:
                     type: string
@@ -841,12 +838,11 @@ components:
                 title:
                     type: string
                     minLength: 4
-                    maxLength: 2000
+                    maxLength: 80
                     example: This is my first contribution
                 text:
                     type: string
                     nullable: true
-                    maxLength: 500
                     example: Hello Wordl!
         BasicResponse:
             type: object
