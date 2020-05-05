@@ -66,46 +66,42 @@ paths:
                 - users
             parameters:
                 - in: query
-                  name: about
-                  description: The new contents for the about field
+                  name: parameter
+                  required: true
                   schema:
-                        type: string
-                        maxLength: 2000
-                - in: query
-                  name: email
-                  description: The new email
-                  schema:
-                        type: string
-                        format: email
-                        maxLength: 254
-                - in: query
-                  name: showdead
-                  description: The new value for the showdead
-                  schema:
-                        type: boolean
-                - in: query
-                  name: noprocast
-                  description: The new value for the noprocast
-                  schema:
-                        type: boolean
-                - in: query
-                  name: maxvisit
-                  description: The new value for the maxvisit
-                  schema:
-                        type: integer
-                        format: int32
-                - in: query
-                  name: minaway
-                  description: The new value for the minaway
-                  schema:
-                        type: integer
-                        format: int32
-                - in: query
-                  name: delay
-                  description: The new value for the delay
-                  schema:
-                        type: integer
-                        format: int32
+                    type: object
+                    properties:
+                        about:
+                            type: string
+                            maxLength: 2000
+                            example: I love crisps.
+                        email:
+                            type: string
+                            format: email
+                            maxLength: 254
+                            example: johnDoe@mail.com
+                        showdead:
+                            type: boolean
+                            example: false
+                        noprocast:
+                            type: boolean
+                            example: true
+                        maxvisit:
+                            type: integer
+                            format: int32
+                            example: 20
+                        minaway:
+                            type: integer
+                            format: int32
+                            example: 30
+                        delay:
+                            type: integer
+                            format: int32
+                            example: 20
+                    minProperties: 1
+                    additionalProperties: false
+                  style: form
+                  explode: true
             responses:
                 200:
                     description: Successful operation
