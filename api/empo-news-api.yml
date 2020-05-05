@@ -310,14 +310,7 @@ paths:
                 - comments
             responses:
                 204:
-                    description: Contribution deleted
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BasicResponse'
-                            examples:
-                                successExample:
-                                    $ref: '#/components/examples/success204'
+                    $ref: '#/components/responses/204'
                 404:
                     $ref: '#/components/responses/404'
                 401:
@@ -460,8 +453,8 @@ paths:
             parameters:
               - $ref: '#/components/parameters/contributionId'
             responses:
-                200:
-                    $ref: '#/components/responses/200'
+                204:
+                    $ref: '#/components/responses/204'
                 401:
                     $ref: '#/components/responses/401'
                 404:
@@ -482,8 +475,8 @@ paths:
             parameters:
               - $ref: '#/components/parameters/contributionId'
             responses:
-                200:
-                    $ref: '#/components/responses/200'
+                204:
+                    $ref: '#/components/responses/204'
                 401:
                     $ref: '#/components/responses/401'
                 404:
@@ -504,8 +497,8 @@ paths:
             parameters:
               - $ref: '#/components/parameters/contributionId'
             responses:
-                200:
-                    $ref: '#/components/responses/200'
+                204:
+                    $ref: '#/components/responses/204'
                 401:
                     $ref: '#/components/responses/401'
                 404:
@@ -526,8 +519,8 @@ paths:
             parameters:
               - $ref: '#/components/parameters/contributionId'
             responses:
-                200:
-                    $ref: '#/components/responses/200'
+                204:
+                    $ref: '#/components/responses/204'
                 401:
                     $ref: '#/components/responses/401'
                 404:
@@ -586,6 +579,24 @@ components:
                     examples:
                         successExample:
                             $ref: '#/components/examples/success200'
+        201:
+            description: Successful operation
+            content:
+                aplication/json:
+                    schema:
+                        $ref: '#/components/schemas/BasicResponse'
+                    examples:
+                        successExample:
+                            $ref: '#/components/examples/success201'
+        204:
+            description: Successful operation
+            content:
+                aplication/json:
+                    schema:
+                        $ref: '#/components/schemas/BasicResponse'
+                    examples:
+                        successExample:
+                            $ref: '#/components/examples/success204'
         400:
             description: 'Error: Bad Request'
             content:
@@ -849,7 +860,7 @@ components:
             properties:
                 status:
                     type: integer
-                    enum: [200, 204]
+                    enum: [200, 201, 204]
                 message: 
                     type: string
                 
@@ -869,6 +880,10 @@ components:
             value:
                 status: 200
                 message: OK
+        success201:
+            value:
+                status: 201
+                message: Created
         success204:
             value:
                 status: 204
