@@ -760,10 +760,6 @@ components:
                     type: string
                     maxLength: 150
                     example: John
-                likes:
-                    type: integer
-                    format: int32
-                    example: 38
                 hidden:
                     type: integer
                     format: int32
@@ -797,11 +793,6 @@ components:
                     type: string
                     maxLength: 150
                     example: John
-                likes:
-                    type: integer
-                    format: int32
-                    default: 1
-                    example: 1
                 hidden:
                     type: integer
                     format: int32
