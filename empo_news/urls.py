@@ -94,5 +94,5 @@ urlpatterns = [
     path('api/v1/comments/<int:commentId>', comments_id_view, name='api_id_comments'),
     path('api/v1/contributions/<int:id>/comments', contribution_comments_view, name='api_contribution_comments'),
     path('api/v1/profiles', profiles_id_args, name='api_profiles_id_args'),
-    path('api/v1/profiles/<int:id>', profiles_id_kwargs, name='api_profiles_id_kwargs'),
+    path('api/v1/profile/<int:id>', profiles_id_kwargs, name='api_profiles_id_kwargs'),
 ]
