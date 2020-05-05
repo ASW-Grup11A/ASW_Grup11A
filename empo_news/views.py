@@ -857,7 +857,7 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
         contribution.save()
 
-        return Response(ContributionSerializer(contribution).data)
+        return Response(ContributionSerializer(contribution).data, status=status.HTTP_204_NO_CONTENT)
 
 
 class VoteIdViewSet(viewsets.ModelViewSet):
@@ -888,8 +888,8 @@ class VoteIdViewSet(viewsets.ModelViewSet):
         contribution.likes += 1
         contribution.save()
 
-        response = {'status': 200, 'message': 'OK'}
-        return Response(response)
+        response = {'status': 204, 'message': 'OK'}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class UnVoteIdViewSet(viewsets.ModelViewSet):
@@ -930,8 +930,8 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
         contribution.likes -= 1
         contribution.save()
 
-        response = {'status': 200, 'message': 'OK'}
-        return Response(response)
+        response = {'status': 204, 'message': 'OK'}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class HideIdViewSet(viewsets.ModelViewSet):
@@ -962,8 +962,8 @@ class HideIdViewSet(viewsets.ModelViewSet):
         contribution.hidden += 1
         contribution.save()
 
-        response = {'status': 200, 'message': 'OK'}
-        return Response(response)
+        response = {'status': 204, 'message': 'OK'}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class UnHideIdViewSet(viewsets.ModelViewSet):
@@ -1001,8 +1001,8 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
         contribution.hidden -= 1
         contribution.save()
 
-        response = {'status': 200, 'message': 'OK'}
-        return Response(response)
+        response = {'status': 204, 'message': 'OK'}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentViewSet(viewsets.ReadOnlyModelViewSet):
@@ -1074,7 +1074,7 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         comment.user_likes.add(user_field.user)
         comment.save()
 
-        return Response(CommentSerializer(comment).data)
+        return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
 
 
 class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
@@ -1163,4 +1163,4 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
 
         user_fields.save()
 
-        return Response(UserFieldsSerializer(user_fields).data)
+        return Response(UserFieldsSerializer(user_fields).data, status=status.HTTP_204_NO_CONTENT)
