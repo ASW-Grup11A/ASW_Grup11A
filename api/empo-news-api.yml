@@ -72,29 +72,36 @@ paths:
                     type: object
                     properties:
                         about:
+                            description: The new about
                             type: string
                             maxLength: 2000
                             example: I love crisps.
                         email:
+                            description: The new email
                             type: string
                             format: email
                             maxLength: 254
                             example: johnDoe@mail.com
                         showdead:
+                            description: The new showdead
                             type: boolean
                             example: false
                         noprocast:
+                            description: The new noprocast
                             type: boolean
                             example: true
                         maxvisit:
+                            description: The new maxvisit
                             type: integer
                             format: int32
                             example: 20
                         minaway:
+                            description: The new minaway
                             type: integer
                             format: int32
                             example: 30
                         delay:
+                            description: The new delay
                             type: integer
                             format: int32
                             example: 20
@@ -225,31 +232,29 @@ paths:
                 - contributions
                 - comments
             description: Edits a single contribution or comment
-            requestBody:
-              required: true
-              description: Provides the new content for the contribution or comment
-              content:
-                  application/json:
-                      schema:
-                          oneOf:
-                              - type: object
-                                properties:
-                                    title:
-                                        type: string
-                                        minLength: 4
-                                        maxLength: 2000
-                                        example: 'This is my new title'
-                              - $ref: '#/components/schemas/CreateContributionWithText'
-                      examples:
-                          urlContribution:
-                              summary: Example of a contribution with url
-                              value:
-                                  title: This is my new title
-                          textContribution:
-                              summary: Example of a contribution with text
-                              value:
-                                  title: This is my new title
-                                  text: Hey there!
+            parameters:
+                - in: query
+                  name: parameter
+                  required: true
+                  schema:
+                    type: object
+                    properties:
+                        title:
+                            description: The new title
+                            type: string
+                            minLength: 4
+                            maxLength: 2000
+                            example: 'This is my new title'
+                        text:
+                            description: The new text. It must not be used in those contributions that have a url instead of text.
+                            type: string
+                            nullable: true
+                            maxLength: 500
+                            example: Hey there!
+                    minProperties: 1
+                    additionalProperties: false
+                  style: form
+                  explode: true
             responses:
                 200:
                     description: Successful operation
