@@ -555,7 +555,7 @@ components:
             name: id
             in: path
             required: true
-            description: ID of the profile to return
+            description: ID of the user
             schema:
                 type: integer
                 format: int64
