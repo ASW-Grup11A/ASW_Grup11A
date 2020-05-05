@@ -84,6 +84,15 @@ CORS_ALLOW_HEADERS = [
     'Api-Key',
 ]
 
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'empo_news.errors.empo_news_exception_handler'
 }
