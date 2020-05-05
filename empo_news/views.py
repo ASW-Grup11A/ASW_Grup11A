@@ -1099,7 +1099,7 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(user)
 
 
-class ProfilesIdViewSet(viewsets.ReadOnlyModelViewSet):
+class ProfilesIdViewSet(viewsets.ModelViewSet):
     queryset = UserFields.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [KeyPermission]
@@ -1116,5 +1116,51 @@ class ProfilesIdViewSet(viewsets.ReadOnlyModelViewSet):
 
         if user_fields.api_key != api_key.id:
             raise ForbiddenException
+
+        return Response(UserFieldsSerializer(user_fields).data)
+
+    @action(detail=True, methods=['put'], renderer_classes=[renderers.StaticHTMLRenderer])
+    def update_actual(self, request, *args, **kwargs):
+        about = self.request.query_params.get('about', '')
+        email = self.request.query_params.get('email', '')
+        showdead = self.request.query_params.get('showdead', '')
+        noprocrast = self.request.query_params.get('noprocrast', '')
+        maxvisit = self.request.query_params.get('maxvisit', '')
+        minaway = self.request.query_params.get('minaway', '')
+        delay = self.request.query_params.get('delay', '')
+
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_fields = UserFields.objects.get(id=kwargs.get('id'))
+        except UserFields.DoesNotExist:
+            raise NotFoundException
+
+        if user_fields.api_key != api_key.id:
+            raise ForbiddenException
+
+        if about:
+            user_fields.about = about
+
+        if email:
+            user_fields.email = email
+
+        if showdead:
+            user_fields.showdead = showdead == 'true'
+
+        if noprocrast:
+            user_fields.noprocrast = noprocrast == 'true'
+
+        if maxvisit:
+            user_fields.maxvisit = maxvisit
+
+        if minaway:
+            user_fields.minaway = minaway
+
+        if delay:
+            user_fields.delay = delay
+
+        user_fields.save()
 
         return Response(UserFieldsSerializer(user_fields).data)
