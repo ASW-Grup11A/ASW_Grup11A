@@ -1004,7 +1004,7 @@ class HideIdViewSet(viewsets.ModelViewSet):
             if str(user_field.user.username) == str(user_hidden):
                 raise ConflictException
 
-        if contribution.get_class() == 'Contribution':
+        if contribution.get_class() != 'Comment':
             contribution.user_id_hidden.add(user_field.user.id)
             contribution.hidden += 1
             contribution.save()
