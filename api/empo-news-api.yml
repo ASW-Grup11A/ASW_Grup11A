@@ -423,8 +423,10 @@ paths:
                 schema:
                     type: string
                     enum:
-                        - publication_date
-                        - votes
+                        - publication_date_asc
+                        - publication_date_desc
+                        - votes_asc
+                        - votes_desc
             responses:
                 200:
                   description: List of all comments
@@ -592,9 +594,12 @@ components:
             schema:
                 type: string
                 enum:
-                    - publication_date
-                    - title
-                    - votes
+                    - publication_date_asc
+                    - publication_date_desc
+                    - title_asc
+                    - title_desc
+                    - votes_asc
+                    - votes_desc
     responses:
         200:
             description: Successful operation
