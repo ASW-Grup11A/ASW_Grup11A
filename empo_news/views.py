@@ -971,15 +971,6 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
-def hide_comment(comment, user_id):
-    comment.user_id_hidden.add(user_id)
-    comment.hidden += 1
-    comment.save()
-
-    for child_comment in comment.comment_set.all():
-        hide_comment(child_comment, user_id)
-
-
 class HideIdViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
@@ -1004,17 +995,9 @@ class HideIdViewSet(viewsets.ModelViewSet):
             if str(user_field.user.username) == str(user_hidden):
                 raise ConflictException
 
-        try:
-            comment = Comment.objects.get(id=contribution.id)
-            hide_comment(comment, user_field.user.id)
-        except Comment.DoesNotExist:
-            contribution.user_id_hidden.add(user_field.user.id)
-            contribution.hidden += 1
-            contribution.save()
-
-            comments = Comment.objects.get(contribution_id=contribution.id)
-            for comment in comments:
-                hide_comment(comment, user_field.user.id)
+        contribution.user_id_hidden.add(user_field.user.id)
+        contribution.hidden += 1
+        contribution.save()
 
         response = {'status': 204, 'message': 'OK'}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
