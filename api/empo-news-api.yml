@@ -369,6 +369,18 @@ paths:
                     $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
+                409:
+                    description: 'Error: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                errorExample:
+                                    value:
+                                      status: 409
+                                      error: "Conflict"
+                                      message: "The contribution is yours"
                 500:
                     $ref: '#/components/responses/500'
         get:
