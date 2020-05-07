@@ -1069,12 +1069,33 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
         try:
             Contribution.objects.get(id=kwargs.get('id'))
         except Contribution.DoesNotExist:
             raise NotFoundException
 
         contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
+
+        for contrib in contribution_comments:
+            try:
+                contrib.user_likes.get(id=user_field.user.id)
+                contrib.liked = True
+            except User.DoesNotExist:
+                contrib.liked = False
+
+            try:
+                contrib.user_id_hidden.get(id=user_field.user.id)
+                contrib.show = False
+            except User.DoesNotExist:
+                contrib.show = True
 
         return Response(CommentSerializer(contribution_comments, many=True).data)
 
