@@ -1165,6 +1165,26 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
             except User.DoesNotExist:
                 contrib.show = True
 
+        username_filter = self.request.query_params.get('username', '')
+        order_by_filter = self.request.query_params.get('orderBy', '')
+
+        if username_filter:
+            try:
+                user = User.objects.get(username=username_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
+            contribution_comments = contribution_comments.filter(user_id=user.id)
+
+        if order_by_filter:
+            if order_by_filter == 'publication_time_asc':
+                contribution_comments = contribution_comments.order_by('publication_time')
+            elif order_by_filter == 'publication_time_desc':
+                contribution_comments = contribution_comments.order_by('-publication_time')
+            elif order_by_filter == 'votes_asc':
+                contribution_comments = contribution_comments.order_by('points')
+            else:
+                contribution_comments = contribution_comments.order_by('-points')
+
         return Response(CommentSerializer(contribution_comments, many=True).data)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
