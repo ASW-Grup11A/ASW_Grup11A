@@ -223,8 +223,6 @@ paths:
                 500:
                    $ref: '#/components/responses/500'
     /contribution/{id}:
-        parameters:
-                - $ref: '#/components/parameters/contributionId'
         put:
             summary: Edits a contribution or comment by its ID
             operationId: editContributionById
@@ -233,6 +231,13 @@ paths:
                 - comments
             description: Edits a single contribution or comment
             parameters:
+                - in: path
+                  name: id
+                  description: ID of the contribution or comment
+                  required: true
+                  schema:
+                      type: integer
+                      format: int64
                 - in: query
                   name: parameter
                   required: true
@@ -308,6 +313,14 @@ paths:
             tags:
                 - contributions
                 - comments
+            parameters:
+                - in: path
+                  name: id
+                  description: ID of the contribution
+                  required: true
+                  schema:
+                      type: integer
+                      format: int64
             responses:
                 204:
                     $ref: '#/components/responses/204'
@@ -763,6 +776,12 @@ components:
                     type: integer
                     format: int32
                     example: 5
+                liked:
+                    type: boolean
+                    example: true
+                show:
+                    type: boolean
+                    example: true
         Comment:
             type: object
             properties:
