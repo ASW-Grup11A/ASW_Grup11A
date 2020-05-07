@@ -14,7 +14,7 @@ class UserFieldsSerializer(serializers.ModelSerializer):
 
 
 class ContributionSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.id')
+    user = serializers.ReadOnlyField(source='user.username')
     points = serializers.ReadOnlyField()
     publication_time = serializers.ReadOnlyField()
     comments = serializers.ReadOnlyField()
@@ -24,7 +24,7 @@ class ContributionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contribution
         fields = ['id', 'title', 'points', 'publication_time', 'url', 'text', 'comments',
-                  'liked', 'show', 'user', 'likes', 'hidden']
+                  'liked', 'show', 'user', 'hidden']
 
 
 class CommentSerializer(serializers.ModelSerializer):

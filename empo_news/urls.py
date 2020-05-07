@@ -8,7 +8,7 @@ from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet, 
 app_name = 'empo_news'
 
 contributions_view = ContributionsViewSet.as_view({
-    'get': 'list',
+    'get': 'get_actual',
     'post': 'create'
 })
 

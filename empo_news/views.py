@@ -748,6 +748,30 @@ class ContributionsViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     permission_classes = [KeyPermission]
 
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        contributions = Contribution.objects.all()
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        user_fields = UserFields.objects.get(api_key=api_key.id)
+
+        for contrib in contributions:
+            try:
+                contrib.user_likes.get(id=user_fields.user.id)
+                contrib.liked = True
+            except User.DoesNotExist:
+                contrib.liked = False
+
+            try:
+                contrib.user_id_hidden.get(id=user_fields.user.id)
+                contrib.show = False
+            except User.DoesNotExist:
+                contrib.show = True
+
+        return Response(ContributionSerializer(contributions, many=True).data)
+
+
     def perform_create(self, serializer):
         title = self.request.data.get('title', '')
         url = self.request.data.get('url', '')
@@ -807,6 +831,19 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
             contribution = Contribution.objects.get(id=kwargs.get('id'))
         except Contribution.DoesNotExist:
             raise NotFoundException
+
+        try:
+            contribution.user_likes.get(id=contribution.user.id)
+            contribution.liked = True
+        except User.DoesNotExist:
+            contribution.liked = False
+
+        try:
+            contribution.user_id_hidden.get(id=contribution.user.id)
+            contribution.show = False
+        except User.DoesNotExist:
+            contribution.show = True
+
         return Response(ContributionSerializer(contribution).data)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
