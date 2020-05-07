@@ -783,7 +783,7 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             contributions = contributions.filter(user__username=username_filter)
 
         if show_en_filter:
-            contributions = contributions.filter(title__startswith="Show En:")
+            contributions = contributions.filter(title__startswith="Show EN:")
 
         if url_filter:
             contributions = contributions.filter(url=url_filter)
