@@ -1110,7 +1110,8 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user_fields = UserFields.objects.get(user_id=kwargs.get('id'))
+            user = User.objects.get(username=self.request.query_params.get('username'))
+            user_fields = UserFields.objects.get(user_id=user.id)
         except UserFields.DoesNotExist:
             raise NotFoundException
 
@@ -1133,7 +1134,8 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user_fields = UserFields.objects.get(user_id=kwargs.get('id'))
+            user = User.objects.get(username=self.request.query_params.get('username'))
+            user_fields = UserFields.objects.get(user_id=user.id)
         except UserFields.DoesNotExist:
             raise NotFoundException
 
