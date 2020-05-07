@@ -686,7 +686,7 @@ def voted_submissions(request):
         list_base = 0
 
     contributions = Contribution.objects.filter(comment__isnull=True,
-                                                likes__username__contains=request.user.username).exclude(
+                                                user_likes__username__contains=request.user.username).exclude(
         user=request.user)
     update_show(contributions.order_by('-points'), request.user.id, pg * 30)
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
@@ -720,7 +720,7 @@ def voted_comments(request):
     elif pg == 1:
         list_base = 0
 
-    comments = Comment.objects.filter(likes__username__contains=request.user.username).exclude(user=request.user)
+    comments = Comment.objects.filter(user_likes__username__contains=request.user.username).exclude(user=request.user)
     most_recent_list = comments.order_by('-publication_time')[list_base:(pg * 30)]
     more = len(comments) > (pg * 30)
     for contribution in most_recent_list:
