@@ -1003,6 +1003,8 @@ components:
                 comments: 2
                 user_id: John
                 hidden: 0
+                liked: true
+                show: true
                 contribution_id: 235
                 parent_id: 381
     securitySchemes:
