@@ -35,7 +35,7 @@ unhide_id_view = UnHideIdViewSet.as_view({
 })
 
 comments_view = CommentViewSet.as_view({
-    'get': 'list'
+    'get': 'get_actual'
 })
 
 comments_id_view = CommentIdViewSet.as_view({

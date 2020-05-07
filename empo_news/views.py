@@ -1050,6 +1050,13 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [KeyPermission]
 
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        user = User.objects.get(username=self.request.query_params.get('username'))
+        comments = Comment.objects.filter(user=user.id)
+
+        return Response(CommentSerializer(comments, many=True).data)
+
 
 class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Comment.objects.all()
@@ -1125,7 +1132,6 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
             except Contribution.DoesNotExist:
                 raise NotFoundException
 
-        print("COMMENT " + str(comment) + " CONTRIBUTION " + str(contribution.id))
         if (comment is None and contribution.user.id == user_field.user.id) \
                 or (comment is not None and comment.user.id == user_field.user.id):
             raise ContributionUserException
