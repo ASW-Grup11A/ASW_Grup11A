@@ -1086,9 +1086,10 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
     def get_actual(self, request, *args, **kwargs):
         try:
             user = User.objects.get(username=self.request.query_params.get('username'))
-            user_fields = UserFields.objects.get(user_id=user.id)
         except UserFields.DoesNotExist:
             raise NotFoundException
+
+        user_fields = UserFields.objects.get(user_id=user.id)
 
         user = {
             "username": user_fields.user.username,
@@ -1111,9 +1112,10 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
 
         try:
             user = User.objects.get(username=kwargs.get('username'))
-            user_fields = UserFields.objects.get(user_id=user.id)
-        except UserFields.DoesNotExist:
+        except User.DoesNotExist:
             raise NotFoundException
+
+        user_fields = UserFields.objects.get(user_id=user.id)
 
         if user_fields.api_key != api_key.id:
             raise ForbiddenException
@@ -1135,9 +1137,10 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
 
         try:
             user = User.objects.get(username=kwargs.get('username'))
-            user_fields = UserFields.objects.get(user_id=user.id)
-        except UserFields.DoesNotExist:
+        except User.DoesNotExist:
             raise NotFoundException
+
+        user_fields = UserFields.objects.get(user_id=user.id)
 
         if user_fields.api_key != api_key.id:
             raise ForbiddenException
