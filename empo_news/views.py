@@ -789,7 +789,7 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             contributions = contributions.filter(url=url_filter)
 
         if ask_filter:
-            contributions = contributions.filter(text__isnull=False)
+            contributions = contributions.filter(url__isnull=True)
 
         if order_by_filter:
             if order_by_filter == 'publication_time_asc':
