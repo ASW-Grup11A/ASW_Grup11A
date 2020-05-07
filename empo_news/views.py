@@ -1085,12 +1085,12 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
         try:
-            user_fields = UserFields.objects.get(user_id=self.request.query_params.get('id'))
+            user = User.objects.get(username=self.request.query_params.get('username'))
+            user_fields = UserFields.objects.get(user_id=user.id)
         except UserFields.DoesNotExist:
             raise NotFoundException
 
         user = {
-            "id": user_fields.user.id,
             "username": user_fields.user.username,
             "data_joined": user_fields.user.date_joined,
             "karma": user_fields.karma
