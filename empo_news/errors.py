@@ -33,6 +33,12 @@ class UrlIsTooLongException(APIException):
     default_code = 'Bad Request'
 
 
+class InvalidQueryParametersException(APIException):
+    status_code = 400
+    default_detail = 'Url and ask parameters cannot be used together'
+    default_code = 'Bad Request'
+
+
 class UnauthenticatedException(APIException):
     status_code = 401
     default_detail = 'The user is not authenticated'

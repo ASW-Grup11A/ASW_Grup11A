@@ -11,7 +11,8 @@ from rest_framework.response import Response
 from rest_framework_api_key.models import APIKey
 
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
-    NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException
+    NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException, \
+    InvalidQueryParametersException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
@@ -768,6 +769,41 @@ class ContributionsViewSet(viewsets.ModelViewSet):
                 contrib.show = False
             except User.DoesNotExist:
                 contrib.show = True
+
+        username_filter = self.request.query_params('username', '')
+        show_en_filter = self.request.query_params('showEn', '')
+        url_filter = self.request.query_params('url', '')
+        ask_filter = self.request.query_params('ask', '')
+        order_by_filter = self.request.query_params('orderBy', '')
+
+        if url_filter and ask_filter:
+            raise InvalidQueryParametersException
+
+        if username_filter:
+            contributions = contributions.filter(user__username=username_filter)
+
+        if show_en_filter:
+            contributions = contributions.filter(title__startswith="Show En:")
+
+        if url_filter:
+            contributions = contributions.filter(url=url_filter)
+
+        if ask_filter:
+            contributions = contributions.filter(text__isnull=False)
+
+        if order_by_filter:
+            if order_by_filter == 'publication_time_asc':
+                contributions = contributions.order_by('publication_time')
+            elif order_by_filter == 'publication_time_desc':
+                contributions = contributions.order_by('-publication_time')
+            elif order_by_filter == 'title_asc':
+                contributions = contributions.order_by('title')
+            elif order_by_filter == 'title_desc':
+                contributions = contributions.order_by('-title')
+            elif order_by_filter == 'votes_asc':
+                contributions = contributions.order_by('points')
+            else:
+                contributions = contributions.order_by('-points')
 
         return Response(ContributionSerializer(contributions, many=True).data)
 
