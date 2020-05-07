@@ -13,15 +13,15 @@ paths:
             tags:
                 - users
             parameters:
-                - name: id
+                - name: username
                   in: query
                   required: true
-                  description: ID of the profile to return
+                  description: Username of the profile to return
                   schema:
                       type: string
             responses:
                 200:
-                    description: Finds a user by its ID
+                    description: Finds a user by its username
                     content:
                         application/json:
                             schema:
@@ -34,7 +34,7 @@ paths:
                     $ref: '#/components/responses/405'
                 500:
                     $ref: '#/components/responses/500'
-    /profile/{id}:
+    /profile/{username}:
         parameters:
                 - $ref: '#/components/parameters/userId'
         get:
@@ -545,13 +545,12 @@ components:
               type: integer
               format: int64
         userId:
-            name: id
+            name: username
             in: path
             required: true
-            description: ID of the user
+            description: Username of the user
             schema:
-                type: integer
-                format: int64
+                type: string
         userIdQuery:
             name: id
             in: query
