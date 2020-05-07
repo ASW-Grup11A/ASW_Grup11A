@@ -69,6 +69,33 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'asw_grup11a.urls'
 API_KEY_CUSTOM_HEADER = "HTTP_API_KEY"
+CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Api-Key',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'empo_news.errors.empo_news_exception_handler'
+}
 
 TEMPLATES = [
     {

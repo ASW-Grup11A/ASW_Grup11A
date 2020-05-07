@@ -8,7 +8,7 @@ from .views import ContributionsViewSet, ContributionsIdViewSet, VoteIdViewSet, 
 app_name = 'empo_news'
 
 contributions_view = ContributionsViewSet.as_view({
-    'get': 'list',
+    'get': 'get_actual',
     'post': 'create'
 })
 
@@ -35,7 +35,7 @@ unhide_id_view = UnHideIdViewSet.as_view({
 })
 
 comments_view = CommentViewSet.as_view({
-    'get': 'list'
+    'get': 'get_actual'
 })
 
 comments_id_view = CommentIdViewSet.as_view({
@@ -85,14 +85,14 @@ urlpatterns = [
     path('collapse/<int:contribution_id>/<int:comment_id>', views.collapse, name='collapse'),
 
     path('api/v1/contributions', contributions_view, name='api_contributions'),
-    path('api/v1/contributions/<int:id>', contributions_id_view, name='api_contributions_id'),
-    path('api/v1/contributions/<int:id>/vote', vote_id_view, name='api_vote_id'),
-    path('api/v1/contributions/<int:id>/unvote', unvote_id_view, name='api_unvote_id'),
-    path('api/v1/contributions/<int:id>/hide', hide_id_view, name='api_hide_id'),
-    path('api/v1/contributions/<int:id>/unhide', unhide_id_view, name='api_unhide_id'),
+    path('api/v1/contribution/<int:id>', contributions_id_view, name='api_contributions_id'),
+    path('api/v1/contribution/<int:id>/vote', vote_id_view, name='api_vote_id'),
+    path('api/v1/contribution/<int:id>/unvote', unvote_id_view, name='api_unvote_id'),
+    path('api/v1/contribution/<int:id>/hide', hide_id_view, name='api_hide_id'),
+    path('api/v1/contribution/<int:id>/unhide', unhide_id_view, name='api_unhide_id'),
     path('api/v1/comments', comments_view, name='api_comments'),
-    path('api/v1/comments/<int:commentId>', comments_id_view, name='api_id_comments'),
-    path('api/v1/contributions/<int:id>/comments', contribution_comments_view, name='api_contribution_comments'),
+    path('api/v1/comment/<int:commentId>', comments_id_view, name='api_id_comments'),
+    path('api/v1/contribution/<int:id>/comments', contribution_comments_view, name='api_contribution_comments'),
     path('api/v1/profiles', profiles_id_args, name='api_profiles_id_args'),
-    path('api/v1/profiles/<int:id>', profiles_id_kwargs, name='api_profiles_id_kwargs'),
+    path('api/v1/profile/<str:username>', profiles_id_kwargs, name='api_profiles_id_kwargs'),
 ]

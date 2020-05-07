@@ -5,13 +5,14 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from rest_framework import viewsets, renderers
+from rest_framework import viewsets, renderers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_api_key.models import APIKey
 
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
-    NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException
+    NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException, \
+    InvalidQueryParametersException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
@@ -177,12 +178,12 @@ def likes(request, view, pg, contribution_id):
         userFields.save()
     if contribution.user_likes.filter(id=request.user.id).exists():
         contribution.user_likes.remove(request.user)
-        contribution.likes = contribution.likes - 1
+        contribution.points = contribution.points - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.user_likes.add(request.user)
-        contribution.likes = contribution.likes + 1
+        contribution.points = contribution.points + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -200,12 +201,12 @@ def likes_reply(request, contribution_id, comment_id, path):
         userFields.save()
     if comment.user_likes.filter(id=request.user.id).exists():
         comment.user_likes.remove(request.user)
-        comment.likes = comment.likes - 1
+        comment.points = comment.points - 1
         UserFields.objects.filter(user=comment.user).update(
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) - 1)
     else:
         comment.user_likes.add(request.user)
-        comment.likes = comment.likes + 1
+        comment.points = comment.points + 1
         UserFields.objects.filter(user=comment.user).update(
             karma=getattr(UserFields.objects.filter(user=comment.user).first(), 'karma', 1) + 1)
     comment.points = comment.total_likes()
@@ -223,12 +224,12 @@ def likes_contribution(request, contribution_id):
         userFields.save()
     if contribution.user_likes.filter(id=request.user.id).exists():
         contribution.user_likes.remove(request.user)
-        contribution.likes = contribution.likes - 1
+        contribution.points = contribution.points - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.user_likes.add(request.user)
-        contribution.likes = contribution.likes + 1
+        contribution.points = contribution.points + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -244,12 +245,12 @@ def likes_comment(request, comment_id, username):
         userFields.save()
     if contribution.user_likes.filter(id=request.user.id).exists():
         contribution.user_likes.remove(request.user)
-        contribution.likes = contribution.likes - 1
+        contribution.points = contribution.points - 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) - 1)
     else:
         contribution.user_likes.add(request.user)
-        contribution.likes = contribution.likes + 1
+        contribution.points = contribution.points + 1
         UserFields.objects.filter(user=contribution.user).update(
             karma=getattr(UserFields.objects.filter(user=contribution.user).first(), 'karma', 1) + 1)
     contribution.points = contribution.total_likes()
@@ -686,7 +687,7 @@ def voted_submissions(request):
         list_base = 0
 
     contributions = Contribution.objects.filter(comment__isnull=True,
-                                                likes__username__contains=request.user.username).exclude(
+                                                user_likes__username__contains=request.user.username).exclude(
         user=request.user)
     update_show(contributions.order_by('-points'), request.user.id, pg * 30)
     most_points_list = contributions.filter(show=True).order_by('-points')[list_base:(pg * 30)]
@@ -720,7 +721,7 @@ def voted_comments(request):
     elif pg == 1:
         list_base = 0
 
-    comments = Comment.objects.filter(likes__username__contains=request.user.username).exclude(user=request.user)
+    comments = Comment.objects.filter(user_likes__username__contains=request.user.username).exclude(user=request.user)
     most_recent_list = comments.order_by('-publication_time')[list_base:(pg * 30)]
     more = len(comments) > (pg * 30)
     for contribution in most_recent_list:
@@ -747,6 +748,69 @@ def is_url_valid(url):
 class ContributionsViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        contributions = Contribution.objects.filter(comment__isnull=True)
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        user_fields = UserFields.objects.get(api_key=api_key.id)
+
+        for contrib in contributions:
+            try:
+                contrib.user_likes.get(id=user_fields.user.id)
+                contrib.liked = True
+            except User.DoesNotExist:
+                contrib.liked = False
+
+            try:
+                contrib.user_id_hidden.get(id=user_fields.user.id)
+                contrib.show = False
+            except User.DoesNotExist:
+                contrib.show = True
+
+        username_filter = self.request.query_params.get('username', '')
+        show_en_filter = self.request.query_params.get('showEn', '')
+        url_filter = self.request.query_params.get('url', '')
+        ask_filter = self.request.query_params.get('ask', '')
+        order_by_filter = self.request.query_params.get('orderBy', '')
+
+        if url_filter and ask_filter:
+            raise InvalidQueryParametersException
+
+        if username_filter:
+            try:
+                User.objects.get(username=username_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
+            contributions = contributions.filter(user__username=username_filter)
+
+        if show_en_filter:
+            contributions = contributions.filter(title__startswith="Show EN:")
+
+        if url_filter:
+            contributions = contributions.filter(url=url_filter)
+
+        if ask_filter:
+            contributions = contributions.filter(url__isnull=True)
+
+        if order_by_filter:
+            if order_by_filter == 'publication_time_asc':
+                contributions = contributions.order_by('publication_time')
+            elif order_by_filter == 'publication_time_desc':
+                contributions = contributions.order_by('-publication_time')
+            elif order_by_filter == 'title_asc':
+                contributions = contributions.order_by('title')
+            elif order_by_filter == 'title_desc':
+                contributions = contributions.order_by('-title')
+            elif order_by_filter == 'votes_asc':
+                contributions = contributions.order_by('points')
+            else:
+                contributions = contributions.order_by('-points')
+
+        return Response(ContributionSerializer(contributions, many=True).data)
+
 
     def perform_create(self, serializer):
         title = self.request.data.get('title', '')
@@ -807,6 +871,19 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
             contribution = Contribution.objects.get(id=kwargs.get('id'))
         except Contribution.DoesNotExist:
             raise NotFoundException
+
+        try:
+            contribution.user_likes.get(id=contribution.user.id)
+            contribution.liked = True
+        except User.DoesNotExist:
+            contribution.liked = False
+
+        try:
+            contribution.user_id_hidden.get(id=contribution.user.id)
+            contribution.show = False
+        except User.DoesNotExist:
+            contribution.show = True
+
         return Response(ContributionSerializer(contribution).data)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
@@ -816,7 +893,7 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         except Contribution.DoesNotExist:
             raise NotFoundException
 
-        user = UserFields.objects.get(id=contribution.user.id)
+        user = UserFields.objects.get(user_id=contribution.user.id)
         key = request.META.get('HTTP_API_KEY', '')
         api_key = APIKey.objects.get_from_key(key)
 
@@ -825,13 +902,13 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
         contribution.delete()
         message = {'status': 204, 'message': 'Deleted'}
-        return Response(message)
+        return Response(message, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def update_actual(self, request, *args, **kwargs):
-        title = self.request.data.get('title', '')
-        url = self.request.data.get('url', '')
-        text = self.request.data.get('text', '')
+        title = self.request.query_params.get('title', '')
+        url = self.request.query_params.get('url', '')
+        text = self.request.query_params.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
         api_key = APIKey.objects.get_from_key(key)
@@ -852,8 +929,11 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
         contribution = Contribution.objects.get(id=kwargs.get('id'))
         contribution.title = title
-        contribution.url = url
-        contribution.text = text
+
+        if url:
+            contribution.url = url
+        else:
+            contribution.text = text
 
         contribution.save()
 
@@ -885,11 +965,11 @@ class VoteIdViewSet(viewsets.ModelViewSet):
                 raise ConflictException
 
         contribution.user_likes.add(user_field.user.id)
-        contribution.likes += 1
+        contribution.points += 1
         contribution.save()
 
-        response = {'status': 200, 'message': 'OK'}
-        return Response(response)
+        response = {'status': 204, 'message': 'OK'}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class UnVoteIdViewSet(viewsets.ModelViewSet):
@@ -927,11 +1007,11 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
             raise ConflictException
 
         contribution.user_likes.remove(user_field.user.id)
-        contribution.likes -= 1
+        contribution.points -= 1
         contribution.save()
 
-        response = {'status': 200, 'message': 'OK'}
-        return Response(response)
+        response = {'status': 204, 'message': 'OK'}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class HideIdViewSet(viewsets.ModelViewSet):
@@ -962,8 +1042,8 @@ class HideIdViewSet(viewsets.ModelViewSet):
         contribution.hidden += 1
         contribution.save()
 
-        response = {'status': 200, 'message': 'OK'}
-        return Response(response)
+        response = {'status': 204, 'message': 'OK'}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class UnHideIdViewSet(viewsets.ModelViewSet):
@@ -1001,14 +1081,39 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
         contribution.hidden -= 1
         contribution.save()
 
-        response = {'status': 200, 'message': 'OK'}
-        return Response(response)
+        response = {'status': 204, 'message': 'OK'}
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        username_filter = self.request.query_params.get('username', '')
+        order_by_filter = self.request.query_params.get('orderBy', '')
+        comments = Comment.objects.all()
+
+        if username_filter:
+            try:
+                user = User.objects.get(username=username_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
+            comments = comments.filter(user_id=user.id)
+
+        if order_by_filter:
+            if order_by_filter == 'publication_time_asc':
+                comments = comments.order_by('publication_time')
+            elif order_by_filter == 'publication_time_desc':
+                comments = comments.order_by('-publication_time')
+            elif order_by_filter == 'votes_asc':
+                comments = comments.order_by('points')
+            else:
+                comments = comments.order_by('-points')
+
+        return Response(CommentSerializer(comments, many=True).data)
 
 
 class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
@@ -1032,12 +1137,53 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
         try:
             Contribution.objects.get(id=kwargs.get('id'))
         except Contribution.DoesNotExist:
             raise NotFoundException
 
         contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
+
+        for contrib in contribution_comments:
+            try:
+                contrib.user_likes.get(id=user_field.user.id)
+                contrib.liked = True
+            except User.DoesNotExist:
+                contrib.liked = False
+
+            try:
+                contrib.user_id_hidden.get(id=user_field.user.id)
+                contrib.show = False
+            except User.DoesNotExist:
+                contrib.show = True
+
+        username_filter = self.request.query_params.get('username', '')
+        order_by_filter = self.request.query_params.get('orderBy', '')
+
+        if username_filter:
+            try:
+                user = User.objects.get(username=username_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
+            contribution_comments = contribution_comments.filter(user_id=user.id)
+
+        if order_by_filter:
+            if order_by_filter == 'publication_time_asc':
+                contribution_comments = contribution_comments.order_by('publication_time')
+            elif order_by_filter == 'publication_time_desc':
+                contribution_comments = contribution_comments.order_by('-publication_time')
+            elif order_by_filter == 'votes_asc':
+                contribution_comments = contribution_comments.order_by('points')
+            else:
+                contribution_comments = contribution_comments.order_by('-points')
 
         return Response(CommentSerializer(contribution_comments, many=True).data)
 
@@ -1064,7 +1210,8 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
             except Contribution.DoesNotExist:
                 raise NotFoundException
 
-        if (comment is None and contribution.user.id == user_field.user.id) or comment.user.id == user_field.user.id:
+        if (comment is None and contribution.user.id == user_field.user.id) \
+                or (comment is not None and comment.user.id == user_field.user.id):
             raise ContributionUserException
 
         comment = Comment(user=user_field.user, title='', points=1, publication_time=datetime.today(),
@@ -1074,7 +1221,7 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         comment.user_likes.add(user_field.user)
         comment.save()
 
-        return Response(CommentSerializer(comment).data)
+        return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
 
 
 class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
@@ -1085,12 +1232,13 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
         try:
-            user_fields = UserFields.objects.get(id=self.request.GET.get('id'))
+            user = User.objects.get(username=self.request.query_params.get('username'))
         except UserFields.DoesNotExist:
             raise NotFoundException
 
+        user_fields = UserFields.objects.get(user_id=user.id)
+
         user = {
-            "id": user_fields.user.id,
             "username": user_fields.user.username,
             "data_joined": user_fields.user.date_joined,
             "karma": user_fields.karma
@@ -1110,9 +1258,11 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user_fields = UserFields.objects.get(id=kwargs.get('id'))
-        except UserFields.DoesNotExist:
+            user = User.objects.get(username=kwargs.get('username'))
+        except User.DoesNotExist:
             raise NotFoundException
+
+        user_fields = UserFields.objects.get(user_id=user.id)
 
         if user_fields.api_key != api_key.id:
             raise ForbiddenException
@@ -1133,9 +1283,11 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user_fields = UserFields.objects.get(id=kwargs.get('id'))
-        except UserFields.DoesNotExist:
+            user = User.objects.get(username=kwargs.get('username'))
+        except User.DoesNotExist:
             raise NotFoundException
+
+        user_fields = UserFields.objects.get(user_id=user.id)
 
         if user_fields.api_key != api_key.id:
             raise ForbiddenException

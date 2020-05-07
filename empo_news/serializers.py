@@ -4,18 +4,17 @@ from empo_news.models import UserFields, Contribution, Comment
 
 
 class UserFieldsSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(source='user.id')
     username = serializers.ReadOnlyField(source='user.username')
     date_joined = serializers.ReadOnlyField(source='user.date_joined')
 
     class Meta:
         model = UserFields
-        fields = ['id', 'username', 'date_joined', 'karma', 'about', 'showdead', 'noprocrast', 'maxvisit',
+        fields = ['username', 'date_joined', 'karma', 'about', 'showdead', 'noprocrast', 'maxvisit',
                   'minaway', 'delay']
 
 
 class ContributionSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.id')
+    user = serializers.ReadOnlyField(source='user.username')
     points = serializers.ReadOnlyField()
     publication_time = serializers.ReadOnlyField()
     comments = serializers.ReadOnlyField()
@@ -25,17 +24,17 @@ class ContributionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contribution
         fields = ['id', 'title', 'points', 'publication_time', 'url', 'text', 'comments',
-                  'liked', 'show', 'user', 'likes', 'hidden']
+                  'liked', 'show', 'user', 'hidden']
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.id')
+    user = serializers.ReadOnlyField(source='user.username')
     contribution = serializers.ReadOnlyField(source='contribution.id')
     parent = serializers.ReadOnlyField(source='parent.id')
 
     class Meta:
         model = Comment
-        fields = ['id', 'title', 'points', 'publication_time', 'url', 'text', 'likes', 'hidden', 'comments',
+        fields = ['id', 'points', 'publication_time', 'text', 'hidden', 'comments',
                   'liked', 'show', 'user', 'contribution', 'parent']
 
 

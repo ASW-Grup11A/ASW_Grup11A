@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+{% load functions %}
+{% load humanize %}
+<html op="news">
+   <head>
+       {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'empo_news/main_page.css' %}">
+        <link rel="icon" src="{% static 'images/favicon.ico' %}"/>
+       {% block css %}{% endblock %}
+       <title>Empo News</title>
+   </head>
+   <body>
+        <div align="center">
+            <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
+                <tr>
+                    <td bgcolor="#ff0080">
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
+                            <tr>
+                                <td style="width:18px;padding-right:4px">
+                                    <a href={% url 'empo_news:main_page' %}>
+                                        <img src="{% static 'empo_news/images/y18.gif' %}" width="18" height="18" style="border:1px white solid;">
+                                    </a>
+                                </td>
+                                <td style="line-height:12pt; height:10px;">
+                                    <span class="pagetop">
+                                        <b class="hnname"><a href={% url 'empo_news:main_page' %}>Empo News</a></b>
+                                        {% if highlight == "new" %}
+                                            <span class="topsel">
+                                            <a href={% url 'empo_news:new_page' %}>new</a>
+                                            </span>
+                                        {% else %}
+                                            <a href={% url 'empo_news:new_page' %}>new</a>
+                                        {% endif %}
+                                         |
+                                        {% if request.user.is_authenticated %}
+                                            {% if highlight == "threads" and request.user == userSelected %}
+                                            <span class="topsel">
+                                                <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
+                                            </span>
+                                            {% else %}
+                                                <a href={% url 'empo_news:threads' request.user.username %}>threads</a> |
+                                            {% endif %}
+                                        {% endif %}
+                                        {% if highlight == 'comments' %}
+                                            <span class="topsel">
+                                                <a href={% url 'empo_news:comments' %}>comments</a>
+                                            </span>
+                                        {% else %}
+                                            <a href={% url 'empo_news:comments' %}>comments</a>
+                                        {% endif %}|
+                                        {% if highlight == "ask" %}
+                                            <span class="topsel">
+                                            <a href={% url 'empo_news:ask_list' %}>ask</a>
+                                            </span>
+                                        {% else %}
+                                            <a href={% url 'empo_news:ask_list' %}>ask</a>
+                                        {% endif %} |
+                                        {% if highlight == "show" %}
+                                            <span class="topsel">
+                                            <a href={% url 'empo_news:show_list' %}>show</a>
+                                            </span>
+                                        {% else %}
+                                            <a href={% url 'empo_news:show_list' %}>show</a>
+                                        {% endif %} |
+                                        {% if request.user.is_authenticated %}
+                                            <a href={% url 'empo_news:submit' %}>submit</a>
+                                        {% else %}
+                                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">submit</a>
+                                        {% endif %}
+                                        {% if highlight == "hidden" %}
+                                            |
+                                            <span class="topsel" style="color: white">
+                                            hidden
+                                            </span>
+                                        {% endif %}
+                                        {% if highlight == "submitted" %}
+                                            |
+                                            <span class="topsel" style="color: white">
+                                            {{ submitted_id }}'s submissions
+                                            </span>
+                                        {% endif %}
+                                        {% if highlight == "voted_submissions" or highlight == "voted_comments"%}
+                                            |
+                                            <span class="topsel" style="color: white">
+                                            upvoted
+                                            </span>
+                                        {% endif %}
+                                        {% if highlight == "threads" and not userSelected == request.user %}
+                                            | <span class="topsel">
+                                                <a href="">{{ userSelected.username }}'s comments</a>
+                                            </span>
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td style="text-align:right;padding-right:4px;">
+                                    <span class="pagetop">
+                                        {% if user.is_authenticated %}
+                                            <a href={% url 'empo_news:user_page' request.user.username %}>{{ user.username }}</a>
+                                            (<a>{{ karma }}</a>) |
+                                            <a href="/logout">Logout</a>
+                                        {% else %}
+                                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={% url 'empo_news:item' %}?id={{ contribution.id }}">Login</a>
+                                        {% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr id="pagespace" title="" style="height:10px"></tr>
+                <tr>
+                    {% block contribution_body %}{% endblock %}
+                </tr>
+                {% if not notBottom %}
+                    <tr>
+                        <td>
+                            <table width="100%" cellspacing="0" cellpadding="1">
+                                <tr>
+                                    <td bgcolor="#ff0080"></td>
+                                </tr>
+                            </table>
+                            <br>
+                            <div align="center"><a href={% url 'empo_news:main_page' %}>
+                                 You are welcome to Empo News, enjoy your stay
+                                 </a>
+                            </div>
+                            <br>
+                            <div align="center">
+                                 <span class="yclinks">
+                                     <a href=https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/coding-style/>Guidelines</a>
+                                     | <a href=https://docs.djangoproject.com/es/3.0/faq/>FAQ</a>
+                                     | <a href=https://github.com/ASW-Grup11A/ASW_Grup11A>GitHub</a>
+                                     | <a href=https://trello.com/b/sE4Wc0xS/aswgrup11a>Trello</a>
+                                 </span><br><br>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+   </body>
+</html>
