@@ -916,7 +916,7 @@ components:
                 text: Hello World!
         myProfile:
             value:
-                id: John
+                username: John
                 date_joined: '2020-04-16 22:41:09.025719'
                 karma: 3
                 about: null
@@ -928,7 +928,7 @@ components:
                 delay: 0
         otherProfile:
             value:
-                id: Thomas
+                username: Thomas
                 date_joined: '2020-04-6 12:21:09.025719'
                 karma: 7
     securitySchemes:
