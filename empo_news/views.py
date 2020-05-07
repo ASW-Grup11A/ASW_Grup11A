@@ -1125,7 +1125,9 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
             except Contribution.DoesNotExist:
                 raise NotFoundException
 
-        if (comment is None and contribution.user.id == user_field.user.id) or comment.user.id == user_field.user.id:
+        print("COMMENT " + str(comment) + " CONTRIBUTION " + str(contribution.id))
+        if (comment is None and contribution.user.id == user_field.user.id) \
+                or (comment is not None and comment.user.id == user_field.user.id):
             raise ContributionUserException
 
         comment = Comment(user=user_field.user, title='', points=1, publication_time=datetime.today(),
