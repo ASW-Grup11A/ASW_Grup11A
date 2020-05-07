@@ -425,8 +425,8 @@ paths:
                 schema:
                     type: string
                     enum:
-                        - publication_date_asc
-                        - publication_date_desc
+                        - publication_time_asc
+                        - publication_time_desc
                         - votes_asc
                         - votes_desc
             responses:
@@ -596,8 +596,8 @@ components:
             schema:
                 type: string
                 enum:
-                    - publication_date_asc
-                    - publication_date_desc
+                    - publication_time_asc
+                    - publication_time_desc
                     - title_asc
                     - title_desc
                     - votes_asc
