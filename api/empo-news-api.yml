@@ -848,6 +848,12 @@ components:
                     format: int32
                     default: 0
                     example: 0
+                liked:
+                    type: boolean
+                    example: true
+                show:
+                    type: boolean
+                    example: true
                 contribution_id:
                     type: integer
                     format: int64
