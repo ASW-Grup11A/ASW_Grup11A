@@ -270,7 +270,14 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Contribution'
+                                oneOf:
+                                    - $ref: '#/components/schemas/Contribution'
+                                    - $ref: '#/components/schemas/Comment'
+                            examples:
+                                contributionExample:
+                                    $ref: '#/components/examples/contributionExample'
+                                commentExample:
+                                    $ref: '#/components/examples/commentExample'
                 400:
                     $ref: '#/components/responses/400'
                 401:
@@ -975,6 +982,29 @@ components:
                 username: Thomas
                 date_joined: '2020-04-6 12:21:09.025719'
                 karma: 7
+        contributionExample:
+            value:
+                id: 1
+                title: This is my new title
+                points: 3
+                publication_time: '2020-04-16 22:18:21.208736'
+                text: Hey there!
+                comments: 3
+                user_id: John
+                hidden: 5
+                liked: true
+                show: true
+        commentExample:
+            value:
+                id: 1
+                points: 1
+                publication_time: '2020-04-16 22:18:21.208736'
+                text: Hey there!
+                replies: 0
+                user_id: John
+                hidden: 0
+                contribution_id: 235
+                parent_id: 381
     securitySchemes:
         ApiKeyAuth:
             type: apiKey
