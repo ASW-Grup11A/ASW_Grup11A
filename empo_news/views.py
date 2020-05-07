@@ -780,6 +780,10 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             raise InvalidQueryParametersException
 
         if username_filter:
+            try:
+                User.objects.get(username=username_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
             contributions = contributions.filter(user__username=username_filter)
 
         if show_en_filter:
@@ -1093,7 +1097,10 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
         comments = Comment.objects.all()
 
         if username_filter:
-            user = User.objects.get(username=username_filter)
+            try:
+                user = User.objects.get(username=username_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
             comments = comments.filter(user_id=user.id)
 
         if order_by_filter:
