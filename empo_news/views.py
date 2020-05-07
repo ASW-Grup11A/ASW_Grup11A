@@ -750,7 +750,7 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
-        contributions = Contribution.objects.all()
+        contributions = Contribution.objects.filter(comment__isnull=True)
         key = self.request.META.get('HTTP_API_KEY', '')
         api_key = APIKey.objects.get_from_key(key)
 
@@ -1004,7 +1004,10 @@ class HideIdViewSet(viewsets.ModelViewSet):
             if str(user_field.user.username) == str(user_hidden):
                 raise ConflictException
 
-        if contribution.get_class() != 'Comment':
+        try:
+            comment = Comment.objects.get(id=contribution.id)
+            hide_comment(comment, user_field.user.id)
+        except Comment.DoesNotExist:
             contribution.user_id_hidden.add(user_field.user.id)
             contribution.hidden += 1
             contribution.save()
@@ -1012,9 +1015,6 @@ class HideIdViewSet(viewsets.ModelViewSet):
             comments = Comment.objects.get(contribution_id=contribution.id)
             for comment in comments:
                 hide_comment(comment, user_field.user.id)
-        else:
-            hide_comment(contribution, user_field.user.id)
-
 
         response = {'status': 204, 'message': 'OK'}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
