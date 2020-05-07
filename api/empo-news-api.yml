@@ -834,7 +834,7 @@ components:
                     type: string
                     nullable: true
                     example: What's up?
-                replies:
+                comments:
                     type: integer
                     format: int32
                     default: 0
@@ -1000,7 +1000,7 @@ components:
                 points: 1
                 publication_time: '2020-04-16 22:18:21.208736'
                 text: Hey there!
-                replies: 0
+                comments: 2
                 user_id: John
                 hidden: 0
                 contribution_id: 235
