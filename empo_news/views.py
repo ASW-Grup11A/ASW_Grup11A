@@ -770,11 +770,11 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             except User.DoesNotExist:
                 contrib.show = True
 
-        username_filter = self.request.query_params('username', '')
-        show_en_filter = self.request.query_params('showEn', '')
-        url_filter = self.request.query_params('url', '')
-        ask_filter = self.request.query_params('ask', '')
-        order_by_filter = self.request.query_params('orderBy', '')
+        username_filter = self.request.query_params.get('username', '')
+        show_en_filter = self.request.query_params.get('showEn', '')
+        url_filter = self.request.query_params.get('url', '')
+        ask_filter = self.request.query_params.get('ask', '')
+        order_by_filter = self.request.query_params.get('orderBy', '')
 
         if url_filter and ask_filter:
             raise InvalidQueryParametersException
