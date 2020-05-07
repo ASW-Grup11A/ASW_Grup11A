@@ -402,7 +402,8 @@ paths:
             tags:
               - comments
             parameters:
-                - $ref: '#/components/parameters/orderBy'
+                - $ref: '#/components/parameters/userIdQuery'
+                - $ref: '#/components/parameters/commentOrderBy'
             responses:
                 200:
                   description: List of all contribution comments
@@ -428,16 +429,7 @@ paths:
                 - comments
             parameters:
               - $ref: '#/components/parameters/userIdQuery'
-              - in: query
-                name: orderBy
-                description: Orders by one of the available values
-                schema:
-                    type: string
-                    enum:
-                        - publication_date_asc
-                        - publication_date_desc
-                        - votes_asc
-                        - votes_desc
+              - $ref: '#/components/parameters/commentOrderBy'
             responses:
                 200:
                   description: List of all comments
@@ -613,6 +605,17 @@ components:
                     - title_desc
                     - votes_asc
                     - votes_desc
+        commentOrderBy:
+              in: query
+              name: orderBy
+              description: Orders by one of the available values
+              schema:
+                  type: string
+                  enum:
+                      - publication_date_asc
+                      - publication_date_desc
+                      - votes_asc
+                      - votes_desc
     responses:
         200:
             description: Successful operation
