@@ -866,9 +866,9 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def update_actual(self, request, *args, **kwargs):
-        title = self.request.data.get('title', '')
-        url = self.request.data.get('url', '')
-        text = self.request.data.get('text', '')
+        title = self.request.query_params.get('title', '')
+        url = self.request.query_params.get('url', '')
+        text = self.request.query_params.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
         api_key = APIKey.objects.get_from_key(key)
