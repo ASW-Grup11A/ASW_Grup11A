@@ -1088,8 +1088,23 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
-        user = User.objects.get(username=self.request.query_params.get('username'))
-        comments = Comment.objects.filter(user=user.id)
+        username_filter = self.request.query_params.get('username', '')
+        order_by_filter = self.request.query_params.get('orderBy', '')
+        comments = Comment.objects.all()
+
+        if username_filter:
+            user = User.objects.get(username=username_filter)
+            comments = comments.filter(user_id=user.id)
+
+        if order_by_filter:
+            if order_by_filter == 'publication_time_asc':
+                comments = comments.order_by('publication_time')
+            elif order_by_filter == 'publication_time_desc':
+                comments = comments.order_by('-publication_time')
+            elif order_by_filter == 'votes_asc':
+                comments = comments.order_by('points')
+            else:
+                comments = comments.order_by('-points')
 
         return Response(CommentSerializer(comments, many=True).data)
 
