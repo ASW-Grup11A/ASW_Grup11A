@@ -656,7 +656,7 @@ components:
         MyProfile:
             type: object
             properties:
-                id:
+                username:
                     type: string
                     maxLength: 150
                     example: John
@@ -706,7 +706,7 @@ components:
         OtherProfile:
             type: object
             properties:
-                id:
+                username:
                     type: string
                     maxLength: 150
                     example: 'Thomas'
