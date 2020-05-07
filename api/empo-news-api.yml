@@ -176,6 +176,8 @@ paths:
                 description: Filter Show EN contributions
                 schema:
                     type: boolean
+                    enum:
+                        - true
               - in: query
                 name: url
                 description: > 
