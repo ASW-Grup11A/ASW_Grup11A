@@ -36,13 +36,13 @@ paths:
                 500:
                     $ref: '#/components/responses/500'
     /profile/{username}:
+        parameters:
+                - $ref: '#/components/parameters/userId'
         get:
             summary: Returns the current signed in user profile
             operationId: getMyProfile
             tags:
                 - users
-            parameters:
-                - $ref: '#/components/parameters/userId'
             responses:
                 200:
                     description: Returns the authenticated profile
@@ -60,7 +60,6 @@ paths:
                     $ref: '#/components/responses/405'
                 500:
                     $ref: '#/components/responses/500'
-    /profile:
         put:
             summary: Updates the current signed in user profile
             operationId: updateMyProfile
