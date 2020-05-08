@@ -1291,9 +1291,11 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user_fields = UserFields.objects.get(api_key=api_key.id)
-        except UserFields.DoesNotExist:
+            user = User.objects.get(username=kwargs.get('username'))
+        except User.DoesNotExist:
             raise NotFoundException
+
+        user_fields = UserFields.objects.get(user_id=user.id)
 
         if user_fields.api_key != api_key.id:
             raise ForbiddenException
