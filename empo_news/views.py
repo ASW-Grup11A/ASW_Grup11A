@@ -322,9 +322,13 @@ def profile(request, username):
         generate = request.GET.get('generate', 'false')
 
         if generate == 'true':
+            old_api_key = userFields.api_key
             api_key, key = APIKey.objects.create_key(name="empo-news")
             userFields.api_key = api_key.id
             userFields.save()
+
+            if old_api_key is not None:
+                APIKey.objects.get(id=old_api_key).delete()
 
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
