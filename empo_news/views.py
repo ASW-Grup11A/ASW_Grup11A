@@ -12,7 +12,7 @@ from rest_framework_api_key.models import APIKey
 
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
     NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException, \
-    InvalidQueryParametersException
+    InvalidQueryParametersException, UrlCannotBeModifiedException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
@@ -31,6 +31,12 @@ def submit(request):
                                         publication_time=datetime.today(), text='')
             if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
                 contribution.url = form.cleaned_data['url']
+
+                """try:
+                    contribution_url = Contribution.objects.get(url=contribution.url)
+                    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_url.id))
+                except Contribution.DoesNotExist:
+                    pass """
             else:
                 contribution.text = form.cleaned_data['text']
             contribution.save()
@@ -842,6 +848,9 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             raise UrlAndTextFieldException
 
         if isinstance(serializer, UrlContributionSerializer):
+            """try:
+                pass
+            except Contribution.DoesNotExist:"""
             serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
                             comments=0, liked=True, show=True, text=None)
         else:
@@ -914,7 +923,6 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def update_actual(self, request, *args, **kwargs):
         title = self.request.query_params.get('title', '')
-        url = self.request.query_params.get('url', '')
         text = self.request.query_params.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
@@ -928,20 +936,13 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         if len(title) > 80:
             raise TitleIsTooLongException
 
-        if len(url) > 500:
-            raise UrlIsTooLongException
-
-        if url and text and is_url_valid(url):
-            raise UrlAndTextFieldException
-
         contribution = Contribution.objects.get(id=kwargs.get('id'))
+
+        if contribution.url is not None and text != '':
+            raise UrlCannotBeModifiedException
+
         contribution.title = title
-
-        if url:
-            contribution.url = url
-        else:
-            contribution.text = text
-
+        contribution.text = text
         contribution.save()
 
         return Response(ContributionSerializer(contribution).data)
@@ -1290,11 +1291,9 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user = User.objects.get(username=kwargs.get('username'))
-        except User.DoesNotExist:
+            user_fields = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
             raise NotFoundException
-
-        user_fields = UserFields.objects.get(user_id=user.id)
 
         if user_fields.api_key != api_key.id:
             raise ForbiddenException

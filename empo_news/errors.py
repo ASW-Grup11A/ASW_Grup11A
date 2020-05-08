@@ -39,6 +39,12 @@ class InvalidQueryParametersException(APIException):
     default_code = 'Bad Request'
 
 
+class UrlCannotBeModifiedException(APIException):
+    status_code = 400
+    default_detail = 'Url contributions cannot be modified'
+    default_code = 'Bad Request'
+
+
 class UnauthenticatedException(APIException):
     status_code = 401
     default_detail = 'The user is not authenticated'
