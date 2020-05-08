@@ -755,7 +755,10 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         key = self.request.META.get('HTTP_API_KEY', '')
         api_key = APIKey.objects.get_from_key(key)
 
-        user_fields = UserFields.objects.get(api_key=api_key.id)
+        try:
+            user_fields = UserFields.objects.get(api_key=api_key.id)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
 
         for contrib in contributions:
             try:
