@@ -1251,7 +1251,7 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user_fields = UserFields.objects.get(api_key=api_key)
+            user_fields = UserFields.objects.get(api_key=api_key.id)
         except UserFields.DoesNotExist:
             raise NotFoundException
 
