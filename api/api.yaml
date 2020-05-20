@@ -6,7 +6,7 @@ info:
 servers:
     - url: 'https://empo-news.herokuapp.com/api/v1'
 paths:
-    /profiles:
+    /profile:
        put:
             summary: Updates the current signed in user profile
             operationId: updateMyProfile
