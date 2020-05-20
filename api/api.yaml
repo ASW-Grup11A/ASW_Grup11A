@@ -195,7 +195,6 @@ paths:
             operationId: editContributionById
             tags:
                 - contributions
-                - comments
             description: Edits a single contribution or comment
             parameters:
                 - in: path
@@ -286,7 +285,6 @@ paths:
             operationId: deleteContribution
             tags:
                 - contributions
-                - comments
             parameters:
                 - in: path
                   name: id
@@ -306,6 +304,90 @@ paths:
                     $ref: '#/components/responses/403'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
+    /contribution/{id}/vote:
+        put:
+            summary: Votes a contribution or comment
+            operationId: voteContribution
+            tags:
+                - contributions
+            parameters:
+              - $ref: '#/components/parameters/contributionId'
+            responses:
+                204:
+                    $ref: '#/components/responses/204'
+                401:
+                    $ref: '#/components/responses/401'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                409:
+                    $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
+    /contribution/{id}/unvote:
+        put:
+            summary: Unvotes a contribution or comment
+            operationId: unvoteContribution
+            tags:
+                - contributions
+            parameters:
+              - $ref: '#/components/parameters/contributionId'
+            responses:
+                204:
+                    $ref: '#/components/responses/204'
+                401:
+                    $ref: '#/components/responses/401'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                409:
+                    $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
+    /contribution/{id}/hide:
+        put:
+            summary: Hides a contribution or a comment
+            operationId: hideContribution
+            tags:
+                - contributions
+            parameters:
+              - $ref: '#/components/parameters/contributionId'
+            responses:
+                204:
+                    $ref: '#/components/responses/204'
+                401:
+                    $ref: '#/components/responses/401'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                409:
+                    $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
+    /contribution/{id}/unhide:
+        put:
+            summary: Unhides a contribution or a comment
+            operationId: unhideContribution
+            tags:
+                - contributions
+            parameters:
+              - $ref: '#/components/parameters/contributionId'
+            responses:
+                204:
+                    $ref: '#/components/responses/204'
+                401:
+                    $ref: '#/components/responses/401'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                409:
+                    $ref: '#/components/responses/409'
                 500:
                     $ref: '#/components/responses/500'
     /contribution/{id}/comments:
@@ -438,95 +520,6 @@ paths:
                     $ref: '#/components/responses/405'
                 500:
                     $ref: '#/components/responses/500'
-    /contribution/{id}/vote:
-        put:
-            summary: Votes a contribution or comment
-            operationId: voteContribution
-            tags:
-                - contributions
-                - comments
-            parameters:
-              - $ref: '#/components/parameters/contributionId'
-            responses:
-                204:
-                    $ref: '#/components/responses/204'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                409:
-                    $ref: '#/components/responses/409'
-                500:
-                    $ref: '#/components/responses/500'
-    /contribution/{id}/unvote:
-        put:
-            summary: Unvotes a contribution or comment
-            operationId: unvoteContribution
-            tags:
-                - contributions
-                - comments
-            parameters:
-              - $ref: '#/components/parameters/contributionId'
-            responses:
-                204:
-                    $ref: '#/components/responses/204'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                409:
-                    $ref: '#/components/responses/409'
-                500:
-                    $ref: '#/components/responses/500'
-    /contribution/{id}/hide:
-        put:
-            summary: Hides a contribution or a comment
-            operationId: hideContribution
-            tags:
-                - contributions
-                - comments
-            parameters:
-              - $ref: '#/components/parameters/contributionId'
-            responses:
-                204:
-                    $ref: '#/components/responses/204'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                409:
-                    $ref: '#/components/responses/409'
-                500:
-                    $ref: '#/components/responses/500'
-    /contribution/{id}/unhide:
-        put:
-            summary: Unhides a contribution or a comment
-            operationId: unhideContribution
-            tags:
-                - contributions
-                - comments
-            parameters:
-              - $ref: '#/components/parameters/contributionId'
-            responses:
-                204:
-                    $ref: '#/components/responses/204'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                409:
-                    $ref: '#/components/responses/409'
-                500:
-                    $ref: '#/components/responses/500'
-                
 security:
 - ApiKeyAuth: []
 components:
