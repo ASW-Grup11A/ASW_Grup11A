@@ -310,12 +310,12 @@ def profile(request, username):
     else:
         userFields = UserFields.objects.get(user=userSelected)
 
-    if userFields.showdead == 0:
+    if not userFields.showdead:
         posS = '0'
     else:
         posS = '1'
 
-    if userFields.noprocrast == 0:
+    if not userFields.noprocrast:
         posN = '0'
     else:
         posN = '1'
@@ -1265,10 +1265,10 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
             user_fields.email = email
 
         if showdead:
-            user_fields.showdead = showdead
+            user_fields.showdead = showdead == "true"
 
         if noprocrast:
-            user_fields.noprocrast = noprocrast
+            user_fields.noprocrast = noprocrast == "true"
 
         if maxvisit:
             user_fields.maxvisit = maxvisit
