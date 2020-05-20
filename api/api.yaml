@@ -7,60 +7,7 @@ servers:
     - url: 'https://empo-news.herokuapp.com/api/v1'
 paths:
     /profiles:
-        get:
-            summary: Return a user profile
-            operationId: getUserProfile
-            tags:
-                - users
-            parameters:
-                - name: username
-                  in: query
-                  required: true
-                  description: Username of the profile to return
-                  schema:
-                      type: string
-                      maxLength: 150
-            responses:
-                200:
-                    description: Finds a user by its username
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/OtherProfile'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                500:
-                    $ref: '#/components/responses/500'
-    /profile/{username}:
-        parameters:
-                - $ref: '#/components/parameters/userId'
-        get:
-            summary: Returns the current signed in user profile
-            operationId: getMyProfile
-            tags:
-                - users
-            responses:
-                200:
-                    description: Returns the authenticated profile
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/MyProfile'
-                401:
-                    $ref: '#/components/responses/401'
-                403:
-                    $ref: '#/components/responses/403'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                500:
-                    $ref: '#/components/responses/500'
-        put:
+       put:
             summary: Updates the current signed in user profile
             operationId: updateMyProfile
             tags:
@@ -119,6 +66,27 @@ paths:
                                 $ref: '#/components/schemas/MyProfile'
                 400:
                     $ref: '#/components/responses/400'
+                401:
+                    $ref: '#/components/responses/401'
+                403:
+                    $ref: '#/components/responses/403'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
+    /profile/{username}:
+        get:
+            summary: Returns a user profile
+            operationId: getUserProfile
+            tags:
+                - users
+            parameters:
+                - $ref: '#/components/parameters/userId'
+            responses:
+                200:
+                    $ref: '#/components/responses/profileResponse'
                 401:
                     $ref: '#/components/responses/401'
                 403:
@@ -617,6 +585,17 @@ components:
                       - votes_asc
                       - votes_desc
     responses:
+        profileResponse:
+            description: Returns a user profile
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/BasicResponse'
+                    examples:
+                        myProfileExample:
+                            $ref: '#/components/examples/myProfile'
+                        otherProfileExample:
+                            $ref: '#/components/examples/otherProfile'
         200:
             description: Successful operation
             content:
