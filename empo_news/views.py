@@ -938,6 +938,9 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
         contribution = Contribution.objects.get(id=kwargs.get('id'))
 
+        if contribution.user != user_field.user:
+            raise ForbiddenException
+
         if contribution.url is not None and text != '':
             raise UrlCannotBeModifiedException
 
