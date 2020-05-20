@@ -1265,10 +1265,10 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
             user_fields.email = email
 
         if showdead:
-            user_fields.showdead = showdead == 'true'
+            user_fields.showdead = showdead
 
         if noprocrast:
-            user_fields.noprocrast = noprocrast == 'true'
+            user_fields.noprocrast = noprocrast
 
         if maxvisit:
             user_fields.maxvisit = maxvisit
