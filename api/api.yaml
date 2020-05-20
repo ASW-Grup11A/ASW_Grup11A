@@ -29,7 +29,7 @@ paths:
                             type: boolean
                             example: false
                         noprocrast:
-                            description: The new noprocast
+                            description: The new noprocrast
                             type: boolean
                             example: true
                         maxvisit:
@@ -698,7 +698,7 @@ components:
                     type: boolean
                     default: false
                     example: true
-                noprocast:
+                noprocrast:
                     type: boolean
                     default: false
                     example: false
@@ -948,7 +948,7 @@ components:
                 about: null
                 email: john@mail.com
                 showdead: false
-                noprocast: false
+                noprocrast: false
                 maxvisit: 1
                 minaway: 100
                 delay: 0
