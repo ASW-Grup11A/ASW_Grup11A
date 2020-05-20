@@ -1237,46 +1237,6 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [KeyPermission]
 
-    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
-    def get_actual(self, request, *args, **kwargs):
-        try:
-            user = User.objects.get(username=self.request.query_params.get('username'))
-        except UserFields.DoesNotExist:
-            raise NotFoundException
-
-        user_fields = UserFields.objects.get(user_id=user.id)
-
-        user = {
-            "username": user_fields.user.username,
-            "data_joined": user_fields.user.date_joined,
-            "karma": user_fields.karma
-        }
-
-        return Response(user)
-
-
-class ProfilesIdViewSet(viewsets.ModelViewSet):
-    queryset = UserFields.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [KeyPermission]
-
-    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
-    def get_actual(self, request, *args, **kwargs):
-        key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
-
-        try:
-            user = User.objects.get(username=kwargs.get('username'))
-        except User.DoesNotExist:
-            raise NotFoundException
-
-        user_fields = UserFields.objects.get(user_id=user.id)
-
-        if user_fields.api_key != api_key.id:
-            raise ForbiddenException
-
-        return Response(UserFieldsSerializer(user_fields).data)
-
     @action(detail=True, methods=['put'], renderer_classes=[renderers.StaticHTMLRenderer])
     def update_actual(self, request, *args, **kwargs):
         about = self.request.query_params.get('about', '')
@@ -1291,11 +1251,9 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         api_key = APIKey.objects.get_from_key(key)
 
         try:
-            user = User.objects.get(username=kwargs.get('username'))
-        except User.DoesNotExist:
+            user_fields = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
             raise NotFoundException
-
-        user_fields = UserFields.objects.get(user_id=user.id)
 
         if user_fields.api_key != api_key.id:
             raise ForbiddenException
@@ -1322,5 +1280,32 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
             user_fields.delay = delay
 
         user_fields.save()
+
+        return Response(UserFieldsSerializer(user_fields).data)
+
+
+class ProfilesIdViewSet(viewsets.ModelViewSet):
+    queryset = UserFields.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKey.objects.get_from_key(key)
+
+        try:
+            user = User.objects.get(username=kwargs.get('username'))
+        except User.DoesNotExist:
+            raise NotFoundException
+
+        user_fields = UserFields.objects.get(user_id=user.id)
+
+        if user_fields.api_key != api_key.id:
+            data = {'username': user.username,
+                    'date_joined': user.date_joined,
+                    'karma': user_fields.karma,
+                    'about': user_fields.about}
+            return Response(data)
 
         return Response(UserFieldsSerializer(user_fields).data)
