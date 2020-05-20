@@ -28,7 +28,7 @@ paths:
                             description: The new showdead
                             type: boolean
                             example: false
-                        noprocast:
+                        noprocrast:
                             description: The new noprocast
                             type: boolean
                             example: true
