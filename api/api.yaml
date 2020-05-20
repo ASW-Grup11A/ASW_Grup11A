@@ -24,12 +24,6 @@ paths:
                             type: string
                             maxLength: 2000
                             example: I love crisps.
-                        email:
-                            description: The new email
-                            type: string
-                            format: email
-                            maxLength: 254
-                            example: johnDoe@mail.com
                         showdead:
                             description: The new showdead
                             type: boolean
