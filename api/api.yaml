@@ -129,32 +129,40 @@ paths:
         get:
             summary: Retrieves all the contributions
             operationId: listContributions
+            description: >
+                Retrieves all the contibutions according to the union of the filters. The result will be ordered according to the orderBy parameter if specified.
             tags:
                 - contributions
             parameters:
               - $ref: '#/components/parameters/userIdQuery'
               - in: query
-                name: showEn
-                description: Filter Show EN contributions
-                schema:
-                    type: boolean
-                    enum:
-                        - true
-              - in: query
-                name: url
-                description: > 
-                  Filter contributions by their URL. It cannot be used in conjunction with ask parameter.
-                schema:
-                    type: string
-                    format: url
-              - in: query
-                name: ask
+                name: filter
                 description: >
-                    Filter all contributions with text. It cannot be used in conjunction with url parameter.
+                  Avaliable filters:
+                    * `showEn` - Filter Show EN contributions
+                    
+                    * `url` - Filter contributions by their URL. It cannot be used in conjunction with ask parameter
+                    
+                    * `ask` - Filter all contributions with text. It cannot be used in conjunction with url parameter
                 schema:
-                    type: boolean
-                    enum:
-                        - true
+                    type: object
+                    properties:
+                      showEn:
+                        type: boolean
+                        enum:
+                            - true
+                      url:
+                        type: string
+                        format: url
+                        example: 'https://www.google.es'
+                      ask:
+                        type: boolean
+                        enum:
+                            - true
+                    minProperties: 1
+                    additionalProperties: false
+                style: form
+                explode: true
               - $ref: '#/components/parameters/orderBy'
             responses:
                 200:
@@ -550,7 +558,19 @@ components:
         orderBy:
             in: query
             name: orderBy
-            description: Orders by one of the available values
+            description: >
+                  Orders by:
+                    * `publication_date_asc` - Orders by newest contribution
+                    
+                    * `publication_date_desc` - Orders by oldest contribution
+                    
+                    * `title_asc` - Orders by ascending title, from A to Z
+                    
+                    * `title_desc` - Orders by descending title, from Z to A
+                    
+                    * `votes_asc` - Orders by  ascending number of votes
+                    
+                    * `votes_desc` - Orders by  descending number of votes
             schema:
                 type: string
                 enum:
@@ -563,7 +583,15 @@ components:
         commentOrderBy:
               in: query
               name: orderBy
-              description: Orders by one of the available values
+              description: >
+                  Orders by:
+                    * `publication_date_asc` - Orders by newest contribution
+                    
+                    * `publication_date_desc` - Orders by oldest contribution
+                    
+                    * `votes_asc` - Orders by  ascending number of votes
+                    
+                    * `votes_desc` - Orders by  descending number of votes
               schema:
                   type: string
                   enum:
