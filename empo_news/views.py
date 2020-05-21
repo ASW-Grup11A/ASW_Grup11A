@@ -51,6 +51,13 @@ def submit(request):
 
                 contribution.url_domain = get_domain(actual_url)
                 contribution.url = actual_url
+
+                try:
+                    contribution_same_url = Contribution.objects.get(url=actual_url)
+                    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_same_url.id))
+                except Contribution.DoesNotExist:
+                    pass
+
                 """try:
                     contribution_url = Contribution.objects.get(url=contribution.url)
                     return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_url.id))
