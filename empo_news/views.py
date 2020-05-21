@@ -824,7 +824,6 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
         return Response(ContributionSerializer(contributions, many=True).data)
 
-
     def perform_create(self, serializer):
         title = self.request.data.get('title', '')
         url = self.request.data.get('url', '')
@@ -1175,11 +1174,33 @@ def get_basic_attributes_map(contribution, user_fields):
     return dataMap
 
 
-def get_comment_map(comment, user_fields):
+def apply_filters(comments_list, username_filter, order_by_filter):
+    if username_filter:
+        try:
+            user = User.objects.get(username=username_filter)
+        except User.DoesNotExist:
+            raise NotFoundException
+        comments_list = comments_list.filter(user_id=user.id)
+
+    if order_by_filter:
+        if order_by_filter == 'publication_time_asc':
+            comments_list = comments_list.order_by('publication_time')
+        elif order_by_filter == 'publication_time_desc':
+            comments_list = comments_list.order_by('-publication_time')
+        elif order_by_filter == 'votes_asc':
+            comments_list = comments_list.order_by('points')
+        else:
+            comments_list = comments_list.order_by('-points')
+
+
+def get_comment_map(comment, user_fields, username_filter, order_by_filter):
     comment_map = get_basic_attributes_map(comment, user_fields)
     child_comment_list = []
 
-    for child_comment in comment.comment_set.all():
+    actual_comments = comment.comment_set.all()
+    apply_filters(actual_comments, username_filter, order_by_filter)
+
+    for child_comment in actual_comments:
         child_comment_list.append(get_comment_map(child_comment, user_fields))
 
     comment_map["comments_list"] = child_comment_list
@@ -1211,12 +1232,15 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         contribution_first_comments = Comment.objects.filter(contribution_id=kwargs.get('id'),
                                                              parent__isnull=True)
 
+        username_filter = self.request.query_params.get('username', '')
+        order_by_filter = self.request.query_params.get('orderBy', '')
+        apply_filters(contribution_first_comments, username_filter, order_by_filter)
+
         comment_list = []
         for comment in contribution_first_comments:
-            comment_list.append(get_comment_map(comment, user_field))
+            comment_list.append(get_comment_map(comment, user_field, username_filter, order_by_filter))
 
         contribution_map["comments_list"] = comment_list
-
 
         """contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
 
@@ -1253,7 +1277,7 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
             else:
                 contribution_comments = contribution_comments.order_by('-points')"""
 
-        #return Response(CommentSerializer(contribution_comments, many=True).data)
+        # return Response(CommentSerializer(contribution_comments, many=True).data)
         return Response(contribution_map)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
