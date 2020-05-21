@@ -28,8 +28,8 @@ paths:
                             description: The new showdead
                             type: boolean
                             example: false
-                        noprocrast:
-                            description: The new noprocrast
+                        noprocast:
+                            description: The new noprocast
                             type: boolean
                             example: true
                         maxvisit:
@@ -62,6 +62,10 @@ paths:
                     $ref: '#/components/responses/400'
                 401:
                     $ref: '#/components/responses/401'
+                403:
+                    $ref: '#/components/responses/403'
+                404:
+                    $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
                 500:
@@ -79,6 +83,8 @@ paths:
                     $ref: '#/components/responses/profileResponse'
                 401:
                     $ref: '#/components/responses/401'
+                403:
+                    $ref: '#/components/responses/403'
                 404:
                     $ref: '#/components/responses/404'
                 405:
@@ -177,6 +183,8 @@ paths:
                                         example: Url and ask parameters cannot be used together
                 401:
                      $ref: '#/components/responses/401'
+                404:
+                     $ref: '#/components/responses/404'
                 405:
                     $ref: '#/components/responses/405'
                 500:
@@ -690,7 +698,7 @@ components:
                     type: boolean
                     default: false
                     example: true
-                noprocrast:
+                noprocast:
                     type: boolean
                     default: false
                     example: false
@@ -709,22 +717,6 @@ components:
                     format: int32
                     default: 0
                     example: 0
-        OtherProfile:
-            type: object
-            properties:
-                username:
-                    type: string
-                    maxLength: 150
-                    example: 'Thomas'
-                date_joined:
-                    type: string
-                    format: date-time
-                    example: '2020-04-16 22:41:09.025719'
-                karma:
-                    type: integer
-                    format: int32
-                    default: 1
-                    example: 4
         Contribution:
             type: object
             properties:
@@ -898,7 +890,7 @@ components:
             value:
                 status: 401
                 error: "Unauthorized"
-                message: "You provided no api key or it is invalid (Api-Key Header)"
+                message: "You provided no api key (Api-Key Header)"
         error403:
             value:
                 status: 403
@@ -940,7 +932,7 @@ components:
                 about: null
                 email: john@mail.com
                 showdead: false
-                noprocrast: false
+                noprocast: false
                 maxvisit: 1
                 minaway: 100
                 delay: 0
