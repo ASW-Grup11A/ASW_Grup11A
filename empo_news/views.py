@@ -18,6 +18,7 @@ from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer, \
     CommentSerializer, UserFieldsSerializer
+from empo_news.templatetags.functions import get_domain
 
 
 def submit(request):
@@ -35,16 +36,18 @@ def submit(request):
                     domain_split = url_split[2].split('.')
                     if domain_split[0] != "www":
                         partial_url = form.cleaned_data['url'].split('//')
-                        contribution.url = partial_url[0] + "//www." + partial_url[1]
+                        actual_url = partial_url[0] + "//www." + partial_url[1]
                     else:
-                        contribution.url = form.cleaned_data['url']
+                        actual_url = form.cleaned_data['url']
                 else:
                     domain_split = form.cleaned_data['url'].split('.')
                     if domain_split[0] != "www":
-                        contribution.url = "http://www." + form.cleaned_data['url']
+                        actual_url = "http://www." + form.cleaned_data['url']
                     else:
-                        contribution.url = "http://" + form.cleaned_data['url']
+                        actual_url = "http://" + form.cleaned_data['url']
 
+                contribution.url_domain = get_domain(actual_url)
+                contribution.url = actual_url
                 """try:
                     contribution_url = Contribution.objects.get(url=contribution.url)
                     return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_url.id))

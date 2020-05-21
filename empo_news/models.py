@@ -20,6 +20,7 @@ class Contribution(models.Model):
     points = models.IntegerField(default=1)
     publication_time = models.DateTimeField('publication time')
     url = models.CharField(max_length=500, blank=True, null=True)
+    url_domain = models.CharField(max_length=500, blank=True, null=True)
     text = models.CharField(max_length=2000, blank=True, null=True)
     user_likes = models.ManyToManyField(User, related_name="likes", blank=True)
     user_id_hidden = models.ManyToManyField(User, related_name="hide", blank=True)
