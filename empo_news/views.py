@@ -1256,10 +1256,7 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             user_fields = UserFields.objects.get(api_key=api_key.id)
         except UserFields.DoesNotExist:
-            raise NotFoundException
-
-        if user_fields.api_key != api_key.id:
-            raise ForbiddenException
+            raise UnauthenticatedException
 
         if about:
             user_fields.about = about
