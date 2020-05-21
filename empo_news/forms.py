@@ -21,11 +21,21 @@ class SubmitForm(forms.Form):
         if not url and not text:
             raise forms.ValidationError('Sorry, either url or text fields must be filled.')
 
+        if url and not self.valid_url(url):
+            raise forms.ValidationError('Invalid url')
+
         return cleaned_data
 
     @staticmethod
     def valid_url(url):
-        return "." in url
+        url_split = url.split('/')
+        print("url " + url)
+        result = True
+        if len(url_split) > 1:
+            result = ((url_split[0] == "http:") or (url_split[0] == "https:"))
+        if len(url_split) >= 2:
+            result = result and not(url_split[1])
+        return "." in url and result
 
 
 class CommentForm(forms.Form):

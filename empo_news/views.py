@@ -30,7 +30,14 @@ def submit(request):
             contribution = Contribution(user=request.user, title=form.cleaned_data['title'],
                                         publication_time=datetime.today(), text='')
             if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
-                contribution.url = form.cleaned_data['url']
+                url_split = form.cleaned_data['url'].split('/')
+                if url_split[0] == "http:" or url_split[0] == "https:":
+                    contribution.url = form.cleaned_data['url']
+                    domain_split = url_split[2].split('.')
+                    if domain_split[0] == "www":
+                        contribution.url = "http://" + form.cleaned_data['url']
+                    else:
+                        contribution.url = "http://www." + form.cleaned_data['url']
 
                 """try:
                     contribution_url = Contribution.objects.get(url=contribution.url)
@@ -1201,7 +1208,7 @@ def get_comment_map(comment, user_fields, username_filter, order_by_filter):
     apply_filters(actual_comments, username_filter, order_by_filter)
 
     for child_comment in actual_comments:
-        child_comment_list.append(get_comment_map(child_comment, user_fields))
+        child_comment_list.append(get_comment_map(child_comment, user_fields, username_filter, order_by_filter))
 
     comment_map["comments_list"] = child_comment_list
     return comment_map
