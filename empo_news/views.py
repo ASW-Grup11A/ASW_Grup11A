@@ -32,12 +32,18 @@ def submit(request):
             if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
                 url_split = form.cleaned_data['url'].split('/')
                 if url_split[0] == "http:" or url_split[0] == "https:":
-                    contribution.url = form.cleaned_data['url']
                     domain_split = url_split[2].split('.')
-                    if domain_split[0] == "www":
-                        contribution.url = "http://" + form.cleaned_data['url']
+                    if domain_split[0] != "www":
+                        partial_url = form.cleaned_data['url'].split('//')
+                        contribution.url = partial_url[0] + "//www." + partial_url[1]
                     else:
+                        contribution.url = form.cleaned_data['url']
+                else:
+                    domain_split = form.cleaned_data['url'].split('.')
+                    if domain_split[0] != "www":
                         contribution.url = "http://www." + form.cleaned_data['url']
+                    else:
+                        contribution.url = "http://" + form.cleaned_data['url']
 
                 """try:
                     contribution_url = Contribution.objects.get(url=contribution.url)
