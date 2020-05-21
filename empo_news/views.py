@@ -18,7 +18,10 @@ from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer, \
     CommentSerializer, UserFieldsSerializer
-from empo_news.templatetags.functions import get_domain
+
+
+def get_domain(url):
+    return url.split('www.')[1].split('/')[0]
 
 
 def submit(request):

@@ -53,9 +53,3 @@ def is_hidden(contribution, user_id):
 def google_url(originalString):
     return originalString.replace(" ", "+")
 
-@register.filter
-def get_domain(url):
-    url_split = url.split('/')
-    if len(url_split) > 2:
-        return url_split[2]
-    return url
