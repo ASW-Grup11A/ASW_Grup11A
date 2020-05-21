@@ -1141,6 +1141,51 @@ class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(CommentSerializer(comment).data)
 
 
+def is_liked_by_user(contribution, user_id):
+    try:
+        contribution.user_likes.get(id=user_id)
+        return True
+    except User.DoesNotExist:
+        return False
+
+
+def is_shown_by_user(contribution, user_id):
+    try:
+        contribution.user_id_hidden.get(id=user_id)
+        return False
+    except User.DoesNotExist:
+        return True
+
+
+def get_basic_attributes_map(contribution, user_fields):
+    dataMap = {
+        'id': contribution.id,
+        'title': contribution.title,
+        'points': contribution.points,
+        'publication_time': contribution.publication_time,
+        'url': contribution.url,
+        'text': contribution.text,
+        'comments': contribution.comments,
+        'user_id': contribution.user.username,
+        'hidden': contribution.hidden,
+        'liked': is_liked_by_user(contribution, user_fields.user.id),
+        'show': is_shown_by_user(contribution, user_fields.user.id)
+    }
+
+    return dataMap
+
+
+def get_comment_map(comment, user_fields):
+    comment_map = get_basic_attributes_map(comment, user_fields)
+    child_comment_list = []
+
+    for child_comment in comment.comment_set.all().order_by('-publication_time'):
+        child_comment_list.append(get_comment_map(child_comment, user_fields))
+
+    comment_map["comments"] = child_comment_list
+    return comment_map
+
+
 class ContributionCommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -1161,7 +1206,19 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         except Contribution.DoesNotExist:
             raise NotFoundException
 
-        contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
+        contribution = Contribution.objects.get(id=kwargs.get('id'))
+        contribution_map = get_basic_attributes_map(contribution, user_field)
+        contribution_first_comments = Comment.objects.filter(contribution_id=kwargs.get('id'),
+                                                             parent__isnull=True)
+
+        comment_list = []
+        for comment in contribution_first_comments:
+            comment_list.append(get_comment_map(comment, user_field))
+
+        contribution_map["comments"] = comment_list
+
+
+        """contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
 
         for contrib in contribution_comments:
             try:
@@ -1194,9 +1251,10 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
             elif order_by_filter == 'votes_asc':
                 contribution_comments = contribution_comments.order_by('points')
             else:
-                contribution_comments = contribution_comments.order_by('-points')
+                contribution_comments = contribution_comments.order_by('-points')"""
 
-        return Response(CommentSerializer(contribution_comments, many=True).data)
+        #return Response(CommentSerializer(contribution_comments, many=True).data)
+        return Response(contribution_map)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def create_comment(self, request, *args, **kwargs):
