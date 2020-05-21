@@ -1179,10 +1179,10 @@ def get_comment_map(comment, user_fields):
     comment_map = get_basic_attributes_map(comment, user_fields)
     child_comment_list = []
 
-    for child_comment in comment.comment_set.all().order_by('-publication_time'):
+    for child_comment in comment.comment_set.all():
         child_comment_list.append(get_comment_map(child_comment, user_fields))
 
-    comment_map["comments"] = child_comment_list
+    comment_map["comments_list"] = child_comment_list
     return comment_map
 
 
@@ -1215,7 +1215,7 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         for comment in contribution_first_comments:
             comment_list.append(get_comment_map(comment, user_field))
 
-        contribution_map["comments"] = comment_list
+        contribution_map["comments_list"] = comment_list
 
 
         """contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
