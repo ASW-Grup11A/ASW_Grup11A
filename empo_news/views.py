@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime
 
 from django.contrib.auth import logout as do_logout
@@ -8,8 +9,8 @@ from django.urls import reverse
 from rest_framework import viewsets, renderers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework_api_key.models import APIKey
 
+from empo_news.APIKeyManager import APIKeyManager
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
     NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException, \
     InvalidQueryParametersException, UrlCannotBeModifiedException
@@ -328,40 +329,40 @@ def profile(request, username):
     key = ''
     if request.user.is_authenticated:
         karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
-    userSelected = User.objects.get(username=username)
-    if UserFields.objects.filter(user=userSelected).count() == 0:
-        userFields = UserFields(user=userSelected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+    user_selected = User.objects.get(username=username)
+    if UserFields.objects.filter(user=user_selected).count() == 0:
+        user_fields = UserFields(user=user_selected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
                                 minaway=180, delay=0)
-        userFields.save()
-    else:
-        userFields = UserFields.objects.get(user=userSelected)
 
-    if not userFields.showdead:
+        user_fields.save()
+
+        coding_string = get_coding_string(user_selected)
+        encoded_string_bytes = base64.b64encode(coding_string.encode("utf-8"))
+        key = str(encoded_string_bytes, "utf-8")
+        hash_key = APIKeyManager.get_hash_key(key)
+
+        user_fields.api_key = hash_key
+        user_fields.save()
+    else:
+        user_fields = UserFields.objects.get(user=user_selected)
+        coding_string = get_coding_string(user_selected)
+        encoded_string_bytes = base64.b64encode(coding_string.encode("utf-8"))
+        key = str(encoded_string_bytes, "utf-8")
+    if not user_fields.showdead:
         posS = '0'
     else:
         posS = '1'
 
-    if not userFields.noprocrast:
+    if not user_fields.noprocrast:
         posN = '0'
     else:
         posN = '1'
     form = UserUpdateForm(
-        initial={'email': userSelected.email, 'karma': userFields.karma, 'about': userFields.about,
-                 'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
-                 'minaway': userFields.minaway, 'delay': userFields.delay})
+        initial={'email': user_selected.email, 'karma': user_fields.karma, 'about': user_fields.about,
+                 'showdead': posS, 'noprocrast': posN, 'maxvisit': user_fields.maxvisit,
+                 'minaway': user_fields.minaway, 'delay': user_fields.delay})
 
-    if userSelected == request.user:
-        generate = request.GET.get('generate', 'false')
-
-        if generate == 'true':
-            old_api_key = userFields.api_key
-            api_key, key = APIKey.objects.create_key(name="empo-news")
-            userFields.api_key = api_key.id
-            userFields.save()
-
-            if old_api_key is not None:
-                APIKey.objects.get(id=old_api_key).delete()
-
+    if user_selected == request.user:
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
             if form.is_valid():
@@ -373,16 +374,28 @@ def profile(request, username):
                                                                     delay=int(form.cleaned_data['delay']))
                 User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
 
-                return HttpResponseRedirect(reverse('empo_news:user_page', kwargs={"username": userSelected.username}))
+                return HttpResponseRedirect(reverse('empo_news:user_page', kwargs={"username": user_selected.username}))
     context = {
         "form": form,
-        "userSelected": userSelected,
-        "userFields": userFields,
+        "userSelected": user_selected,
+        "userFields": user_fields,
         "karma": karma,
         "notBottom": True,
-        "key": key,
+        "key": key
     }
     return render(request, 'empo_news/profile.html', context)
+
+
+def get_coding_string(user_selected):
+    coding_string = user_selected.username + user_selected.email
+    username_length = len(user_selected.username)
+    email_length = len(user_selected.email)
+    if username_length > email_length:
+        coding_string += str(username_length // email_length)
+    else:
+        coding_string += str(email_length // username_length)
+
+    return coding_string
 
 
 def increment_comments_number(contrib):
@@ -789,10 +802,10 @@ class ContributionsViewSet(viewsets.ModelViewSet):
     def get_actual(self, request, *args, **kwargs):
         contributions = Contribution.objects.filter(comment__isnull=True)
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_fields = UserFields.objects.get(api_key=api_key.id)
+            user_fields = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -856,10 +869,10 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         text = self.request.data.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -936,9 +949,9 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
         user = UserFields.objects.get(user_id=contribution.user.id)
         key = request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
-        if user.api_key != api_key.id:
+        if user.api_key != api_key:
             raise ForbiddenException
 
         contribution.delete()
@@ -951,10 +964,10 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         text = self.request.query_params.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -984,10 +997,10 @@ class VoteIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def vote(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1016,10 +1029,10 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def unvote(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1058,10 +1071,10 @@ class HideIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def hide(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1090,10 +1103,10 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def unhide(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1241,10 +1254,10 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1312,10 +1325,10 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         parent_id = kwargs.get('id', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1359,10 +1372,10 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
         delay = self.request.query_params.get('delay', '')
 
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_fields = UserFields.objects.get(api_key=api_key.id)
+            user_fields = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1400,7 +1413,7 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
             user = User.objects.get(username=kwargs.get('username'))
@@ -1409,7 +1422,7 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
 
         user_fields = UserFields.objects.get(user_id=user.id)
 
-        if user_fields.api_key != api_key.id:
+        if user_fields.api_key != api_key:
             data = {'username': user.username,
                     'date_joined': user.date_joined,
                     'karma': user_fields.karma,
