@@ -365,6 +365,7 @@ def profile(request, username):
     if user_selected == request.user:
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
+
             if form.is_valid():
                 UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
                                                                     showdead=form.cleaned_data['showdead'],
@@ -372,7 +373,6 @@ def profile(request, username):
                                                                     maxvisit=int(form.cleaned_data['maxvisit']),
                                                                     minaway=int(form.cleaned_data['minaway']),
                                                                     delay=int(form.cleaned_data['delay']))
-                User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
 
                 return HttpResponseRedirect(reverse('empo_news:user_page', kwargs={"username": user_selected.username}))
     context = {
