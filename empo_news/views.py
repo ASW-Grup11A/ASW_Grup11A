@@ -1422,7 +1422,10 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
 
         user_fields = UserFields.objects.get(user_id=user.id)
 
-        if user_fields.api_key != api_key:
+        print("USER API KEY " + str(user_fields.api_key))
+        print("HASHED API KEY " + str(api_key))
+
+        if str(user_fields.api_key) != str(api_key):
             data = {'username': user.username,
                     'date_joined': user.date_joined,
                     'karma': user_fields.karma,
