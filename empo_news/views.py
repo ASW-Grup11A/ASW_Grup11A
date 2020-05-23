@@ -968,7 +968,7 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         key = request.META.get('HTTP_API_KEY', '')
         api_key = APIKeyManager.get_hash_key(key)
 
-        if user.api_key != api_key:
+        if str(user.api_key) != str(api_key):
             raise ForbiddenException
 
         contribution.delete()
