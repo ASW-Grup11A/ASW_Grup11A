@@ -22,4 +22,4 @@ class KeyPermission(HasAPIKey):
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
-        return super().has_permission(request, view)
+        return True
