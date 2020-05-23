@@ -885,12 +885,28 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         if url and text and is_url_valid(url):
             raise UrlAndTextFieldException
 
+        domain = None
+
         if isinstance(serializer, UrlContributionSerializer):
-            """try:
-                pass
-            except Contribution.DoesNotExist:"""
+            url_split = url.split('/')
+            if url_split[0] == "http:" or url_split[0] == "https:":
+                domain_split = url_split[2].split('.')
+                if domain_split[0] != "www":
+                    partial_url = url.split('//')
+                    actual_url = partial_url[0] + "//www." + partial_url[1]
+                else:
+                    actual_url = url
+            else:
+                domain_split = url.split('.')
+                if domain_split[0] != "www":
+                    actual_url = "http://www." + url
+                else:
+                    actual_url = "http://" + url
+
+            domain = get_domain(actual_url)
+
             serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
-                            comments=0, liked=True, show=True, text=None)
+                            comments=0, liked=True, show=True, url=actual_url, text=None)
         else:
             serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
                             comments=0, liked=True, show=True, url=None)
@@ -899,6 +915,7 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         contribution = user_contributions[0]
 
         contribution.user_likes.add(user_field.user)
+        contribution.url_domain = domain
         contribution.save()
 
     def get_serializer_class(self):
