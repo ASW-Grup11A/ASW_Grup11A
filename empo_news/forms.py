@@ -29,7 +29,6 @@ class SubmitForm(forms.Form):
     @staticmethod
     def valid_url(url):
         url_split = url.split('/')
-        print("url " + url)
         result = True
         if len(url_split) > 1:
             result = ((url_split[0] == "http:") or (url_split[0] == "https:"))
