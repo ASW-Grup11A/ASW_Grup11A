@@ -327,12 +327,14 @@ def logout(request):
 def profile(request, username):
     karma = 0
     key = ''
+
     if request.user.is_authenticated:
         karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
     user_selected = User.objects.get(username=username)
+
     if UserFields.objects.filter(user=user_selected).count() == 0:
         user_fields = UserFields(user=user_selected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
-                                minaway=180, delay=0)
+                                 minaway=180, delay=0)
 
         user_fields.save()
 
@@ -863,7 +865,8 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
         return Response(ContributionSerializer(contributions, many=True).data)
 
-    def perform_create(self, serializer):
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def create_contribution(self, request, *args, **kwargs):
         title = self.request.data.get('title', '')
         url = self.request.data.get('url', '')
         text = self.request.data.get('text', '')
@@ -887,7 +890,7 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
         domain = None
 
-        if isinstance(serializer, UrlContributionSerializer):
+        if url:
             url_split = url.split('/')
             if url_split[0] == "http:" or url_split[0] == "https:":
                 domain_split = url_split[2].split('.')
@@ -905,11 +908,17 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
             domain = get_domain(actual_url)
 
-            serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
-                            comments=0, liked=True, show=True, url=actual_url, text=None)
+            try:
+                actual_contribution = Contribution.objects.get(url=actual_url)
+                return Response(get_basic_attributes_map(actual_contribution, user_field), status=status.HTTP_200_OK)
+            except Contribution.DoesNotExist:
+                contribution = Contribution(user=user_field.user, title=title, publication_time=datetime.today(),
+                                            liked=True, show=True, url=actual_url, text=None)
+                contribution.save()
         else:
-            serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
-                            comments=0, liked=True, show=True, url=None)
+            contribution = Contribution(user=user_field.user, title=title, publication_time=datetime.today(),
+                                        liked=True, show=True, url=None, text=text)
+            contribution.save()
 
         user_contributions = Contribution.objects.filter(user=user_field.user).order_by('-publication_time')
         contribution = user_contributions[0]
@@ -917,6 +926,8 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         contribution.user_likes.add(user_field.user)
         contribution.url_domain = domain
         contribution.save()
+
+        return Response(get_basic_attributes_map(contribution, user_field), status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
         if self.action == 'create':

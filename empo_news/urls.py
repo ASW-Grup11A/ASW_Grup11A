@@ -9,7 +9,7 @@ app_name = 'empo_news'
 
 contributions_view = ContributionsViewSet.as_view({
     'get': 'get_actual',
-    'post': 'create'
+    'post': 'create_contribution'
 })
 
 contributions_id_view = ContributionsIdViewSet.as_view({
