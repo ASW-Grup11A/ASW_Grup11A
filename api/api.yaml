@@ -97,6 +97,8 @@ paths:
             operationId: createContribution
             tags:
                 - contributions
+            description: >
+                Adds a new contribution to the system. When publishing a contribution with url, if another one already has the same url it won't create a new one and will return the existent one.
             requestBody:
                 description: Provide the content of the new contribution
                 content:
@@ -112,6 +114,12 @@ paths:
                                 $ref: '#/components/examples/postText'
                 required: true
             responses:
+                200:
+                    description: A contribution with the same url already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Contribution'
                 201:
                     description: Contribution created
                     content:
@@ -771,11 +779,11 @@ components:
                     nullable: true
                     format: url
                     maxLength: 500
-                    example: null
+                    example: 'https://www.google.com'
                 text:
                     type: string
                     nullable: true
-                    example: "Hello Wordl!"
+                    example:
                 comments:
                     type: integer
                     format: int32
