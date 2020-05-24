@@ -39,15 +39,21 @@ class InvalidQueryParametersException(APIException):
     default_code = 'Bad Request'
 
 
+class UrlCannotBeModifiedException(APIException):
+    status_code = 400
+    default_detail = 'Url contributions cannot be modified'
+    default_code = 'Bad Request'
+
+
 class UnauthenticatedException(APIException):
     status_code = 401
-    default_detail = 'The user is not authenticated'
+    default_detail = 'You provided no api key or it is invalid (Api-Key Header)'
     default_code = 'Unauthorized'
 
 
 class ForbiddenException(APIException):
     status_code = 403
-    default_detail = 'Your api key (Api-Key Header) is not valid'
+    default_detail = 'Your api key (Api-Key Header) does not belong to this user'
     default_code = 'Forbidden'
 
 

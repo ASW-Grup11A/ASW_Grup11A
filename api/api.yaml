@@ -6,61 +6,8 @@ info:
 servers:
     - url: 'https://empo-news.herokuapp.com/api/v1'
 paths:
-    /profiles:
-        get:
-            summary: Return a user profile
-            operationId: getUserProfile
-            tags:
-                - users
-            parameters:
-                - name: username
-                  in: query
-                  required: true
-                  description: Username of the profile to return
-                  schema:
-                      type: string
-                      maxLength: 150
-            responses:
-                200:
-                    description: Finds a user by its username
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/OtherProfile'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                500:
-                    $ref: '#/components/responses/500'
-    /profile/{username}:
-        parameters:
-                - $ref: '#/components/parameters/userId'
-        get:
-            summary: Returns the current signed in user profile
-            operationId: getMyProfile
-            tags:
-                - users
-            responses:
-                200:
-                    description: Returns the authenticated profile
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/MyProfile'
-                401:
-                    $ref: '#/components/responses/401'
-                403:
-                    $ref: '#/components/responses/403'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                500:
-                    $ref: '#/components/responses/500'
-        put:
+    /profile:
+       put:
             summary: Updates the current signed in user profile
             operationId: updateMyProfile
             tags:
@@ -77,12 +24,6 @@ paths:
                             type: string
                             maxLength: 2000
                             example: I love crisps.
-                        email:
-                            description: The new email
-                            type: string
-                            format: email
-                            maxLength: 254
-                            example: johnDoe@mail.com
                         showdead:
                             description: The new showdead
                             type: boolean
@@ -129,12 +70,35 @@ paths:
                     $ref: '#/components/responses/405'
                 500:
                     $ref: '#/components/responses/500'
+    /profile/{username}:
+        get:
+            summary: Returns a user profile
+            operationId: getUserProfile
+            tags:
+                - users
+            parameters:
+                - $ref: '#/components/parameters/userId'
+            responses:
+                200:
+                    $ref: '#/components/responses/profileResponse'
+                401:
+                    $ref: '#/components/responses/401'
+                403:
+                    $ref: '#/components/responses/403'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
     /contributions:
         post:
             summary: Adds a new contribution
             operationId: createContribution
             tags:
                 - contributions
+            description: >
+                Adds a new contribution to the system. When publishing a contribution with url, if another one already has the same url it won't create a new one and will return the existent one.
             requestBody:
                 description: Provide the content of the new contribution
                 content:
@@ -150,6 +114,12 @@ paths:
                                 $ref: '#/components/examples/postText'
                 required: true
             responses:
+                200:
+                    description: A contribution with the same url already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Contribution'
                 201:
                     description: Contribution created
                     content:
@@ -167,32 +137,40 @@ paths:
         get:
             summary: Retrieves all the contributions
             operationId: listContributions
+            description: >
+                Retrieves all the contibutions according to the union of the filters. The result will be ordered according to the orderBy parameter if specified.
             tags:
                 - contributions
             parameters:
               - $ref: '#/components/parameters/userIdQuery'
               - in: query
-                name: showEn
-                description: Filter Show EN contributions
-                schema:
-                    type: boolean
-                    enum:
-                        - true
-              - in: query
-                name: url
-                description: > 
-                  Filter contributions by their URL. It cannot be used in conjunction with ask parameter.
-                schema:
-                    type: string
-                    format: url
-              - in: query
-                name: ask
+                name: filter
                 description: >
-                    Filter all contributions with text. It cannot be used in conjunction with url parameter.
+                  Avaliable filters:
+                    * `showEn` - Filter Show EN contributions
+                    
+                    * `url` - Filter contributions by their URL. It cannot be used in conjunction with ask parameter
+                    
+                    * `ask` - Filter all contributions with text. It cannot be used in conjunction with url parameter
                 schema:
-                    type: boolean
-                    enum:
-                        - true
+                    type: object
+                    properties:
+                      showEn:
+                        type: boolean
+                        enum:
+                            - true
+                      url:
+                        type: string
+                        format: url
+                        example: 'https://www.google.es'
+                      ask:
+                        type: boolean
+                        enum:
+                            - true
+                    minProperties: 1
+                    additionalProperties: false
+                style: form
+                explode: true
               - $ref: '#/components/parameters/orderBy'
             responses:
                 200:
@@ -233,7 +211,6 @@ paths:
             operationId: editContributionById
             tags:
                 - contributions
-                - comments
             description: Edits a single contribution or comment
             parameters:
                 - in: path
@@ -324,7 +301,6 @@ paths:
             operationId: deleteContribution
             tags:
                 - contributions
-                - comments
             parameters:
                 - in: path
                   name: id
@@ -344,6 +320,90 @@ paths:
                     $ref: '#/components/responses/403'
                 405:
                     $ref: '#/components/responses/405'
+                500:
+                    $ref: '#/components/responses/500'
+    /contribution/{id}/vote:
+        put:
+            summary: Votes a contribution or comment
+            operationId: voteContribution
+            tags:
+                - contributions
+            parameters:
+              - $ref: '#/components/parameters/contributionId'
+            responses:
+                204:
+                    $ref: '#/components/responses/204'
+                401:
+                    $ref: '#/components/responses/401'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                409:
+                    $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
+    /contribution/{id}/unvote:
+        put:
+            summary: Unvotes a contribution or comment
+            operationId: unvoteContribution
+            tags:
+                - contributions
+            parameters:
+              - $ref: '#/components/parameters/contributionId'
+            responses:
+                204:
+                    $ref: '#/components/responses/204'
+                401:
+                    $ref: '#/components/responses/401'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                409:
+                    $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
+    /contribution/{id}/hide:
+        put:
+            summary: Hides a contribution or a comment
+            operationId: hideContribution
+            tags:
+                - contributions
+            parameters:
+              - $ref: '#/components/parameters/contributionId'
+            responses:
+                204:
+                    $ref: '#/components/responses/204'
+                401:
+                    $ref: '#/components/responses/401'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                409:
+                    $ref: '#/components/responses/409'
+                500:
+                    $ref: '#/components/responses/500'
+    /contribution/{id}/unhide:
+        put:
+            summary: Unhides a contribution or a comment
+            operationId: unhideContribution
+            tags:
+                - contributions
+            parameters:
+              - $ref: '#/components/parameters/contributionId'
+            responses:
+                204:
+                    $ref: '#/components/responses/204'
+                401:
+                    $ref: '#/components/responses/401'
+                404:
+                    $ref: '#/components/responses/404'
+                405:
+                    $ref: '#/components/responses/405'
+                409:
+                    $ref: '#/components/responses/409'
                 500:
                     $ref: '#/components/responses/500'
     /contribution/{id}/comments:
@@ -476,95 +536,6 @@ paths:
                     $ref: '#/components/responses/405'
                 500:
                     $ref: '#/components/responses/500'
-    /contribution/{id}/vote:
-        put:
-            summary: Votes a contribution or comment
-            operationId: voteContribution
-            tags:
-                - contributions
-                - comments
-            parameters:
-              - $ref: '#/components/parameters/contributionId'
-            responses:
-                204:
-                    $ref: '#/components/responses/204'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                409:
-                    $ref: '#/components/responses/409'
-                500:
-                    $ref: '#/components/responses/500'
-    /contribution/{id}/unvote:
-        put:
-            summary: Unvotes a contribution or comment
-            operationId: unvoteContribution
-            tags:
-                - contributions
-                - comments
-            parameters:
-              - $ref: '#/components/parameters/contributionId'
-            responses:
-                204:
-                    $ref: '#/components/responses/204'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                409:
-                    $ref: '#/components/responses/409'
-                500:
-                    $ref: '#/components/responses/500'
-    /contribution/{id}/hide:
-        put:
-            summary: Hides a contribution or a comment
-            operationId: hideContribution
-            tags:
-                - contributions
-                - comments
-            parameters:
-              - $ref: '#/components/parameters/contributionId'
-            responses:
-                204:
-                    $ref: '#/components/responses/204'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                409:
-                    $ref: '#/components/responses/409'
-                500:
-                    $ref: '#/components/responses/500'
-    /contribution/{id}/unhide:
-        put:
-            summary: Unhides a contribution or a comment
-            operationId: unhideContribution
-            tags:
-                - contributions
-                - comments
-            parameters:
-              - $ref: '#/components/parameters/contributionId'
-            responses:
-                204:
-                    $ref: '#/components/responses/204'
-                401:
-                    $ref: '#/components/responses/401'
-                404:
-                    $ref: '#/components/responses/404'
-                405:
-                    $ref: '#/components/responses/405'
-                409:
-                    $ref: '#/components/responses/409'
-                500:
-                    $ref: '#/components/responses/500'
-                
 security:
 - ApiKeyAuth: []
 components:
@@ -595,7 +566,19 @@ components:
         orderBy:
             in: query
             name: orderBy
-            description: Orders by one of the available values
+            description: >
+                  Orders by:
+                    * `publication_date_asc` - Orders by newest contribution
+                    
+                    * `publication_date_desc` - Orders by oldest contribution
+                    
+                    * `title_asc` - Orders by ascending title, from A to Z
+                    
+                    * `title_desc` - Orders by descending title, from Z to A
+                    
+                    * `votes_asc` - Orders by  ascending number of votes
+                    
+                    * `votes_desc` - Orders by  descending number of votes
             schema:
                 type: string
                 enum:
@@ -608,7 +591,15 @@ components:
         commentOrderBy:
               in: query
               name: orderBy
-              description: Orders by one of the available values
+              description: >
+                  Orders by:
+                    * `publication_date_asc` - Orders by newest contribution
+                    
+                    * `publication_date_desc` - Orders by oldest contribution
+                    
+                    * `votes_asc` - Orders by  ascending number of votes
+                    
+                    * `votes_desc` - Orders by  descending number of votes
               schema:
                   type: string
                   enum:
@@ -617,6 +608,17 @@ components:
                       - votes_asc
                       - votes_desc
     responses:
+        profileResponse:
+            description: Returns a user profile
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/BasicResponse'
+                    examples:
+                        myProfileExample:
+                            $ref: '#/components/examples/myProfile'
+                        otherProfileExample:
+                            $ref: '#/components/examples/otherProfile'
         200:
             description: Successful operation
             content:
@@ -751,22 +753,6 @@ components:
                     format: int32
                     default: 0
                     example: 0
-        OtherProfile:
-            type: object
-            properties:
-                username:
-                    type: string
-                    maxLength: 150
-                    example: 'Thomas'
-                date_joined:
-                    type: string
-                    format: date-time
-                    example: '2020-04-16 22:41:09.025719'
-                karma:
-                    type: integer
-                    format: int32
-                    default: 1
-                    example: 4
         Contribution:
             type: object
             properties:
@@ -793,11 +779,11 @@ components:
                     nullable: true
                     format: url
                     maxLength: 500
-                    example: null
+                    example: 'https://www.google.com'
                 text:
                     type: string
                     nullable: true
-                    example: "Hello Wordl!"
+                    example:
                 comments:
                     type: integer
                     format: int32

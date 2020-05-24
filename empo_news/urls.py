@@ -9,7 +9,7 @@ app_name = 'empo_news'
 
 contributions_view = ContributionsViewSet.as_view({
     'get': 'get_actual',
-    'post': 'create'
+    'post': 'create_contribution'
 })
 
 contributions_id_view = ContributionsIdViewSet.as_view({
@@ -48,12 +48,11 @@ contribution_comments_view = ContributionCommentViewSet.as_view({
 })
 
 profiles_id_args = ProfilesViewSet.as_view({
-    'get': 'get_actual'
+    'put': 'update_actual'
 })
 
 profiles_id_kwargs = ProfilesIdViewSet.as_view({
-    'get': 'get_actual',
-    'put': 'update_actual'
+    'get': 'get_actual'
 })
 
 urlpatterns = [
@@ -93,6 +92,6 @@ urlpatterns = [
     path('api/v1/comments', comments_view, name='api_comments'),
     path('api/v1/comment/<int:commentId>', comments_id_view, name='api_id_comments'),
     path('api/v1/contribution/<int:id>/comments', contribution_comments_view, name='api_contribution_comments'),
-    path('api/v1/profiles', profiles_id_args, name='api_profiles_id_args'),
+    path('api/v1/profile', profiles_id_args, name='api_profiles_id_args'),
     path('api/v1/profile/<str:username>', profiles_id_kwargs, name='api_profiles_id_kwargs'),
 ]

@@ -125,7 +125,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'emponews',
         'USER': 'admin',
-        'PASSWORD': os.environ.get('ASW_DB_PASSWORD','adminadmin'),
+        'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': '',
     }

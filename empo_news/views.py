@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime
 
 from django.contrib.auth import logout as do_logout
@@ -8,16 +9,20 @@ from django.urls import reverse
 from rest_framework import viewsets, renderers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework_api_key.models import APIKey
 
+from empo_news.APIKeyManager import APIKeyManager
 from empo_news.errors import UrlAndTextFieldException, UrlIsTooLongException, TitleIsTooLongException, \
     NotFoundException, ForbiddenException, UnauthenticatedException, ConflictException, ContributionUserException, \
-    InvalidQueryParametersException
+    InvalidQueryParametersException, UrlCannotBeModifiedException
 from empo_news.forms import SubmitForm, CommentForm, UserUpdateForm
 from empo_news.models import Contribution, UserFields, Comment
 from empo_news.permissions import KeyPermission
 from empo_news.serializers import ContributionSerializer, UrlContributionSerializer, AskContributionSerializer, \
     CommentSerializer, UserFieldsSerializer
+
+
+def get_domain(url):
+    return url.split('www.')[1].split('/')[0]
 
 
 def submit(request):
@@ -30,7 +35,35 @@ def submit(request):
             contribution = Contribution(user=request.user, title=form.cleaned_data['title'],
                                         publication_time=datetime.today(), text='')
             if form.cleaned_data['url'] and SubmitForm.valid_url(form.cleaned_data['url']):
-                contribution.url = form.cleaned_data['url']
+                url_split = form.cleaned_data['url'].split('/')
+                if url_split[0] == "http:" or url_split[0] == "https:":
+                    domain_split = url_split[2].split('.')
+                    if domain_split[0] != "www":
+                        partial_url = form.cleaned_data['url'].split('//')
+                        actual_url = partial_url[0] + "//www." + partial_url[1]
+                    else:
+                        actual_url = form.cleaned_data['url']
+                else:
+                    domain_split = form.cleaned_data['url'].split('.')
+                    if domain_split[0] != "www":
+                        actual_url = "http://www." + form.cleaned_data['url']
+                    else:
+                        actual_url = "http://" + form.cleaned_data['url']
+
+                contribution.url_domain = get_domain(actual_url)
+                contribution.url = actual_url
+
+                try:
+                    contribution_same_url = Contribution.objects.get(url=actual_url)
+                    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_same_url.id))
+                except Contribution.DoesNotExist:
+                    pass
+
+                """try:
+                    contribution_url = Contribution.objects.get(url=contribution.url)
+                    return HttpResponseRedirect(reverse('empo_news:item') + '?id=' + str(contribution_url.id))
+                except Contribution.DoesNotExist:
+                    pass """
             else:
                 contribution.text = form.cleaned_data['text']
             contribution.save()
@@ -294,44 +327,47 @@ def logout(request):
 def profile(request, username):
     karma = 0
     key = ''
+
     if request.user.is_authenticated:
         karma = getattr(UserFields.objects.filter(user=request.user).first(), 'karma', 1)
-    userSelected = User.objects.get(username=username)
-    if UserFields.objects.filter(user=userSelected).count() == 0:
-        userFields = UserFields(user=userSelected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
-                                minaway=180, delay=0)
-        userFields.save()
-    else:
-        userFields = UserFields.objects.get(user=userSelected)
+    user_selected = User.objects.get(username=username)
 
-    if userFields.showdead == 0:
+    if UserFields.objects.filter(user=user_selected).count() == 0:
+        user_fields = UserFields(user=user_selected, karma=1, about="", showdead=0, noprocrast=0, maxvisit=20,
+                                 minaway=180, delay=0)
+
+        user_fields.save()
+
+        coding_string = get_coding_string(user_selected)
+        encoded_string_bytes = base64.b64encode(coding_string.encode("utf-8"))
+        key = str(encoded_string_bytes, "utf-8")
+        hash_key = APIKeyManager.get_hash_key(key)
+
+        user_fields.api_key = hash_key
+        user_fields.save()
+    else:
+        user_fields = UserFields.objects.get(user=user_selected)
+        coding_string = get_coding_string(user_selected)
+        encoded_string_bytes = base64.b64encode(coding_string.encode("utf-8"))
+        key = str(encoded_string_bytes, "utf-8")
+    if not user_fields.showdead:
         posS = '0'
     else:
         posS = '1'
 
-    if userFields.noprocrast == 0:
+    if not user_fields.noprocrast:
         posN = '0'
     else:
         posN = '1'
     form = UserUpdateForm(
-        initial={'email': userSelected.email, 'karma': userFields.karma, 'about': userFields.about,
-                 'showdead': posS, 'noprocrast': posN, 'maxvisit': userFields.maxvisit,
-                 'minaway': userFields.minaway, 'delay': userFields.delay})
+        initial={'email': user_selected.email, 'karma': user_fields.karma, 'about': user_fields.about,
+                 'showdead': posS, 'noprocrast': posN, 'maxvisit': user_fields.maxvisit,
+                 'minaway': user_fields.minaway, 'delay': user_fields.delay})
 
-    if userSelected == request.user:
-        generate = request.GET.get('generate', 'false')
-
-        if generate == 'true':
-            old_api_key = userFields.api_key
-            api_key, key = APIKey.objects.create_key(name="empo-news")
-            userFields.api_key = api_key.id
-            userFields.save()
-
-            if old_api_key is not None:
-                APIKey.objects.get(id=old_api_key).delete()
-
+    if user_selected == request.user:
         if request.method == 'POST':
             form = UserUpdateForm(request.POST)
+
             if form.is_valid():
                 UserFields.objects.filter(user=request.user).update(user=request.user, about=form.cleaned_data['about'],
                                                                     showdead=form.cleaned_data['showdead'],
@@ -339,18 +375,29 @@ def profile(request, username):
                                                                     maxvisit=int(form.cleaned_data['maxvisit']),
                                                                     minaway=int(form.cleaned_data['minaway']),
                                                                     delay=int(form.cleaned_data['delay']))
-                User.objects.filter(username=request.user.username).update(email=form.cleaned_data['email'])
 
-                return HttpResponseRedirect(reverse('empo_news:user_page', kwargs={"username": userSelected.username}))
+                return HttpResponseRedirect(reverse('empo_news:user_page', kwargs={"username": user_selected.username}))
     context = {
         "form": form,
-        "userSelected": userSelected,
-        "userFields": userFields,
+        "userSelected": user_selected,
+        "userFields": user_fields,
         "karma": karma,
         "notBottom": True,
-        "key": key,
+        "key": key
     }
     return render(request, 'empo_news/profile.html', context)
+
+
+def get_coding_string(user_selected):
+    coding_string = user_selected.username + user_selected.email
+    username_length = len(user_selected.username)
+    email_length = len(user_selected.email)
+    if username_length > email_length:
+        coding_string += str(username_length // email_length)
+    else:
+        coding_string += str(email_length // username_length)
+
+    return coding_string
 
 
 def increment_comments_number(contrib):
@@ -757,10 +804,10 @@ class ContributionsViewSet(viewsets.ModelViewSet):
     def get_actual(self, request, *args, **kwargs):
         contributions = Contribution.objects.filter(comment__isnull=True)
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_fields = UserFields.objects.get(api_key=api_key.id)
+            user_fields = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -818,17 +865,17 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
         return Response(ContributionSerializer(contributions, many=True).data)
 
-
-    def perform_create(self, serializer):
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def create_contribution(self, request, *args, **kwargs):
         title = self.request.data.get('title', '')
         url = self.request.data.get('url', '')
         text = self.request.data.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -841,18 +888,46 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         if url and text and is_url_valid(url):
             raise UrlAndTextFieldException
 
-        if isinstance(serializer, UrlContributionSerializer):
-            serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
-                            comments=0, liked=True, show=True, text=None)
+        domain = None
+
+        if url:
+            url_split = url.split('/')
+            if url_split[0] == "http:" or url_split[0] == "https:":
+                domain_split = url_split[2].split('.')
+                if domain_split[0] != "www":
+                    partial_url = url.split('//')
+                    actual_url = partial_url[0] + "//www." + partial_url[1]
+                else:
+                    actual_url = url
+            else:
+                domain_split = url.split('.')
+                if domain_split[0] != "www":
+                    actual_url = "http://www." + url
+                else:
+                    actual_url = "http://" + url
+
+            domain = get_domain(actual_url)
+
+            try:
+                actual_contribution = Contribution.objects.get(url=actual_url)
+                return Response(get_basic_attributes_map(actual_contribution, user_field), status=status.HTTP_200_OK)
+            except Contribution.DoesNotExist:
+                contribution = Contribution(user=user_field.user, title=title, publication_time=datetime.today(),
+                                            liked=True, show=True, url=actual_url, text=None)
+                contribution.save()
         else:
-            serializer.save(user=user_field.user, title=title, points=1, publication_time=datetime.today(),
-                            comments=0, liked=True, show=True, url=None)
+            contribution = Contribution(user=user_field.user, title=title, publication_time=datetime.today(),
+                                        liked=True, show=True, url=None, text=text)
+            contribution.save()
 
         user_contributions = Contribution.objects.filter(user=user_field.user).order_by('-publication_time')
         contribution = user_contributions[0]
 
         contribution.user_likes.add(user_field.user)
+        contribution.url_domain = domain
         contribution.save()
+
+        return Response(get_basic_attributes_map(contribution, user_field), status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -902,9 +977,9 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
 
         user = UserFields.objects.get(user_id=contribution.user.id)
         key = request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
-        if user.api_key != api_key.id:
+        if str(user.api_key) != str(api_key):
             raise ForbiddenException
 
         contribution.delete()
@@ -914,34 +989,29 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def update_actual(self, request, *args, **kwargs):
         title = self.request.query_params.get('title', '')
-        url = self.request.query_params.get('url', '')
         text = self.request.query_params.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
         if len(title) > 80:
             raise TitleIsTooLongException
 
-        if len(url) > 500:
-            raise UrlIsTooLongException
-
-        if url and text and is_url_valid(url):
-            raise UrlAndTextFieldException
-
         contribution = Contribution.objects.get(id=kwargs.get('id'))
+
+        if contribution.user != user_field.user:
+            raise ForbiddenException
+
+        if contribution.url is not None and text != '':
+            raise UrlCannotBeModifiedException
+
         contribution.title = title
-
-        if url:
-            contribution.url = url
-        else:
-            contribution.text = text
-
+        contribution.text = text
         contribution.save()
 
         return Response(ContributionSerializer(contribution).data)
@@ -955,10 +1025,10 @@ class VoteIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def vote(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -987,10 +1057,10 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def unvote(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1029,10 +1099,10 @@ class HideIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def hide(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1061,10 +1131,10 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def unhide(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1137,6 +1207,73 @@ class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(CommentSerializer(comment).data)
 
 
+def is_liked_by_user(contribution, user_id):
+    try:
+        contribution.user_likes.get(id=user_id)
+        return True
+    except User.DoesNotExist:
+        return False
+
+
+def is_shown_by_user(contribution, user_id):
+    try:
+        contribution.user_id_hidden.get(id=user_id)
+        return False
+    except User.DoesNotExist:
+        return True
+
+
+def get_basic_attributes_map(contribution, user_fields):
+    dataMap = {
+        'id': contribution.id,
+        'title': contribution.title,
+        'points': contribution.points,
+        'publication_time': contribution.publication_time,
+        'url': contribution.url,
+        'text': contribution.text,
+        'comments': contribution.comments,
+        'user_id': contribution.user.username,
+        'hidden': contribution.hidden,
+        'liked': is_liked_by_user(contribution, user_fields.user.id),
+        'show': is_shown_by_user(contribution, user_fields.user.id)
+    }
+
+    return dataMap
+
+
+def apply_filters(comments_list, username_filter, order_by_filter):
+    if username_filter:
+        try:
+            user = User.objects.get(username=username_filter)
+        except User.DoesNotExist:
+            raise NotFoundException
+        comments_list = comments_list.filter(user_id=user.id)
+
+    if order_by_filter:
+        if order_by_filter == 'publication_time_asc':
+            comments_list = comments_list.order_by('publication_time')
+        elif order_by_filter == 'publication_time_desc':
+            comments_list = comments_list.order_by('-publication_time')
+        elif order_by_filter == 'votes_asc':
+            comments_list = comments_list.order_by('points')
+        else:
+            comments_list = comments_list.order_by('-points')
+
+
+def get_comment_map(comment, user_fields, username_filter, order_by_filter):
+    comment_map = get_basic_attributes_map(comment, user_fields)
+    child_comment_list = []
+
+    actual_comments = comment.comment_set.all()
+    apply_filters(actual_comments, username_filter, order_by_filter)
+
+    for child_comment in actual_comments:
+        child_comment_list.append(get_comment_map(child_comment, user_fields, username_filter, order_by_filter))
+
+    comment_map["comments_list"] = child_comment_list
+    return comment_map
+
+
 class ContributionCommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -1145,10 +1282,10 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1157,7 +1294,22 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         except Contribution.DoesNotExist:
             raise NotFoundException
 
-        contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
+        contribution = Contribution.objects.get(id=kwargs.get('id'))
+        contribution_map = get_basic_attributes_map(contribution, user_field)
+        contribution_first_comments = Comment.objects.filter(contribution_id=kwargs.get('id'),
+                                                             parent__isnull=True)
+
+        username_filter = self.request.query_params.get('username', '')
+        order_by_filter = self.request.query_params.get('orderBy', '')
+        apply_filters(contribution_first_comments, username_filter, order_by_filter)
+
+        comment_list = []
+        for comment in contribution_first_comments:
+            comment_list.append(get_comment_map(comment, user_field, username_filter, order_by_filter))
+
+        contribution_map["comments_list"] = comment_list
+
+        """contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
 
         for contrib in contribution_comments:
             try:
@@ -1190,9 +1342,10 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
             elif order_by_filter == 'votes_asc':
                 contribution_comments = contribution_comments.order_by('points')
             else:
-                contribution_comments = contribution_comments.order_by('-points')
+                contribution_comments = contribution_comments.order_by('-points')"""
 
-        return Response(CommentSerializer(contribution_comments, many=True).data)
+        # return Response(CommentSerializer(contribution_comments, many=True).data)
+        return Response(contribution_map)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def create_comment(self, request, *args, **kwargs):
@@ -1200,10 +1353,10 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         parent_id = kwargs.get('id', '')
         key = self.request.META.get('HTTP_API_KEY', '')
 
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user_field = UserFields.objects.get(api_key=api_key.id)
+            user_field = UserFields.objects.get(api_key=api_key)
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
@@ -1236,46 +1389,6 @@ class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [KeyPermission]
 
-    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
-    def get_actual(self, request, *args, **kwargs):
-        try:
-            user = User.objects.get(username=self.request.query_params.get('username'))
-        except UserFields.DoesNotExist:
-            raise NotFoundException
-
-        user_fields = UserFields.objects.get(user_id=user.id)
-
-        user = {
-            "username": user_fields.user.username,
-            "data_joined": user_fields.user.date_joined,
-            "karma": user_fields.karma
-        }
-
-        return Response(user)
-
-
-class ProfilesIdViewSet(viewsets.ModelViewSet):
-    queryset = UserFields.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [KeyPermission]
-
-    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
-    def get_actual(self, request, *args, **kwargs):
-        key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
-
-        try:
-            user = User.objects.get(username=kwargs.get('username'))
-        except User.DoesNotExist:
-            raise NotFoundException
-
-        user_fields = UserFields.objects.get(user_id=user.id)
-
-        if user_fields.api_key != api_key.id:
-            raise ForbiddenException
-
-        return Response(UserFieldsSerializer(user_fields).data)
-
     @action(detail=True, methods=['put'], renderer_classes=[renderers.StaticHTMLRenderer])
     def update_actual(self, request, *args, **kwargs):
         about = self.request.query_params.get('about', '')
@@ -1287,17 +1400,12 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
         delay = self.request.query_params.get('delay', '')
 
         key = self.request.META.get('HTTP_API_KEY', '')
-        api_key = APIKey.objects.get_from_key(key)
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            user = User.objects.get(username=kwargs.get('username'))
-        except User.DoesNotExist:
-            raise NotFoundException
-
-        user_fields = UserFields.objects.get(user_id=user.id)
-
-        if user_fields.api_key != api_key.id:
-            raise ForbiddenException
+            user_fields = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
 
         if about:
             user_fields.about = about
@@ -1306,10 +1414,10 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
             user_fields.email = email
 
         if showdead:
-            user_fields.showdead = showdead == 'true'
+            user_fields.showdead = showdead == "true"
 
         if noprocrast:
-            user_fields.noprocrast = noprocrast == 'true'
+            user_fields.noprocrast = noprocrast == "true"
 
         if maxvisit:
             user_fields.maxvisit = maxvisit
@@ -1321,5 +1429,32 @@ class ProfilesIdViewSet(viewsets.ModelViewSet):
             user_fields.delay = delay
 
         user_fields.save()
+
+        return Response(UserFieldsSerializer(user_fields).data)
+
+
+class ProfilesIdViewSet(viewsets.ModelViewSet):
+    queryset = UserFields.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [KeyPermission]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def get_actual(self, request, *args, **kwargs):
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKeyManager.get_hash_key(key)
+
+        try:
+            user = User.objects.get(username=kwargs.get('username'))
+        except User.DoesNotExist:
+            raise NotFoundException
+
+        user_fields = UserFields.objects.get(user_id=user.id)
+
+        if str(user_fields.api_key) != str(api_key):
+            data = {'username': user.username,
+                    'date_joined': user.date_joined,
+                    'karma': user_fields.karma,
+                    'about': user_fields.about}
+            return Response(data)
 
         return Response(UserFieldsSerializer(user_fields).data)
