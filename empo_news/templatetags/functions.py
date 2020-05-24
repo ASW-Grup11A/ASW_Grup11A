@@ -52,3 +52,4 @@ def is_hidden(contribution, user_id):
 @register.filter
 def google_url(originalString):
     return originalString.replace(" ", "+")
+
