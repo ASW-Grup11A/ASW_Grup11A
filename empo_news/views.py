@@ -811,24 +811,13 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
-        for contrib in contributions:
-            try:
-                contrib.user_likes.get(id=user_fields.user.id)
-                contrib.liked = True
-            except User.DoesNotExist:
-                contrib.liked = False
-
-            try:
-                contrib.user_id_hidden.get(id=user_fields.user.id)
-                contrib.show = False
-            except User.DoesNotExist:
-                contrib.show = True
-
         username_filter = self.request.query_params.get('username', '')
         show_en_filter = self.request.query_params.get('showEn', '')
         url_filter = self.request.query_params.get('url', '')
         ask_filter = self.request.query_params.get('ask', '')
         order_by_filter = self.request.query_params.get('orderBy', '')
+        liked_filter = self.request.query_params.get('liked', '')
+        hidden_filter = self.request.query_params.get('hidden', '')
 
         if url_filter and ask_filter:
             raise InvalidQueryParametersException
@@ -867,7 +856,37 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
         for contrib in contributions:
             contribution_map = get_basic_attributes_map(contrib, user_fields)
-            contribution_list.append(contribution_map)
+            adding = True
+
+            if liked_filter or hidden_filter:
+                adding = False
+
+                if liked_filter and hidden_filter:
+                    liked_result = liked_filter == 'true'
+                    hidden_result = hidden_filter == 'true'
+
+                    if liked_result and hidden_result and contribution_map['liked'] \
+                            and not contribution_map['show']:
+                        adding = True
+                    elif not liked_result and hidden_result and not contribution_map['liked'] \
+                            and not contribution_map['show']:
+                        adding = True
+                    elif liked_result and not hidden_result and contribution_map['liked'] \
+                            and contribution_map['show']:
+                        adding = True
+                    elif not liked_result and not hidden_result and not contribution_map['liked'] \
+                            and contribution_map['show']:
+                        adding = True
+                else:
+                    if liked_filter and ((liked_filter == 'true' and contribution_map['liked'])
+                                         or (liked_filter == 'false' and not contribution_map['liked'])):
+                        adding = True
+                    elif (hidden_filter == 'true' and not contribution_map['show']) \
+                            or (hidden_filter == 'false' and contribution_map['show']):
+                        adding = True
+
+            if adding:
+                contribution_list.append(contribution_map)
 
         return Response(contribution_list, status=status.HTTP_200_OK)
 
