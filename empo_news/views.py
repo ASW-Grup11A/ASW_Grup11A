@@ -1203,6 +1203,7 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
         for comment in comments:
             comment_map = get_basic_attributes_map(comment, user_field)
             comment_map["contribution"] = comment.contribution.id
+            comment_map["contribution_title"] = comment.contribution.title
 
             if comment.parent is not None:
                 comment_map["parent"] = comment.parent.id
@@ -1234,6 +1235,7 @@ class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
 
         comment_map = get_basic_attributes_map(comment, user_field)
         comment_map["contribution"] = comment.contribution.id
+        comment_map["contribution_title"] = comment.contribution.title
 
         if comment.parent is not None:
             comment_map["parent"] = comment.parent.id
@@ -1296,6 +1298,8 @@ def apply_filters(comments_list, username_filter, order_by_filter):
 
 def get_comment_map(comment, user_fields, username_filter, order_by_filter):
     comment_map = get_basic_attributes_map(comment, user_fields)
+    comment_map["contribution_title"] = comment.contribution.title
+
     child_comment_list = []
 
     actual_comments = comment.comment_set.all()
@@ -1415,7 +1419,14 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         comment.user_likes.add(user_field.user)
         comment.save()
 
-        return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+        comment_map = get_basic_attributes_map(comment, user_field)
+        comment_map["contribution"] = comment.contribution.id
+        comment_map["contribution_title"] = comment.contribution.title
+
+        if comment.parent is not None:
+            comment_map["parent"] = comment.parent.id
+
+        return Response(comment_map, status=status.HTTP_201_CREATED)
 
 
 class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
