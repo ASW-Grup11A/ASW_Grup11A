@@ -152,6 +152,10 @@ paths:
                     * `url` - Filter contributions by their URL. It cannot be used in conjunction with ask parameter
                     
                     * `ask` - Filter all contributions with text. It cannot be used in conjunction with url parameter
+                    
+                    * `liked` - Filter all contributions liked by the current user.
+                    
+                    * `hidden` - Filter all contributions hidden by the current user.
                 schema:
                     type: object
                     properties:
@@ -167,6 +171,12 @@ paths:
                         type: boolean
                         enum:
                             - true
+                      liked:
+                        type: boolean
+                        example: true
+                      hidden:
+                        type: boolean
+                        example: false
                     minProperties: 1
                     additionalProperties: false
                 style: form
@@ -489,6 +499,27 @@ paths:
                 - comments
             parameters:
               - $ref: '#/components/parameters/userIdQuery'
+              - in: query
+                name: filter
+                description: >
+                  Avaliable filters:
+                    
+                    * `liked` - Filter all the comments liked by the current user.
+                    
+                    * `hidden` - Filter all the comments hidden by the current user.
+                schema:
+                    type: object
+                    properties:
+                      liked:
+                        type: boolean
+                        example: true
+                      hidden:
+                        type: boolean
+                        example: false
+                    minProperties: 1
+                    additionalProperties: false
+                style: form
+                explode: true
               - $ref: '#/components/parameters/commentOrderBy'
             responses:
                 200:
@@ -568,9 +599,9 @@ components:
             name: orderBy
             description: >
                   Orders by:
-                    * `publication_date_asc` - Orders by newest contribution
+                    * `publication_time_asc` - Orders by newest contribution
                     
-                    * `publication_date_desc` - Orders by oldest contribution
+                    * `publication_time_desc` - Orders by oldest contribution
                     
                     * `title_asc` - Orders by ascending title, from A to Z
                     
@@ -582,8 +613,8 @@ components:
             schema:
                 type: string
                 enum:
-                    - publication_date_asc
-                    - publication_date_desc
+                    - publication_time_asc
+                    - publication_time_desc
                     - title_asc
                     - title_desc
                     - votes_asc
@@ -593,9 +624,9 @@ components:
               name: orderBy
               description: >
                   Orders by:
-                    * `publication_date_asc` - Orders by newest contribution
+                    * `publication_time_asc` - Orders by newest contribution
                     
-                    * `publication_date_desc` - Orders by oldest contribution
+                    * `publication_time_desc` - Orders by oldest contribution
                     
                     * `votes_asc` - Orders by  ascending number of votes
                     
@@ -603,8 +634,8 @@ components:
               schema:
                   type: string
                   enum:
-                      - publication_date_asc
-                      - publication_date_desc
+                      - publication_time_asc
+                      - publication_time_desc
                       - votes_asc
                       - votes_desc
     responses:
