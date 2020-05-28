@@ -863,7 +863,13 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             else:
                 contributions = contributions.order_by('-points')
 
-        return Response(ContributionSerializer(contributions, many=True).data)
+        contribution_list = []
+
+        for contrib in contributions:
+            contribution_map = get_basic_attributes_map(contrib, user_fields)
+            contribution_list.append(contribution_map)
+
+        return Response(contribution_list, status=status.HTTP_200_OK)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def create_contribution(self, request, *args, **kwargs):
@@ -871,7 +877,6 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         url = self.request.data.get('url', '')
         text = self.request.data.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
-
         api_key = APIKeyManager.get_hash_key(key)
 
         try:
@@ -954,19 +959,16 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         except Contribution.DoesNotExist:
             raise NotFoundException
 
-        try:
-            contribution.user_likes.get(id=contribution.user.id)
-            contribution.liked = True
-        except User.DoesNotExist:
-            contribution.liked = False
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            contribution.user_id_hidden.get(id=contribution.user.id)
-            contribution.show = False
-        except User.DoesNotExist:
-            contribution.show = True
+            user_fields = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
 
-        return Response(ContributionSerializer(contribution).data)
+        contribution_map = get_basic_attributes_map(contribution, user_fields)
+        return Response(contribution_map, status=status.HTTP_200_OK)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def delete_actual(self, request, *args, **kwargs):
@@ -1014,7 +1016,8 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         contribution.text = text
         contribution.save()
 
-        return Response(ContributionSerializer(contribution).data)
+        contribution_map = get_basic_attributes_map(contribution, user_field)
+        return Response(contribution_map, status=status.HTTP_200_OK)
 
 
 class VoteIdViewSet(viewsets.ModelViewSet):
