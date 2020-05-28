@@ -1190,7 +1190,26 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
             else:
                 comments = comments.order_by('-points')
 
-        return Response(CommentSerializer(comments, many=True).data)
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKeyManager.get_hash_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        comment_list = []
+
+        for comment in comments:
+            comment_map = get_basic_attributes_map(comment, user_field)
+            comment_map["contribution"] = comment.contribution.id
+
+            if comment.parent is not None:
+                comment_map["parent"] = comment.parent.id
+
+            comment_list.append(comment_map)
+
+        return Response(comment_list)
 
 
 class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
@@ -1204,7 +1223,22 @@ class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
             comment = Comment.objects.get(id=kwargs.get('commentId'))
         except Comment.DoesNotExist:
             raise NotFoundException
-        return Response(CommentSerializer(comment).data)
+
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKeyManager.get_hash_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        comment_map = get_basic_attributes_map(comment, user_field)
+        comment_map["contribution"] = comment.contribution.id
+
+        if comment.parent is not None:
+            comment_map["parent"] = comment.parent.id
+
+        return Response(comment_map)
 
 
 def is_liked_by_user(contribution, user_id):
