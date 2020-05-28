@@ -1197,6 +1197,8 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     def get_actual(self, request, *args, **kwargs):
         username_filter = self.request.query_params.get('username', '')
         order_by_filter = self.request.query_params.get('orderBy', '')
+        liked_filter = self.request.query_params.get('liked', '')
+        hidden_filter = self.request.query_params.get('hidden', '')
         comments = Comment.objects.all()
 
         if username_filter:
@@ -1234,7 +1236,37 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
             if comment.parent is not None:
                 comment_map["parent"] = comment.parent.id
 
-            comment_list.append(comment_map)
+            adding = True
+
+            if liked_filter or hidden_filter:
+                adding = False
+
+                if liked_filter and hidden_filter:
+                    liked_result = liked_filter == 'true'
+                    hidden_result = hidden_filter == 'true'
+
+                    if liked_result and hidden_result and comment_map['liked'] \
+                            and not comment_map['show']:
+                        adding = True
+                    elif not liked_result and hidden_result and not comment_map['liked'] \
+                            and not comment_map['show']:
+                        adding = True
+                    elif liked_result and not hidden_result and comment_map['liked'] \
+                            and comment_map['show']:
+                        adding = True
+                    elif not liked_result and not hidden_result and not comment_map['liked'] \
+                            and comment_map['show']:
+                        adding = True
+                else:
+                    if liked_filter and ((liked_filter == 'true' and comment_map['liked'])
+                                         or (liked_filter == 'false' and not comment_map['liked'])):
+                        adding = True
+                    elif (hidden_filter == 'true' and not comment_map['show']) \
+                            or (hidden_filter == 'false' and comment_map['show']):
+                        adding = True
+
+            if adding:
+                comment_list.append(comment_map)
 
         return Response(comment_list)
 
