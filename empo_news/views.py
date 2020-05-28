@@ -840,9 +840,13 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
         if order_by_filter:
             if order_by_filter == 'publication_time_asc':
-                contributions = contributions.order_by('publication_time')
+                contributions = contributions.order_by('publication_time__year', 'publication_time__month',
+                                                       'publication_time__day', 'publication_time__hour',
+                                                       'publication_time__minute', 'publication_time__second')
             elif order_by_filter == 'publication_time_desc':
-                contributions = contributions.order_by('-publication_time')
+                contributions = contributions.order_by('-publication_time__year', '-publication_time__month',
+                                                       '-publication_time__day', '-publication_time__hour',
+                                                       '-publication_time__minute', '-publication_time__second')
             elif order_by_filter == 'title_asc':
                 contributions = contributions.order_by('title')
             elif order_by_filter == 'title_desc':
