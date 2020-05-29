@@ -1473,6 +1473,8 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         try:
             comment = Comment.objects.get(id=parent_id)
             contribution = comment.contribution
+            contribution.comments += 1
+            contribution.save()
             comment.comments += 1
             comment.save()
 
