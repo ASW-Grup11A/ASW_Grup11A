@@ -812,6 +812,7 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             raise UnauthenticatedException
 
         username_filter = self.request.query_params.get('username', '')
+        exclude_user_filter = self.request.query_params.get('exclude_user', '')
         show_en_filter = self.request.query_params.get('showEn', '')
         url_filter = self.request.query_params.get('url', '')
         ask_filter = self.request.query_params.get('ask', '')
@@ -819,7 +820,7 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         liked_filter = self.request.query_params.get('liked', '')
         hidden_filter = self.request.query_params.get('hidden', '')
 
-        if url_filter and ask_filter:
+        if (url_filter and ask_filter) or (username_filter and exclude_user_filter):
             raise InvalidQueryParametersException
 
         if username_filter:
@@ -828,6 +829,14 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             except User.DoesNotExist:
                 raise NotFoundException
             contributions = contributions.filter(user__username=username_filter)
+
+        if exclude_user_filter:
+            try:
+                User.objects.get(username=exclude_user_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
+            user_contributions = contributions.filter(user__username=exclude_user_filter)
+            contributions = contributions.difference(user_contributions)
 
         if show_en_filter:
             contributions = contributions.filter(title__startswith="Show EN:")
@@ -1196,27 +1205,36 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
         username_filter = self.request.query_params.get('username', '')
+        exclude_user_filter = self.request.query_params.get('exclude_user', '')
         order_by_filter = self.request.query_params.get('orderBy', '')
         liked_filter = self.request.query_params.get('liked', '')
         hidden_filter = self.request.query_params.get('hidden', '')
-        comments = Comment.objects.all()
+        selected_comments = Comment.objects.all()
 
         if username_filter:
             try:
                 user = User.objects.get(username=username_filter)
             except User.DoesNotExist:
                 raise NotFoundException
-            comments = comments.filter(user_id=user.id)
+            selected_comments = selected_comments.filter(user_id=user.id)
+
+        if exclude_user_filter:
+            try:
+                User.objects.get(username=exclude_user_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
+            user_comments = selected_comments.filter(user__username=exclude_user_filter)
+            selected_comments = selected_comments.difference(user_comments)
 
         if order_by_filter:
             if order_by_filter == 'publication_time_asc':
-                comments = comments.order_by('publication_time')
+                selected_comments = selected_comments.order_by('publication_time')
             elif order_by_filter == 'publication_time_desc':
-                comments = comments.order_by('-publication_time')
+                selected_comments = selected_comments.order_by('-publication_time')
             elif order_by_filter == 'votes_asc':
-                comments = comments.order_by('points')
+                selected_comments = selected_comments.order_by('points')
             else:
-                comments = comments.order_by('-points')
+                selected_comments = selected_comments.order_by('-points')
 
         key = self.request.META.get('HTTP_API_KEY', '')
         api_key = APIKeyManager.get_hash_key(key)
@@ -1228,7 +1246,7 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
 
         comment_list = []
 
-        for comment in comments:
+        for comment in selected_comments:
             comment_map = get_basic_attributes_map(comment, user_field)
             comment_map["contribution"] = comment.contribution.id
             comment_map["contribution_title"] = comment.contribution.title
