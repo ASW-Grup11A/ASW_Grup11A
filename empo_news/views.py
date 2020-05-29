@@ -811,26 +811,16 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         except UserFields.DoesNotExist:
             raise UnauthenticatedException
 
-        for contrib in contributions:
-            try:
-                contrib.user_likes.get(id=user_fields.user.id)
-                contrib.liked = True
-            except User.DoesNotExist:
-                contrib.liked = False
-
-            try:
-                contrib.user_id_hidden.get(id=user_fields.user.id)
-                contrib.show = False
-            except User.DoesNotExist:
-                contrib.show = True
-
         username_filter = self.request.query_params.get('username', '')
+        exclude_user_filter = self.request.query_params.get('exclude_user', '')
         show_en_filter = self.request.query_params.get('showEn', '')
         url_filter = self.request.query_params.get('url', '')
         ask_filter = self.request.query_params.get('ask', '')
         order_by_filter = self.request.query_params.get('orderBy', '')
+        liked_filter = self.request.query_params.get('liked', '')
+        hidden_filter = self.request.query_params.get('hidden', '')
 
-        if url_filter and ask_filter:
+        if (url_filter and ask_filter) or (username_filter and exclude_user_filter):
             raise InvalidQueryParametersException
 
         if username_filter:
@@ -839,6 +829,14 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             except User.DoesNotExist:
                 raise NotFoundException
             contributions = contributions.filter(user__username=username_filter)
+
+        if exclude_user_filter:
+            try:
+                User.objects.get(username=exclude_user_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
+            user_contributions = contributions.filter(user__username=exclude_user_filter)
+            contributions = contributions.difference(user_contributions)
 
         if show_en_filter:
             contributions = contributions.filter(title__startswith="Show EN:")
@@ -851,9 +849,13 @@ class ContributionsViewSet(viewsets.ModelViewSet):
 
         if order_by_filter:
             if order_by_filter == 'publication_time_asc':
-                contributions = contributions.order_by('publication_time')
+                contributions = contributions.order_by('publication_time__year', 'publication_time__month',
+                                                       'publication_time__day', 'publication_time__hour',
+                                                       'publication_time__minute', 'publication_time__second')
             elif order_by_filter == 'publication_time_desc':
-                contributions = contributions.order_by('-publication_time')
+                contributions = contributions.order_by('-publication_time__year', '-publication_time__month',
+                                                       '-publication_time__day', '-publication_time__hour',
+                                                       '-publication_time__minute', '-publication_time__second')
             elif order_by_filter == 'title_asc':
                 contributions = contributions.order_by('title')
             elif order_by_filter == 'title_desc':
@@ -863,7 +865,43 @@ class ContributionsViewSet(viewsets.ModelViewSet):
             else:
                 contributions = contributions.order_by('-points')
 
-        return Response(ContributionSerializer(contributions, many=True).data)
+        contribution_list = []
+
+        for contrib in contributions:
+            contribution_map = get_basic_attributes_map(contrib, user_fields)
+            adding = True
+
+            if liked_filter or hidden_filter:
+                adding = False
+
+                if liked_filter and hidden_filter:
+                    liked_result = liked_filter == 'true'
+                    hidden_result = hidden_filter == 'true'
+
+                    if liked_result and hidden_result and contribution_map['liked'] \
+                            and not contribution_map['show']:
+                        adding = True
+                    elif not liked_result and hidden_result and not contribution_map['liked'] \
+                            and not contribution_map['show']:
+                        adding = True
+                    elif liked_result and not hidden_result and contribution_map['liked'] \
+                            and contribution_map['show']:
+                        adding = True
+                    elif not liked_result and not hidden_result and not contribution_map['liked'] \
+                            and contribution_map['show']:
+                        adding = True
+                else:
+                    if liked_filter and ((liked_filter == 'true' and contribution_map['liked'])
+                                         or (liked_filter == 'false' and not contribution_map['liked'])):
+                        adding = True
+                    elif (hidden_filter == 'true' and not contribution_map['show']) \
+                            or (hidden_filter == 'false' and contribution_map['show']):
+                        adding = True
+
+            if adding:
+                contribution_list.append(contribution_map)
+
+        return Response(contribution_list, status=status.HTTP_200_OK)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def create_contribution(self, request, *args, **kwargs):
@@ -871,7 +909,6 @@ class ContributionsViewSet(viewsets.ModelViewSet):
         url = self.request.data.get('url', '')
         text = self.request.data.get('text', '')
         key = self.request.META.get('HTTP_API_KEY', '')
-
         api_key = APIKeyManager.get_hash_key(key)
 
         try:
@@ -954,19 +991,16 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         except Contribution.DoesNotExist:
             raise NotFoundException
 
-        try:
-            contribution.user_likes.get(id=contribution.user.id)
-            contribution.liked = True
-        except User.DoesNotExist:
-            contribution.liked = False
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKeyManager.get_hash_key(key)
 
         try:
-            contribution.user_id_hidden.get(id=contribution.user.id)
-            contribution.show = False
-        except User.DoesNotExist:
-            contribution.show = True
+            user_fields = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
 
-        return Response(ContributionSerializer(contribution).data)
+        contribution_map = get_basic_attributes_map(contribution, user_fields)
+        return Response(contribution_map, status=status.HTTP_200_OK)
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def delete_actual(self, request, *args, **kwargs):
@@ -983,6 +1017,11 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
             raise ForbiddenException
 
         contribution.delete()
+
+        if contribution.get_class() == 'Comment':
+            contribution.contribution.points -= 1
+            contribution.save()
+
         message = {'status': 204, 'message': 'Deleted'}
         return Response(message, status=status.HTTP_204_NO_CONTENT)
 
@@ -1014,7 +1053,8 @@ class ContributionsIdViewSet(viewsets.ModelViewSet):
         contribution.text = text
         contribution.save()
 
-        return Response(ContributionSerializer(contribution).data)
+        contribution_map = get_basic_attributes_map(contribution, user_field)
+        return Response(contribution_map, status=status.HTTP_200_OK)
 
 
 class VoteIdViewSet(viewsets.ModelViewSet):
@@ -1091,6 +1131,21 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
+def show_childs(comment):
+    comment.show = True
+    comment.save()
+
+    for child_comment in comment.comment_set.all():
+        hide_childs(child_comment)
+
+
+def hide_childs(comment):
+    comment.show = False
+    comment.save()
+
+    for child_comment in comment.comment_set.all():
+        hide_childs(child_comment)
+
 class HideIdViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
@@ -1118,6 +1173,12 @@ class HideIdViewSet(viewsets.ModelViewSet):
         contribution.user_id_hidden.add(user_field.user.id)
         contribution.hidden += 1
         contribution.save()
+
+        try:
+            comment = Comment.objects.get(id=contribution.id)
+            hide_childs(comment)
+        except Comment.DoesNotExist:
+            pass
 
         response = {'status': 204, 'message': 'OK'}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
@@ -1147,7 +1208,7 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
         user_hides = contribution.user_id_hidden.all()
         actual = 0
 
-        while (not found and actual < len(user_hides)):
+        while not found and actual < len(user_hides):
             found = str(user_hides[actual]) == str(user_field.user.username)
             actual += 1
 
@@ -1157,6 +1218,12 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
         contribution.user_id_hidden.remove(user_field.user.id)
         contribution.hidden -= 1
         contribution.save()
+
+        try:
+            comment = Comment.objects.get(id=contribution.id)
+            show_childs(comment)
+        except Comment.DoesNotExist:
+            pass
 
         response = {'status': 204, 'message': 'OK'}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
@@ -1170,27 +1237,88 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def get_actual(self, request, *args, **kwargs):
         username_filter = self.request.query_params.get('username', '')
+        exclude_user_filter = self.request.query_params.get('exclude_user', '')
         order_by_filter = self.request.query_params.get('orderBy', '')
-        comments = Comment.objects.all()
+        liked_filter = self.request.query_params.get('liked', '')
+        hidden_filter = self.request.query_params.get('hidden', '')
+        selected_comments = Comment.objects.all()
 
         if username_filter:
             try:
                 user = User.objects.get(username=username_filter)
             except User.DoesNotExist:
                 raise NotFoundException
-            comments = comments.filter(user_id=user.id)
+            selected_comments = selected_comments.filter(user_id=user.id)
+
+        if exclude_user_filter:
+            try:
+                User.objects.get(username=exclude_user_filter)
+            except User.DoesNotExist:
+                raise NotFoundException
+            user_comments = selected_comments.filter(user__username=exclude_user_filter)
+            selected_comments = selected_comments.difference(user_comments)
 
         if order_by_filter:
             if order_by_filter == 'publication_time_asc':
-                comments = comments.order_by('publication_time')
+                selected_comments = selected_comments.order_by('publication_time')
             elif order_by_filter == 'publication_time_desc':
-                comments = comments.order_by('-publication_time')
+                selected_comments = selected_comments.order_by('-publication_time')
             elif order_by_filter == 'votes_asc':
-                comments = comments.order_by('points')
+                selected_comments = selected_comments.order_by('points')
             else:
-                comments = comments.order_by('-points')
+                selected_comments = selected_comments.order_by('-points')
 
-        return Response(CommentSerializer(comments, many=True).data)
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKeyManager.get_hash_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        comment_list = []
+
+        for comment in selected_comments:
+            comment_map = get_basic_attributes_map(comment, user_field)
+            comment_map["contribution"] = comment.contribution.id
+            comment_map["contribution_title"] = comment.contribution.title
+
+            if comment.parent is not None:
+                comment_map["parent"] = comment.parent.id
+
+            adding = True
+
+            if liked_filter or hidden_filter:
+                adding = False
+
+                if liked_filter and hidden_filter:
+                    liked_result = liked_filter == 'true'
+                    hidden_result = hidden_filter == 'true'
+
+                    if liked_result and hidden_result and comment_map['liked'] \
+                            and not comment_map['show']:
+                        adding = True
+                    elif not liked_result and hidden_result and not comment_map['liked'] \
+                            and not comment_map['show']:
+                        adding = True
+                    elif liked_result and not hidden_result and comment_map['liked'] \
+                            and comment_map['show']:
+                        adding = True
+                    elif not liked_result and not hidden_result and not comment_map['liked'] \
+                            and comment_map['show']:
+                        adding = True
+                else:
+                    if liked_filter and ((liked_filter == 'true' and comment_map['liked'])
+                                         or (liked_filter == 'false' and not comment_map['liked'])):
+                        adding = True
+                    elif (hidden_filter == 'true' and not comment_map['show']) \
+                            or (hidden_filter == 'false' and comment_map['show']):
+                        adding = True
+
+            if adding:
+                comment_list.append(comment_map)
+
+        return Response(comment_list)
 
 
 class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
@@ -1204,7 +1332,23 @@ class CommentIdViewSet(viewsets.ReadOnlyModelViewSet):
             comment = Comment.objects.get(id=kwargs.get('commentId'))
         except Comment.DoesNotExist:
             raise NotFoundException
-        return Response(CommentSerializer(comment).data)
+
+        key = self.request.META.get('HTTP_API_KEY', '')
+        api_key = APIKeyManager.get_hash_key(key)
+
+        try:
+            user_field = UserFields.objects.get(api_key=api_key)
+        except UserFields.DoesNotExist:
+            raise UnauthenticatedException
+
+        comment_map = get_basic_attributes_map(comment, user_field)
+        comment_map["contribution"] = comment.contribution.id
+        comment_map["contribution_title"] = comment.contribution.title
+
+        if comment.parent is not None:
+            comment_map["parent"] = comment.parent.id
+
+        return Response(comment_map)
 
 
 def is_liked_by_user(contribution, user_id):
@@ -1262,6 +1406,8 @@ def apply_filters(comments_list, username_filter, order_by_filter):
 
 def get_comment_map(comment, user_fields, username_filter, order_by_filter):
     comment_map = get_basic_attributes_map(comment, user_fields)
+    comment_map["contribution_title"] = comment.contribution.title
+
     child_comment_list = []
 
     actual_comments = comment.comment_set.all()
@@ -1309,41 +1455,6 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
 
         contribution_map["comments_list"] = comment_list
 
-        """contribution_comments = Comment.objects.filter(contribution_id=kwargs.get('id'))
-
-        for contrib in contribution_comments:
-            try:
-                contrib.user_likes.get(id=user_field.user.id)
-                contrib.liked = True
-            except User.DoesNotExist:
-                contrib.liked = False
-
-            try:
-                contrib.user_id_hidden.get(id=user_field.user.id)
-                contrib.show = False
-            except User.DoesNotExist:
-                contrib.show = True
-
-        username_filter = self.request.query_params.get('username', '')
-        order_by_filter = self.request.query_params.get('orderBy', '')
-
-        if username_filter:
-            try:
-                user = User.objects.get(username=username_filter)
-            except User.DoesNotExist:
-                raise NotFoundException
-            contribution_comments = contribution_comments.filter(user_id=user.id)
-
-        if order_by_filter:
-            if order_by_filter == 'publication_time_asc':
-                contribution_comments = contribution_comments.order_by('publication_time')
-            elif order_by_filter == 'publication_time_desc':
-                contribution_comments = contribution_comments.order_by('-publication_time')
-            elif order_by_filter == 'votes_asc':
-                contribution_comments = contribution_comments.order_by('points')
-            else:
-                contribution_comments = contribution_comments.order_by('-points')"""
-
         # return Response(CommentSerializer(contribution_comments, many=True).data)
         return Response(contribution_map)
 
@@ -1352,7 +1463,6 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         text = self.request.data.get('text', '')
         parent_id = kwargs.get('id', '')
         key = self.request.META.get('HTTP_API_KEY', '')
-
         api_key = APIKeyManager.get_hash_key(key)
 
         try:
@@ -1363,10 +1473,22 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         try:
             comment = Comment.objects.get(id=parent_id)
             contribution = comment.contribution
+            contribution.comments += 1
+            contribution.save()
+            comment.comments += 1
+            comment.save()
+
+            parent = comment.parent
+            while parent is not None:
+                parent.comments += 1
+                parent.save()
+                parent = parent.parent
         except Comment.DoesNotExist:
             try:
                 comment = None
                 contribution = Contribution.objects.get(id=parent_id)
+                contribution.comments += 1
+                contribution.save()
             except Contribution.DoesNotExist:
                 raise NotFoundException
 
@@ -1381,7 +1503,14 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         comment.user_likes.add(user_field.user)
         comment.save()
 
-        return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+        comment_map = get_basic_attributes_map(comment, user_field)
+        comment_map["contribution"] = comment.contribution.id
+        comment_map["contribution_title"] = comment.contribution.title
+
+        if comment.parent is not None:
+            comment_map["parent"] = comment.parent.id
+
+        return Response(comment_map, status=status.HTTP_201_CREATED)
 
 
 class ProfilesViewSet(viewsets.ReadOnlyModelViewSet):
