@@ -1475,6 +1475,12 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
             contribution = comment.contribution
             comment.comments += 1
             comment.save()
+
+            parent = comment.parent
+            while parent is not None:
+                parent.comments += 1
+                parent.save()
+                parent = parent.parent
         except Comment.DoesNotExist:
             try:
                 comment = None
