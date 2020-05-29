@@ -1131,6 +1131,21 @@ class UnVoteIdViewSet(viewsets.ModelViewSet):
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
+def show_childs(comment):
+    comment.show = True
+    comment.save()
+
+    for child_comment in comment.comment_set.all():
+        hide_childs(child_comment)
+
+
+def hide_childs(comment):
+    comment.show = False
+    comment.save()
+
+    for child_comment in comment.comment_set.all():
+        hide_childs(child_comment)
+
 class HideIdViewSet(viewsets.ModelViewSet):
     queryset = Contribution.objects.filter(comment__isnull=True)
     serializer_class = ContributionSerializer
@@ -1158,6 +1173,12 @@ class HideIdViewSet(viewsets.ModelViewSet):
         contribution.user_id_hidden.add(user_field.user.id)
         contribution.hidden += 1
         contribution.save()
+
+        try:
+            comment = Comment.objects.get(id=contribution.id)
+            hide_childs(comment)
+        except Comment.DoesNotExist:
+            pass
 
         response = {'status': 204, 'message': 'OK'}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
@@ -1187,7 +1208,7 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
         user_hides = contribution.user_id_hidden.all()
         actual = 0
 
-        while (not found and actual < len(user_hides)):
+        while not found and actual < len(user_hides):
             found = str(user_hides[actual]) == str(user_field.user.username)
             actual += 1
 
@@ -1197,6 +1218,12 @@ class UnHideIdViewSet(viewsets.ModelViewSet):
         contribution.user_id_hidden.remove(user_field.user.id)
         contribution.hidden -= 1
         contribution.save()
+
+        try:
+            comment = Comment.objects.get(id=contribution.id)
+            show_childs(comment)
+        except Comment.DoesNotExist:
+            pass
 
         response = {'status': 204, 'message': 'OK'}
         return Response(response, status=status.HTTP_204_NO_CONTENT)
