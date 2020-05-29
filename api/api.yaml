@@ -156,6 +156,8 @@ paths:
                     * `liked` - Filter all contributions liked by the current user.
                     
                     * `hidden` - Filter all contributions hidden by the current user.
+                    
+                    * `exclude_user` - Filter all contributions that don't belong to the specified user.
                 schema:
                     type: object
                     properties:
@@ -177,6 +179,9 @@ paths:
                       hidden:
                         type: boolean
                         example: false
+                      exclude_user:
+                        type: string
+                        example: Mark
                     minProperties: 1
                     additionalProperties: false
                 style: form
