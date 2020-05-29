@@ -1463,7 +1463,6 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         text = self.request.data.get('text', '')
         parent_id = kwargs.get('id', '')
         key = self.request.META.get('HTTP_API_KEY', '')
-
         api_key = APIKeyManager.get_hash_key(key)
 
         try:
@@ -1474,10 +1473,14 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
         try:
             comment = Comment.objects.get(id=parent_id)
             contribution = comment.contribution
+            comment.comments += 1
+            comment.save()
         except Comment.DoesNotExist:
             try:
                 comment = None
                 contribution = Contribution.objects.get(id=parent_id)
+                contribution.comments += 1
+                contribution.save()
             except Contribution.DoesNotExist:
                 raise NotFoundException
 
@@ -1498,9 +1501,6 @@ class ContributionCommentViewSet(viewsets.ModelViewSet):
 
         if comment.parent is not None:
             comment_map["parent"] = comment.parent.id
-
-        comment.contribution.points += 1
-        comment.save()
 
         return Response(comment_map, status=status.HTTP_201_CREATED)
 
