@@ -6,10 +6,11 @@ from empo_news.models import UserFields, Contribution, Comment
 class UserFieldsSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='user.username')
     date_joined = serializers.ReadOnlyField(source='user.date_joined')
+    email = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
         model = UserFields
-        fields = ['username', 'date_joined', 'karma', 'about', 'showdead', 'noprocrast', 'maxvisit',
+        fields = ['username', 'date_joined', 'karma', 'about', 'email', 'showdead', 'noprocrast', 'maxvisit',
                   'minaway', 'delay']
 
 
